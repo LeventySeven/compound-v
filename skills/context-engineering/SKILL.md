@@ -7,6 +7,10 @@ description: Curate the smallest high-signal token set for an agent or long task
 
 Context is a finite resource with diminishing returns. The goal is **the smallest set of high-signal tokens that maximizes the desired outcome** — not the shortest context, the *highest-signal* one. Minimal does not mean short: you still give the agent everything it genuinely needs. You just stop paying for tokens that don't change the answer.
 
+**Spend tokens first — "lean" is not "always fewest tokens."** Per Anthropic's multi-agent research system, token spend *alone* explained ~80% of agent-performance variance on their eval (token count + tool-call count + model choice together ~95%); their multi-agent win over a single agent came from spending ~15× more tokens, not from the architecture. Read these as a directional lever, not universal constants: when a result is poor, the first thing to try is usually *more* tokens on the right context — not a cleverer prompt and not more agents.
+
+So lean means two moves, not one: cut the tokens that don't change the answer, *and* deliberately spend many where compute is the lever. Don't mistake this skill for "minimize everything."
+
 ## When to use
 
 - Context is filling up — the working window is past ~40% and growing, or you're seeing the agent repeat itself, lose earlier decisions, or slow down.
@@ -31,6 +35,9 @@ Don't dump everything the agent *might* need into the prompt. Keep **lightweight
 
 The honest tradeoff: runtime exploration is slower than reading pre-computed data, and a poorly-equipped agent can waste context chasing dead ends. So use a **hybrid** when up-front data buys real speed. Claude Code is the canonical example: it naively drops `CLAUDE.md` into context up front (small, always relevant) while using `glob`/`grep` for everything else just-in-time. The rule is **do the simplest thing that works** — pre-load the small, always-needed stuff; retrieve the rest.
 
+### Programmatic tool calling: keep intermediate results out of context entirely
+JIT retrieval controls *what* enters context; programmatic tool calling controls whether the *plumbing between tools* enters it at all. When a task chains tools — fetch 200 rows, filter, join, take the top 5 — don't round-trip every intermediate through the model. Have the agent write a few lines of code that call the tools and do the filtering/aggregation in the execution environment, returning only the final small result. The 200 rows never hit the context; only the 5 that matter do. This is different from JIT retrieval (load on demand): here the agent *orchestrates in code* so bulky intermediates are born and die outside the window. Reach for it when a step's raw output is large but its useful distillate is small.
+
 ## Order context by volatility (static prefix → dynamic boundary)
 
 Lay out context so the **stable parts come first and the volatile parts come last**, split by an explicit boundary. Everything before the boundary is byte-identical across requests and can be served from cache; everything after changes per turn and can't.
@@ -44,12 +51,24 @@ Claude Code does this literally, splitting its system prompt on a `__SYSTEM_PROM
 
 When context grows, apply the cheapest effective lever first. Don't summarize the whole transcript when only tool outputs are fat.
 
-1. **Observation masking — do this first; it's strictly better.** Keep the full history of *actions and reasoning*, but replace older *observations* (tool outputs) with placeholders, retaining only the most recent ~10 turns of full observations. Measured result: **52% cheaper with a +2.6% solve-rate improvement** — not a tradeoff, a free win. Old tool outputs are rarely re-read, but old reasoning still informs current decisions. This is the highest-ROI single knob there is.
+1. **Observation masking — do this first.** Keep the full history of *actions and reasoning*, but replace older *observations* (tool outputs) with placeholders, retaining only the most recent ~10 turns of full observations. Measured result: **52% cheaper with a +2.6% solve-rate improvement** — as good as full summarization at a fraction of the cost. Old tool outputs are rarely re-read, but old reasoning still informs current decisions. This is the highest-ROI single knob there is. One exception to "drop old observations": keep recent *failed* actions and their error output visible — the model learns from the stack trace it just produced, so masking a failure it hasn't resolved yet makes it repeat the mistake. Mask resolved noise, not the live failure it's still working.
 2. **Tool-result clearing — free and mechanical.** Replace consumed `tool_result` bytes with a literal marker like `"[cleared to save context]"`, while **keeping the `tool_use` record** so the agent still knows *what action it took*. Zero inference cost — it's a string swap, not a model call. In practice this alone took one workload from 335K peak tokens to 173K.
 3. **Summarizing compaction — costs one model call, so do it later.** Near the window limit, summarize the conversation and reinitialize with the summary. Preserve **architectural decisions, unresolved bugs, and implementation details**; discard redundant tool chatter. Tune by **maximizing recall first, then precision**. A workable stacked recipe: clear tool-uses at ~50K input tokens (keep the 6 most recent, never clear memory results), compact at ~180K.
 4. **Carry critical state deterministically — never trust the summary to hold it.** A summary is prose; it will drop things. Keep a `NOTES.md` / `todo.md` / progress file *outside* the context, and re-read it after a reset. Structured state (the plan, TODOs, open questions, hard constraints) must be carried by code, not entrusted to summary prose — full rewrites of a memory doc corrupt unrelated fields, so prefer targeted updates.
 
 A useful side effect: re-injecting the plan/TODOs at the *recent end* of context counteracts lost-in-the-middle — the model's attention is strongest at the edges, so the current objective belongs there.
+
+**Durable state survives a crashed window.** The transcript is ephemeral and capped by the window; the workspace persists across as many windows as the task takes — so treat it, not the transcript, as the agent's real memory. The progress file from step 4 is half of this; **git is the other half.** Commit at each clean checkpoint. If a window dies mid-task — runs out, gets compacted badly, derails — the next one recovers by reading `git log`/`git diff` rather than reconstructing intent from a lossy summary: the last good commit is the rollback point, and the diff since it is exactly "what's in flight."
+
+### Compaction as a deliberate cadence, not a panic button
+Don't wait for the context limit to force a compaction. Compact *proactively* between work units — after a sub-task lands and before the next begins — so each unit starts on a clean, intentional summary instead of a window that's 90% full of the previous unit's noise. The cheap levers (mask, clear) run continuously; the summarizing compaction is the natural seam between units of work.
+
+One hard rule for any summary: **it must never assert a completion that wasn't confirmed.** A summary that says "tests pass" when they were never run hands the next window a false premise it will build on. Mark unconfirmed steps as *in-progress*, not done; only a step you verified crosses into "complete." A summary is allowed to lose detail — it is never allowed to invent success.
+
+### Cross-session memory: persist durable facts, nothing else
+When a session discovers a fact the *next* session will also need — the build command, a non-obvious env quirk, a directory that's load-bearing — write it to the repo's agent-readable file (`CLAUDE.md` / `AGENTS.md`) so the next session boots already knowing it instead of re-deriving it. **Hard guard: this is one markdown line in a file the agent reads at startup — not a database, not a vector index, not a memory framework.** The whole value is that it's plain text the model already reads; a retrieval system around it reintroduces the cost and the failure surface you were avoiding.
+
+Gate the write — persist only a fact that is (a) durable (still true in future sessions, not just this run), (b) general (helps future tasks, not only this one), and (c) safe to commit. **Never save:** transient failures or a one-off error you already fixed; secrets, tokens, or credentials; anything task-specific that's noise outside this run. The bar is "a teammate would want this in the README," not "this happened."
 
 ## KV-cache discipline (where the cost actually is)
 
@@ -60,11 +79,15 @@ Agent traffic runs roughly **100:1 input-to-output tokens**, so the input cache 
 - **Deterministic serialization** — sorted JSON keys, stable formatting, so prefixes are byte-identical request to request.
 - **To disable a tool, mask its logits — don't remove it from the tool list.** Removing a tool changes the prefix and busts the cache for everything after it. Keep the tool list constant; suppress unwanted tools at decode time.
 
+At scale the discipline gets concrete. **On a fork (a sub-agent or a retried turn), copy the parent prefix byte-for-byte** — one differing whitespace or reordered field means a cache miss on the entire shared span, so the fork pays full price for context it could have inherited. The steady-state shape per turn is **a static cached prefix plus a freshly rebuilt dynamic suffix**: you don't mutate the prefix to add the new turn, you append the volatile part after the boundary and let the prefix stay byte-identical. And **derive the cache key deterministically** from the stable inputs (prefix hash) so the same prefix maps to the same cached entry every time — nondeterministic serialization upstream (unsorted keys, a stray timestamp) silently fragments one logical prefix into many cache entries, none of which hit.
+
 ## Sub-agents are context firewalls
 
-A sub-agent runs in its own window and returns **only its final summary** — all its intermediate reads, searches, and tool spew stay isolated and never touch the parent's context. So delegate the token-heavy, noisy work (deep exploration, large searches, browser sessions) to a sub-agent and get back a distilled ~1–2K-token digest.
+This is the mechanism the rest of the kit refers to. A sub-agent runs in its **own separate context window**; the parent sees *only the final summary it returns*. Every intermediate read, search, failed attempt, and tool dump happens inside the child's window and **never enters the parent's** — the boundary is a one-way valve that passes a distilled result and blocks the raw byte-stream that produced it. That isolation *is* the firewall: the parent's context stays small and high-signal no matter how noisy the gathering was.
 
-The discipline that makes this work: **findings cross the boundary, raw documents do not.** The parent holds the high-level plan and synthesizes; sub-agents do the messy gathering. (For *when* to fan out vs. stay single-threaded, use compound-v:dispatching-parallel-agents — over-spawning has its own context cost.)
+So delegate the token-heavy, noisy work — deep exploration, large searches, browser sessions, reading a sprawling codebase — to a sub-agent and get back a distilled ~1–2K-token digest. The parent spends a couple thousand tokens to buy work that would have cost tens of thousands inline.
+
+The discipline that makes it hold: **findings cross the boundary, raw documents do not.** The parent holds the high-level plan and synthesizes; sub-agents do the messy gathering and report conclusions, not transcripts. (For *whether* to fan out and how to brief workers, use compound-v:dispatching-parallel-agents; for choosing the agent *shape*, compound-v:designing-agents. Both build on this firewall.)
 
 ## Right-altitude system prompts
 
@@ -81,6 +104,7 @@ The harness is the durable asset; the model is swappable — so spend effort on 
 - Retrieve just-in-time via lightweight identifiers; pre-load only the small, always-needed stuff.
 - Order by volatility: static cacheable prefix, dynamic suffix, explicit boundary.
 - Keep the cached prefix static, the context append-only, serialization deterministic; mask tools, don't delete them.
-- Carry the plan/state in an external file, not in summary prose; recite it at the recent end of context.
+- Carry the plan/state in an external file, not in summary prose; recite it at the recent end of context. Compact proactively between work units; never let a summary claim an unconfirmed success.
+- Persist a *durable* discovered fact to `CLAUDE.md`/`AGENTS.md` (one line, not a memory system); never persist transient failures or secrets.
 - Push noisy, token-heavy work into sub-agents that return only findings.
 - Hard-code only what survives a model upgrade (verifiable checks, state, structure); let the model handle what scale will soon do unaided.

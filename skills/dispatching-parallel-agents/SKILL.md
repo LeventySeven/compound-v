@@ -7,6 +7,8 @@ description: Fan work out to multiple sub-agents only when the pieces are genuin
 
 Parallel sub-agents multiply throughput *and* isolate context — but only when the work is actually independent. The default failure isn't too little parallelism, it's splitting coupled work: isolated agents make divergent assumptions and return pieces that don't fit together. Fan out when the seams are clean; otherwise keep it single-threaded.
 
+compound-v:designing-agents decides *whether* to fan out and into which shape (orchestrator-workers, evaluator-optimizer, …); this skill is the *how* once that choice is made. Each sub-agent is a context firewall (compound-v:context-engineering owns that mechanism) — that's why fan-out also buys context isolation, not just throughput.
+
 ## When to fan out
 
 Parallelize when **all** of these hold:
@@ -16,15 +18,10 @@ Parallelize when **all** of these hold:
 - **No shared mutable state** — no shared in-memory structure, no contended resource they'd race on.
 - **Each piece is worth a fresh context** — it produces enough output (or noise) that isolating it in its own window is a real win.
 
-Good fits: editing N unrelated modules, researching N independent sub-questions, processing a batch of independent items, gathering context across disjoint areas of a repo.
+Good fits: editing N unrelated modules, researching N independent sub-questions, processing a batch of independent items, gathering context across disjoint areas of a repo. When unsure, stay single-threaded — the red-flags table below catches the coupled-work case.
 
-**Don't parallelize coupled work.** For interactive, tightly-linked work, one strong agent that holds the whole picture beats a fan-out that fragments it — three agents each guessing at the shared design produce incompatible results that cost more to reconcile than they saved. Multi-agent only pays when there's a real shared-state mechanism (file partitioning, a shared task list, external artifacts) *or* the tasks are truly disjoint. When unsure, stay single-threaded.
-
-## The two patterns
-
-**Orchestrator–workers** — you (the orchestrator) decompose the task, dispatch one worker per independent piece, and synthesize the results yourself. Use when you can't predict the subtasks up front and want to decide them based on the input. The orchestrator plans and merges; it does **not** do the primary work itself while workers run.
-
-**Evaluator–optimizer** — one agent produces, another evaluates against clear criteria and feeds back, in a bounded loop. Use when you have a verifiable signal and iteration measurably improves the result (this is the shape of a review/recheck loop). Always bound the loop — cap the iterations and return the best-so-far on a soft-fail, or it can spin forever on something that never fully satisfies the criteria.
+### Parallelize intelligence; keep writes single-threaded
+The sharpest version of the independence rule isn't "file-disjoint" — it's *what kind* of work is being parallelized. Per Cognition, multi-agent pays when the extra agents **contribute intelligence (reads, research, critique), while writes stay single-threaded**. Parallel *reading* is safe — N agents can explore disjoint areas at once with no way to collide. Parallel *writing* is where divergence bites: two agents editing toward a shared design make incompatible choices, and the merge costs more than the fan-out saved. So the canonical safe worker is a **read-only retrieval worker** — it gathers and reports findings, mutates nothing; Cognition notes these "mostly resemble tool calls rather than true multi-agent collaboration," which is exactly why they're safe to run in parallel. If a step must *write*, route it through one agent.
 
 ## Pipeline by default; barrier only when you must merge
 
@@ -45,6 +42,16 @@ Two structural limits to design around: sub-agents **cannot spawn sub-agents** (
 
 More workers means more overhead and more reconciliation, not linearly more value. Prefer **fewer, more capable workers** over many narrow ones; add a worker only when it does something genuinely distinct. A 50-CEO lookup splits cleanly into a handful of workers handling batches — not fifty one-each. Match the count to the real independent seams in the work, and route down to a single agent (or no sub-agent at all) when the task doesn't actually have them.
 
+**~4 is the practical optimal for a typical task** (e.g. a frontend / backend / tests / infra split). Beyond a handful you hit the named failure mode YC's Light Cone calls "Claude Code cyber psychosis" — workers stepping on each other's edits and generating incompatible implementations of the same interface, faster than you can reconcile them (the coinage is YC's Light Cone; the ~4 figure is directional, not a measured optimum). The fix is the file-ownership discipline above, but the cheaper fix is *not spawning the extra workers in the first place*.
+
+## Runtime budgets and the synthesis barrier
+
+An unbounded worker is a hang waiting to happen. Give each one a budget and make the barrier tolerant of a worker that blows it:
+
+- **Per-worker step/tool cap.** Bound how many tool calls or steps a worker may take before it must return what it has. A worker that can loop forever will, on the one input that confuses it — and it takes the whole batch's latency hostage.
+- **Per-worker timeout → soft-fail at the barrier.** When you wait for all workers (a synthesis barrier), don't block indefinitely on the slowest. Set a per-worker deadline; if one misses it, **proceed with the partial results and note the gap** rather than hanging the whole fan-out on one stuck agent. Best-so-far beats never-returns.
+- **A pending-set guard against double-dispatch.** The orchestrating model will sometimes re-dispatch a worker it already launched (it forgets, or a retry fires twice). Track in-flight jobs in a pending set and refuse a duplicate with a recoverable message ("already running") — otherwise two agents do the same write and you're back to last-write-wins.
+
 ## Red flags
 
 | Symptom | What it means |
@@ -54,4 +61,6 @@ More workers means more overhead and more reconciliation, not linearly more valu
 | Briefs reference "the file we just looked at" | The worker can't see it — fresh context. Inline the content or the absolute path. |
 | Spawning a worker per tiny item | Over-spawn. Batch items per worker; prefer fewer capable workers. |
 | Blocking on all workers before any next step | Premature barrier. Pipeline unless the next step truly needs the full set. |
+| The same worker dispatched twice | Double-dispatch. Guard with a pending set; refuse the duplicate. |
+| The barrier hangs on one slow worker | No per-worker timeout. Soft-fail it and synthesize the partial results. |
 | Splitting a tightly-coupled design across agents | Coupled work — they'll diverge. Keep it single-threaded. |

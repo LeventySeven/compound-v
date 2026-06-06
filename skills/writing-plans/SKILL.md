@@ -25,11 +25,13 @@ The leverage runs uphill. A bad line of code is one bad line. A bad decision in 
 
 ## Order tasks by risk, not by comfort
 
-Sequence the work by information gained per unit of time: **find the one assumption that, if false, makes the whole plan worthless, and test it first** — with the cheapest experiment that resolves it. Do not put infrastructure, scaffolding, or the fun part first while the load-bearing assumption sits unexamined; that's building a foundation on a guess. The first task should reduce the biggest risk, not lay the most plumbing.
+Sequence the work so the riskiest assumption gets tested first, with the cheapest task that resolves it — don't lay scaffolding or build the fun part while the load-bearing assumption sits unexamined. (Identifying *which* assumption is load-bearing is **compound-v:startup-taste**'s job; this is where that judgment becomes task order.)
 
 ## Write for an implementer with zero context
 
 Assume the implementer is a capable engineer who knows nothing about this codebase or problem domain and has questionable taste. Everything they need is in the plan: which files to touch, the actual code, how to test it, what "done" looks like. They may read tasks out of order, so each task stands alone.
+
+The bar is the **intern test**: if a clear brief would let a competent intern do this task, an agent can. If even a sharp intern would have to come back and ask, the gap is ambiguity in your plan — not a limit of the model — and the fix is to close it here, not to wait for a stronger model.
 
 ### File structure first
 
@@ -47,9 +49,10 @@ Each task produces a self-contained, testable change. Within a task, the steps f
 ### Task N: <component>
 
 **Files:**
-- Create: `src/exact/path.py`
-- Modify: `src/exact/existing.py:123-145`
-- Test:   `tests/exact/path_test.py`
+- [NEW]    `src/exact/path.py`
+- [MODIFY] `src/exact/existing.py:123-145`
+- [DELETE] `src/exact/dead.py`
+- [TEST]   `tests/exact/path_test.py`
 
 - [ ] Write the failing test:
       ```python
@@ -65,7 +68,7 @@ Each task produces a self-contained, testable change. Within a task, the steps f
 - [ ] Commit: `git commit -am "feat: reject expired tokens"`
 ```
 
-Start the plan with a one-line goal, two-to-three sentences on the approach, and the key libraries — enough orientation, no boilerplate ceremony.
+Start the plan with a **preamble** the implementer inherits before any task: a one-line goal, a plan-level `Done = <machine-checkable signal>` (the command or eval that says the whole plan is finished — each task has its own test, but the plan as a whole needs one too), two-to-three sentences on the approach with key libraries, and a **distilled fold-in of the research** — the real files, the line ranges, the data-flow facts, and the canonical/anti-pattern you found. The implementer has none of your context; whatever you learned and don't write here, they re-discover from scratch or guess.
 
 ## No placeholders
 
@@ -80,6 +83,13 @@ A placeholder in a plan is a decision you pushed onto someone with less context 
 
 Estimate effort in hours or days. If a plan reads "this will take weeks", the construction isn't the long pole — re-scope into shippable slices, because building is rarely what's actually slow anymore.
 
+## Verification Plan
+
+End the plan with how the finished work gets checked — the per-task tests prove each piece; this proves the whole thing holds together. Two parts:
+
+- **Automated** — the exact commands a fresh session runs to confirm done: the full test suite, the type check, the lint, the build, any end-to-end command. Write them runnable (`pytest -q && ruff check . && npm run build`), not described. This is the plan-level `Done =` signal, made executable.
+- **Manual** — what a machine can't assert: the thing to click, the screen to eyeball, the case to try by hand. Keep it to what genuinely needs a human; if a step *can* be automated, move it up.
+
 ## Self-review the plan
 
 After the plan is complete, read it against the spec with fresh eyes. This is your own pass, not a subagent.
@@ -92,11 +102,11 @@ Fix inline and move on. Save the plan to `docs/plans/YYYY-MM-DD-<feature>.md` (u
 
 ## Writing a PRD or design doc
 
-When the deliverable is a product doc rather than a code plan, the discipline is the same — concrete over vague, with one cut named — but the sections differ. Keep it to the shortest thing that makes the decision:
+When the deliverable is a product doc rather than a code plan, the discipline is the same — concrete over vague — but the sections differ. A PRD is where **compound-v:startup-taste**'s gates stop being a stance and become a document: the verifier-first signal, the one cut, and the riskiest assumption each get a named place on the page. Keep it to the shortest thing that makes the decision:
 
 - **Problem** — the specific problem and who has it, in plain language. Not a mission statement.
-- **The one verifiable signal** — how you'll *know* it worked: the metric, eval, or observable outcome that says ship/don't-ship. If there's no auto-checkable signal, that gap is the first risk to close, not a detail to defer. For an agent-built feature, make the signal *machine-checkable and tamper-resistant* — a feature list as an executable spec: a JSON list of requirements the agent may flip to `passes: true` but not rewrite (JSON resists accidental overwrite better than prose).
-- **Scope and the cut** — what's in, and explicitly what's out for v1. A doc that only adds is a backlog, not a plan; name what you're refusing.
+- **The one verifiable signal** — the metric, eval, or observable outcome that says ship/don't-ship (startup-taste's verifier-first gate, written down). For an agent-built feature, make it *machine-checkable and tamper-resistant*: a feature list as an executable spec — a JSON list of requirements the agent may flip to `passes: true` but not rewrite (JSON resists accidental overwrite better than prose).
+- **Scope and the cut** — what's in, and explicitly what's out for v1. A doc that only adds is a backlog, not a plan.
 - **Approach** — the chosen design and the real alternatives you rejected, with why. One sentence stating the core idea — if you can't state it in one sentence, the design isn't settled.
 - **Risks, riskiest first** — the load-bearing assumptions, ordered by what would hurt most if wrong, each with how you'd test it cheaply.
 

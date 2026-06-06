@@ -20,11 +20,13 @@ User CLAUDE.md > Compound V skills > default behavior. If the user's instruction
 
 ## Tier routing — smallest box that fits; route *down* when unsure
 
+The kit's bet is that adaptive effort is something the model is increasingly good at on its own; this table makes that judgment explicit rather than trusting it implicitly (anti-overkill law, a JUDGMENT-CALL stance — `references/sources.md` → using-compound-v). Use it as the explicit floor, not a replacement for judgment.
+
 | Tier | Trigger | Workflow |
 |---|---|---|
 | **Trivial** | typo, rename, one-liner, config flip | Just do it → `verification-before-completion`. No plan, no agents. |
 | **Small** | one function/file, clear spec | inline `test-driven-development` → verify. Skip the plan doc. |
-| **Standard** | a feature, ~2–8 tasks | `brainstorming` → `writing-plans` → `batched-implementation` → `recheck`. |
+| **Standard** | a feature, ~2–8 tasks | (open "should we?" → `startup-taste` first) → `brainstorming` → `writing-plans` → `batched-implementation` → `recheck`. |
 | **Large** | multiple subsystems | split into sub-projects; each runs its own Standard cycle. |
 
 ## Other skills
@@ -33,4 +35,5 @@ User CLAUDE.md > Compound V skills > default behavior. If the user's instruction
 - **Build:** `batched-implementation` · `recheck` · `finishing`
 - **Correctness:** `test-driven-development` · `systematic-debugging` · `verification-before-completion`
 - **AI design:** `designing-agents` · `evals` · `context-engineering`
-- **Power:** `searching-patterns` · `dispatching-parallel-agents` (file-disjoint only)
+- **Security:** `agent-security` (lethal trifecta, untrusted input, model-written code)
+- **Power:** `searching-patterns` (pull the canonical pattern + its anti-pattern) · `dispatching-parallel-agents` (file-disjoint only)

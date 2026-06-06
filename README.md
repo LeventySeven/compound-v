@@ -33,9 +33,10 @@ These are the spine, not features:
 - **Honest** — evidence over claims, no praise-padding, no false "done." This README's own
   comparison below reports where Compound V *loses*, because that's the rule.
 - **Safe** — security is a blocking review axis, never traded away to ship. No harmful code.
-- **Grounded** — the skills are distilled from reverse-engineered production agents (Claude Code,
-  Codex, Cursor, Amp, Devin, Junie…), primary practitioner talks, and the canonical engineering
-  posts — not invented best-practices. If a claim isn't grounded, it says so.
+- **Grounded** — the skills are distilled from reverse-engineered production coding agents (Claude
+  Code, Codex, Cursor, Amp, Devin, Junie…), primary practitioner talks, and the canonical
+  engineering posts — not invented best-practices. Every load-bearing number maps to its public
+  primary source in `references/sources.md`; if a claim isn't grounded, it says so.
 
 ## How it works
 
@@ -63,7 +64,7 @@ using-compound-v  →  brainstorming  →  writing-plans  →  batched-implement
   **vulnerabilities** → re-test → over-engineering. Findings only, severity-tagged, N=3 fix cap.
   Read-only because a reviewer that can edit ships its own unreviewed bug.
 
-## The skills (16)
+## The skills (17)
 
 | Group | Skills |
 |---|---|
@@ -71,17 +72,19 @@ using-compound-v  →  brainstorming  →  writing-plans  →  batched-implement
 | **Taste** | `startup-taste` (what to build — wrapper test, revenue-not-cost, ship-in-hours) · `product-taste` (how it feels — name-the-property, slop detector, latency/animation gates) |
 | **Plan** | `brainstorming` (design-first gate) · `writing-plans` (plan + PRD, no placeholders) |
 | **Build** | `batched-implementation` · `recheck` · `finishing` |
-| **Correctness** | `test-driven-development` · `systematic-debugging` · `verification-before-completion` |
+| **Correctness & security** | `test-driven-development` · `systematic-debugging` · `verification-before-completion` · `agent-security` (build-time defense — trifecta, source-trust, sandbox model-written code) |
 | **AI design** | `designing-agents` (call vs. workflow vs. agent) · `evals` (does the AI actually work) · `context-engineering` |
-| **Power** | `searching-patterns` (canonical pattern + anti-pattern via agent-browser) · `dispatching-parallel-agents` |
+| **Power** | `searching-patterns` (canonical pattern + anti-pattern via primary sources) · `dispatching-parallel-agents` |
 
 ## How it compares to superpowers (measured, honest)
 
 We ran a neutral head-to-head (a neutral judge, told not to favor either side). The honest result:
 
-- **Leanness — Compound V wins decisively.** ~88% load-bearing vs ~40–45%. **1,160 lines across 16
-  skills with zero supporting files**, vs superpowers' ~8,474 (3,207 skill lines + 5,267 in
-  supporting files) for near-identical coverage.
+- **Leanness — Compound V wins decisively.** ~88% load-bearing vs ~40–45%. **1,347 lines across 17
+  skills, plus 190 lines of on-demand reference** (`references/interface-checklist.md`,
+  `references/skill-format.md`) — vs superpowers' ~8,474 (3,207 skill lines + 5,267 in supporting
+  files) for near-identical coverage. The reference files load only when needed (progressive
+  disclosure), so the always-on cost is the router alone.
 - **Discoverability — 100%.** On a 15-query trigger eval (12 should-fire, 3 near-miss should-not),
   the descriptions routed correctly 15/15.
 - **Review process — Compound V wins.** 1 read-only pass vs 2 dispatches; findings-only vs
@@ -123,11 +126,17 @@ kit dogfoods its own `context-engineering`).
 ## How it was built
 
 Built with Compound V's own loop — batched Opus implementers + read-only `recheck` — and grounded in
-eight parallel research streams over a large RE corpus: a full audit of superpowers, Anthropic's
-skill-authoring and context-engineering canon, ~20 reverse-engineered coding-agent and
-deep-research teardowns, practitioner transcripts, and a distilled top-1% founder field manual. The
-build's own recheck pass caught real defects (a router over budget, a verdict-handling gap, two
-descriptions violating the kit's own rules) and fixed them before commit.
+reverse-engineered production coding agents and primary practitioner sources: a full audit of
+superpowers, Anthropic's skill-authoring and context-engineering canon, how today's production
+coding and deep-research agents actually behave, practitioner talks and transcripts, and a distilled
+top-tier founder canon. The build's own recheck pass caught real defects (a router over budget, a
+verdict-handling gap, two descriptions violating the kit's own rules) and fixed them before commit.
+
+**v0.2 changes:** a grounding pass that ties every load-bearing number to its public primary source
+in `references/sources.md` (and corrects three that were wrong or unsourced); `agent-security` added
+as the build-time complement to
+`recheck`'s detect-time pass; a dedupe of single-source-of-truth violations across skills; and
+`searching-patterns` re-grounded around primary sources, with its browser tooling demoted to optional.
 
 ## License
 

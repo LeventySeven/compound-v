@@ -1,11 +1,11 @@
 ---
 name: searching-patterns
-description: Look up the canonical, current way to do something before implementing it — drive real docs and GitHub pages with the agent-browser CLI, then extract the right pattern and its matching anti-pattern. Use when about to write an unfamiliar API, a non-obvious or security-sensitive pattern, or pick a library/API shape; when unsure how a framework wants something done; or to confirm a best practice during a code review. Skip it for trivial, well-known code.
+description: Look up the canonical pattern and its matching anti-pattern from primary sources before writing unfamiliar or security-sensitive code, then feed both forward into the plan and the review. Use when about to write an unfamiliar API, a non-obvious or security-sensitive pattern, or pick a library/API shape; when unsure how a framework wants something done; or to confirm a best practice during a code review. Skip it for trivial, well-known code.
 ---
 
 # Searching Patterns
 
-Before writing something you're not sure about, find how it's *actually* done now — then carry back both the canonical pattern and the anti-pattern it replaces. Models confidently generate plausible-but-wrong or outdated API usage; a 60-second lookup against real sources prevents a class of bugs and a round of review churn.
+Before writing something you're not sure about, find how it's *actually* done now — then carry back both the canonical pattern and the anti-pattern it replaces. Models confidently generate plausible-but-wrong or outdated API usage; a 60-second lookup against primary sources prevents a class of bugs and a round of review churn.
 
 ## When to search (and when not)
 
@@ -18,44 +18,44 @@ Search when getting it wrong is likely or expensive:
 
 Don't search for trivial, well-trodden code you'd write correctly from memory (a loop, a standard library call, basic string handling). The lookup is overhead; spend it only where it buys correctness. This is the same instinct as catching an agent's architectural dead end early rather than nitpicking lines.
 
-## How: drive real pages with agent-browser
+## How: read the primary source
 
-`agent-browser` is installed. It drives real docs and GitHub pages deterministically via the accessibility tree (stable refs, not screen-scraping), so you read the *current* source/docs rather than recalling stale training data. Use `--json` when you want to parse output; use a `--session` to carry state across a multi-page lookup.
+The default tools need zero setup. Reach for the heaviest one that fits, lightest first:
+
+- **`WebSearch`** — find the current canonical page when you don't have the URL ("`<lib> <version>` retry middleware docs").
+- **`WebFetch`** — read one known page (a docs section, a guide). The common case.
+- **`gh`** — read the upstream repo directly: `gh api` for file contents, releases, or the `CHANGELOG`; `gh search code` to see how the library itself uses a thing. This is how you reach the *real* source and private/authed pages.
+
+Prefer the library's own repo and docs over blog posts and forum answers — primary sources outrank secondary ones. **Pin the version**: default docs often render an older major than you're on, so read the docs for the version in your lockfile and note which version the pattern applies to.
+
+### When you must navigate: agent-browser (optional)
+
+`WebFetch` reads one static URL; it can't drive a JS-rendered site, page through multi-section docs behind interaction, or operate a repo UI. For that, `agent-browser` drives a real browser deterministically through the accessibility tree (stable refs, not pixel-scraping). It is **not bundled with this kit** — install once, pinned: `npm i -g agent-browser@0.27.0` (the ref-loop below assumes that version's snapshot behavior; bump only after re-verifying it).
+
+The core loop is snapshot-driven: refs (`@e1`, `@e2`, …) are assigned fresh per snapshot and go stale the moment the page changes, so re-snapshot after anything that navigates or re-renders.
 
 ```bash
-agent-browser open <url>            # launch + navigate (e.g. the docs page or a GitHub file)
-agent-browser snapshot              # accessibility tree with refs
-agent-browser snapshot -i           # interactive elements only (links, inputs, buttons)
-agent-browser snapshot --json       # machine-readable, for parsing
-agent-browser get text <sel>        # extract text content from a region
-agent-browser get html <sel>        # innerHTML when structure matters
-agent-browser find text <text> <action>          # locate by visible text
-agent-browser find role <role> <action> [value]  # locate by ARIA role
-agent-browser --session <name> ...  # isolated, reusable session across pages
+agent-browser open <url>            # 1. navigate
+agent-browser snapshot -i           # 2. interactive elements, each tagged @eN
+agent-browser click @e3             # 3. act on a ref from THIS snapshot
+agent-browser snapshot -i           # 4. re-snapshot — refs from step 2 are now stale
+agent-browser get text @e5          # extract a region's text (get html @e5 for structure)
+agent-browser find text <text> <action>   # locate by visible text (find role <role> … for ARIA)
 ```
 
-A typical lookup: `open` the official docs page or the canonical example file in the upstream GitHub repo → `snapshot` to orient → `get text` on the relevant section → if it's spread across pages, reuse a `--session` and `find`/`open` your way through. Prefer the library's own repo and docs over blog posts and forum answers — primary sources outrank secondary ones. For private/authed pages, `agent-browser` won't help; use `gh` or an authenticated tool instead.
-
-(Plain web search or `WebFetch` is fine for a quick fact. Reach for `agent-browser` when you need to *navigate* — follow links, read a specific file in a repo, page through multi-section docs — rather than read one static URL.)
+A typical lookup: `open` the docs or the canonical example file in the upstream repo → `snapshot -i` to orient → `get text` the section → if it spans pages, `find`/`open` your way through, re-snapshotting after each navigation. (`--session <name>` keeps an isolated reusable session across a multi-page lookup; `snapshot --json` emits machine-readable output.)
 
 ## What to extract: pattern + anti-pattern + why
 
 Don't just copy the snippet. A lookup is only useful if it captures three things:
 
-1. **The canonical pattern** — the current, idiomatic way the library/framework intends it, with the version it applies to (APIs drift; note what you're targeting).
+1. **The canonical pattern** — the current, idiomatic way the library/framework intends it, with the version it applies to. APIs drift across majors, and default docs often render an *older* major than you're on — pin the lookup to the version in your lockfile and record it, so the implementer doesn't code the v2 shape against a v4 dependency.
 2. **The matching anti-pattern** — the wrong-but-tempting version it replaces, and how to recognize it. This is what stops the same mistake recurring; the canonical pattern alone doesn't inoculate against the trap.
 3. **Why** — one line on what the right way buys (avoids a race, preserves the cache, closes an injection path). The reason generalizes to cases the example didn't cover.
 
 Then *use* both:
 
 - **Feed it into the plan.** Write the canonical pattern (with its source) into the implementation plan so the implementer codes from the real shape, not a guess.
-- **Feed it into the review.** Hand the anti-pattern to the pattern check during recheck (compound-v:recheck) — "does the diff contain the anti-pattern we found?" turns a vague best-practice opinion into a concrete, checkable test.
+- **Feed it into the review.** Hand the anti-pattern to compound-v:recheck as a *named, checkable* item, not a vibe. Worked end-to-end: you looked up SQL access in the **v4.2** docs (the version in your lockfile, not whatever default the docs rendered) → found the trap: a string-interpolated query is an injection hole, and v4.2's canonical form is a parameterized query → record both with the version → that becomes a concrete recheck assertion — "does the diff build any query by string interpolation?" — which turns a vague best-practice opinion into a test the review can actually run *against the right API*.
 
-## Tool design is an interface (ACI)
-
-When the thing you're building is itself a *tool* for an agent — an MCP tool, a CLI an agent will call, a function exposed to an LLM — apply the same care here as you would to a human UI. The agent is a non-deterministic caller that will call the wrong tool, with the wrong args, in the wrong order, unless the interface prevents it. So when you look up or design a tool's shape:
-
-- **Poka-yoke the arguments** — make wrong calls hard to express. Requiring **absolute paths** instead of relative ones eliminated a whole error class on real benchmarks. Constrain types and enums so invalid states can't be passed.
-- **Minimal overlap.** If a human engineer can't say which of two tools to use in a situation, neither can the agent. Curate a small set of distinct tools; consolidate (one `search_x` that does the work) rather than exposing every low-level endpoint.
-- **Describe it like a docstring for a junior.** State what it does, when to use it, when *not* to, and what it returns. Return high-signal semantic fields (names, types) over cryptic IDs (`uuid`, `mime_type`). Small refinements to a tool's description yield outsized improvements in how reliably it's used.
-- **Make the tool dumb and deterministic, not agentic.** A tool that is itself an LLM or sub-agent is hard to reason about and debug, and chaining two non-deterministic things compounds failure. Prefer a plain deterministic action (a literal web search, a direct lookup) over "ask a sub-agent to figure it out" — push the intelligence into the *calling* agent and keep the tool a predictable primitive.
+Designing your own tool's API (an MCP tool, a CLI an agent will call)? That's a different problem — see compound-v:designing-agents for the agent-computer-interface rules.

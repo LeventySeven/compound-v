@@ -18,7 +18,9 @@ One Opus 4.8 reviewer reads the actual diff, runs the tests itself, and reports 
 
 **Read-only.** The reviewer gets read + run-tests tools, never Edit/Write. A reviewer that can edit can introduce its own bugs, and the bug it adds is the one nobody reviews. Every serious coding agent enforces this on its reviewer (Amp's `oracle` is read-only; Codex's review prompt never patches). The **implementer** applies fixes; recheck only finds them.
 
-**Don't trust the report — verify independently.** The implementer's summary may be optimistic, incomplete, or wrong. Read the actual VCS diff yourself (`git diff <base>..<head>`). Re-run the tests yourself. "Agent reports success" is not evidence; fresh output is. The same caution applies to the model's stated reasoning — a chain-of-thought can be edited to nonsense and still yield the right answer, so "show your reasoning" is not a correctness check. Judge the behavior and the diff, not the explanation.
+**Don't trust the report — verify independently.** The implementer's summary may be optimistic, incomplete, or wrong. Read the actual VCS diff yourself (`git diff <base>..<head>`; if nothing is committed yet, the staged/working set via `git diff HEAD`; with no VCS at all, the changed files named in the handoff). Re-run the tests yourself. "Agent reports success" is not evidence; fresh output is. The same caution applies to the model's stated reasoning — a chain-of-thought can be edited to nonsense and still yield the right answer, so "show your reasoning" is not a correctness check. Judge the behavior and the diff, not the explanation.
+
+**Give the reviewer the diff and the spec — not the implementer's reasoning transcript.** A reviewer that inherits the coder's chain-of-thought inherits its blind spots: the same wrong assumption that produced the bug rationalizes it on review. A clean context reasons *backward* from the diff and the goals, and is free to question a pattern the user asked for that turns out to be insecure or misaligned. (Cognition's Devin Review, run this way, catches an average of ~2 bugs/PR, about 58% of them severe — logic, edge-case, or security.) The findings then **filter back through the agent that holds the full user and spec context**, which decides scope — what's in this batch, what's a separate issue, what the user actually wants. Recheck is a two-way bridge, not a reviewer shouting at a coder.
 
 ## The pass — cheapest-disqualifying-first, short-circuit
 
@@ -30,7 +32,17 @@ Run these in order. If a step disqualifies the work, **stop and report** — don
 
 3. **Bugs.** Read the diff. Logic errors, unhandled edge cases, error paths that swallow or mishandle, off-by-one, null/undefined, race conditions, resource leaks. Only flag bugs **introduced in this diff** — pre-existing bugs are out of scope (flag them separately at most, never as blockers for this batch).
 
-4. **Vulnerabilities** (first-class — most review skills omit this entirely). Check for: injection (SQL/command/template), broken authz (missing ownership/permission checks), secrets in code or logs, unsafe deserialization, SSRF, path traversal, and — for agent/LLM code — the **lethal trifecta** (private data + untrusted content + exfiltration channel in one flow). A security hole is at least Important, usually Critical. Name the class and the exact triggering input (path traversal / CWE-22 via `../`, BOLA/IDOR, SQL/command injection, SSRF), and call out the second-order or at-scale version — a named, reproducible exploit is what gets it fixed.
+4. **Vulnerabilities** (first-class — most review skills omit this entirely). Recheck *detects* these; compound-v:agent-security is the build-time counterpart that *prevents* them — when you find one, the fix usually lives there. Name the class and the exact triggering input, plus the constructive defense:
+   - **Injection** — SQL/command/template; parameterize, never string-concatenate untrusted input into a query/shell.
+   - **Broken authz** — BOLA/IDOR, missing ownership/permission checks; every object access verifies the caller owns it.
+   - **SSRF** — a user-controlled URL the server fetches; the boundary is an egress allowlist or an SSRF-filtering proxy, not a regex denylist.
+   - **RCE / arbitrary exec** — any code-exec, eval, or deploy endpoint must be auth-gated and, for model-written code, run sandboxed (allowlist/AST-check before exec).
+   - **Secret leakage** — keep secrets *and* raw `str(exception)`/stack traces out of agent-facing paths, logs, and error responses; a leaked key or internal path is the next exploit's foothold.
+   - **Destructive tools** — delete/migrate/spend/send actions need an approval gate, not silent autonomy.
+   - **Path traversal** — CWE-22 via `../`; resolve and confine to a base dir.
+   - **The lethal trifecta** (agent/LLM code) — private data + untrusted content + an exfiltration channel in one flow. The injection vector is almost always **untrusted document or page content** the agent reads as if it were instructions; break one leg of the trifecta.
+
+   A security hole is at least Important, usually Critical. Call out the second-order or at-scale version — a named, reproducible exploit is what gets it fixed.
 
 5. **Re-test.** Actually run the test suite, the linter, and the typecheck/build. Read the full output and the exit code — count failures, don't trust "should pass". Confirm the tests are *real*: they exercise behavior, not mock-into-tautology assertions that pass no matter what the code does. Green only counts with fresh evidence in this pass.
 
@@ -59,21 +71,12 @@ Then exactly one verdict:
 
 ## The loop and its cap
 
-Findings go back to the **same implementer** to fix (it has the context; it holds the edit tools). Then re-check. **Cap at 3 fix↔recheck cycles** — this N=3 is convergent across production agents (Devin stops after 3 CI failures, Cursor after 3 lint loops, WARP `MAX_RETRIES=3`). Still failing at cycle 3 is a signal, not a reason for cycle 4: return ARCHITECTURE_CONCERN and question the design or the plan.
-
-## Optional: cross-model reviewer
-
-You run all-Opus by default. If quality matters more than uniformity on a hard change, add **one** reviewer from a different model family for this pass. A single different-family reviewer closes ~74.7% of a same-model quality gap (+4.8% on the hardest problems) at minimal cost — different families catch errors neither catches alone. This is a toggle for high-stakes diffs, not the default.
+Findings go back to the **same implementer** to fix (it has the context; it holds the edit tools). Then re-check. **Cap at 3 fix↔recheck cycles** — the same N=3 that compound-v:systematic-debugging owns (where the convergent production-agent evidence lives). Still failing at cycle 3 is a signal, not a reason for cycle 4: return ARCHITECTURE_CONCERN and question the design or the plan.
 
 ## Red flags
 
 | Smell | Why it's wrong |
 |---|---|
-| Approving from the implementer's summary | You reviewed prose, not code. Read the diff. |
-| Letting recheck edit the code | The reviewer's own bug ships unreviewed. Read-only; implementer fixes. |
-| Grading code style on a misaligned feature | Wasted effort on the wrong thing. Steps 1-2 short-circuit first. |
-| "Tests pass" without running them this pass | Stale or imagined. Re-run; read the exit code. |
-| Skipping the vulnerability step | The omission most review skills make; security holes ship silently. |
-| A wall of Minor nits, no verdict | Buries real issues and gives the implementer nothing to act on. Cap findings; always give a verdict. |
-| Praise padding / "you're absolutely right" | Sycophancy dilutes signal. Findings only. |
-| Attempting fix cycle #4 | The architecture is the problem; escalate, don't grind. |
+| The diff makes a failing test pass by **weakening or deleting the assertion** | A reward-hack — the test now proves nothing, and an assertion gutted to go green is the same shape as a quietly introduced vuln. Flag it; the bug is unfixed. |
+| The reviewer was handed the implementer's reasoning, not just the diff + spec | It inherits the blind spot that produced the bug and rationalizes it. Review from a clean context. |
+| Approving from the implementer's summary | You reviewed prose, not code. Read the diff and re-run the tests this pass. |
