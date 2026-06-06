@@ -68,6 +68,10 @@ The discipline that makes this work: **findings cross the boundary, raw document
 
 When you do put instructions up front, aim between two failure modes: too *brittle* (hardcoded if-else logic that overfits and rots) and too *vague* (high-level prose that assumes shared context the model doesn't have). Strike specific-enough-to-guide yet flexible-enough-to-give-strong-heuristics. Delineate sections with Markdown headers or XML tags. Start from a minimal prompt on the best model, then add instructions and examples to fix observed failure modes — don't pre-write guards for problems you haven't seen.
 
+## Encode what transfers across models; defer what scale washes away
+
+The harness is the durable asset; the model is swappable — so spend effort on what *survives* a model upgrade and let the model handle what it'll soon do unaided. **Encode** the things that transfer across generations: verifiable environments and checks, the plan/state/conventions, agent-addressable structure, and representations that turn a fuzzy task into one the model is already strong at. The sharpest version of that last one: **make a non-coding task look like a coding task** — hand the agent files plus `bash`/`grep` over prose-described data instead of a bespoke tool-for-every-step, because coding-agent training generalizes to anything shaped like filesystem ops. **Don't encode** elaborate cognitive scaffolds, role-play personas, or hand-built planners that the next model will simply absorb — that work gets washed away. The test when unsure whether to build a mechanism: would it still earn its place against a clearly smarter model? If no, defer it.
+
 ## The quick checklist
 
 - Target the smallest high-signal set; cut tokens that don't change the outcome.
@@ -77,3 +81,4 @@ When you do put instructions up front, aim between two failure modes: too *britt
 - Keep the cached prefix static, the context append-only, serialization deterministic; mask tools, don't delete them.
 - Carry the plan/state in an external file, not in summary prose; recite it at the recent end of context.
 - Push noisy, token-heavy work into sub-agents that return only findings.
+- Hard-code only what survives a model upgrade (verifiable checks, state, structure); let the model handle what scale will soon do unaided.

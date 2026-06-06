@@ -18,7 +18,7 @@ One Opus 4.8 reviewer reads the actual diff, runs the tests itself, and reports 
 
 **Read-only.** The reviewer gets read + run-tests tools, never Edit/Write. A reviewer that can edit can introduce its own bugs, and the bug it adds is the one nobody reviews. Every serious coding agent enforces this on its reviewer (Amp's `oracle` is read-only; Codex's review prompt never patches). The **implementer** applies fixes; recheck only finds them.
 
-**Don't trust the report — verify independently.** The implementer's summary may be optimistic, incomplete, or wrong. Read the actual VCS diff yourself (`git diff <base>..<head>`). Re-run the tests yourself. "Agent reports success" is not evidence; fresh output is.
+**Don't trust the report — verify independently.** The implementer's summary may be optimistic, incomplete, or wrong. Read the actual VCS diff yourself (`git diff <base>..<head>`). Re-run the tests yourself. "Agent reports success" is not evidence; fresh output is. The same caution applies to the model's stated reasoning — a chain-of-thought can be edited to nonsense and still yield the right answer, so "show your reasoning" is not a correctness check. Judge the behavior and the diff, not the explanation.
 
 ## The pass — cheapest-disqualifying-first, short-circuit
 

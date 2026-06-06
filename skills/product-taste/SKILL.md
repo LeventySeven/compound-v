@@ -48,6 +48,8 @@ Decoration kills UX. Run every motion through six checks; any fail → cut or fi
 
 Motion added "because it looks nice," with no state change to communicate, fails #3 → it's decoration → cut it.
 
+Craft refinements: animate only **`transform` and `opacity`** — they ride the GPU's composite-only path, while animating layout or color forces repaints that drop frames; keep durations in the **200–300ms** range, `ease-out` for enter/exit. And invert the intuition for *frequency*: an element seen 100+ times a day should **lose** its animation — repeated motion stops reading as delight and becomes noise.
+
 ## Latency gates — perceived speed is taste work, not an infra afterthought
 Hold the perceptual cliffs:
 - **< 200ms** feels instant — target for interactive feedback.
@@ -55,6 +57,9 @@ Hold the perceptual cliffs:
 - **< 50ms** is the bar the best hold for every interaction (Linear); Cursor's tab completion lives at ~260ms — fast enough, deliberately measured.
 
 The levers are perceived-speed work — optimistic updates, skeleton states, streaming — applied *before* you reach for backend speed. "We'll optimize latency later, it's infra" is the wrong call; bake the masks in now.
+
+## Reduce cognitive load, not clicks
+The thing to minimize is *thinking*, not taps. Software that stops the user with a decision they don't understand makes them feel stupid — that's the real cost, not one more click. A flow of many trivially-obvious taps can feel effortless (Snapchat runs at several deliberate taps a second), while a single screen demanding an unfamiliar judgment feels heavy. Cut decisions and unfamiliar choices first; only collapse clicks that each carry real cognitive weight.
 
 ## Constraints generate taste — remove options, don't add them
 Fewer, more opinionated primitives produce more coherence than infinite flexibility. A design system should *remove* choices (Teenage Engineering's fixed palettes as a generative force; Linear collapsed 98 color variables → 3). Default to removing; justify every new variable/flag/token against the coherence it costs. The best design is opinionated — designed for specific users, not everyone. Spec is the floor, not the ceiling.
