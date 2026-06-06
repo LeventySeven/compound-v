@@ -95,7 +95,7 @@ Fix inline and move on. Save the plan to `docs/plans/YYYY-MM-DD-<feature>.md` (u
 When the deliverable is a product doc rather than a code plan, the discipline is the same — concrete over vague, with one cut named — but the sections differ. Keep it to the shortest thing that makes the decision:
 
 - **Problem** — the specific problem and who has it, in plain language. Not a mission statement.
-- **The one verifiable signal** — how you'll *know* it worked: the metric, eval, or observable outcome that says ship/don't-ship. If there's no auto-checkable signal, that gap is the first risk to close, not a detail to defer.
+- **The one verifiable signal** — how you'll *know* it worked: the metric, eval, or observable outcome that says ship/don't-ship. If there's no auto-checkable signal, that gap is the first risk to close, not a detail to defer. For an agent-built feature, make the signal *machine-checkable and tamper-resistant* — a feature list as an executable spec: a JSON list of requirements the agent may flip to `passes: true` but not rewrite (JSON resists accidental overwrite better than prose).
 - **Scope and the cut** — what's in, and explicitly what's out for v1. A doc that only adds is a backlog, not a plan; name what you're refusing.
 - **Approach** — the chosen design and the real alternatives you rejected, with why. One sentence stating the core idea — if you can't state it in one sentence, the design isn't settled.
 - **Risks, riskiest first** — the load-bearing assumptions, ordered by what would hurt most if wrong, each with how you'd test it cheaply.

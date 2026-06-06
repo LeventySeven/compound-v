@@ -86,18 +86,28 @@ We ran a neutral head-to-head (a neutral judge, told not to favor either side). 
   the descriptions routed correctly 15/15.
 - **Review process — Compound V wins.** 1 read-only pass vs 2 dispatches; findings-only vs
   superpowers' *mandated* praise; cleaner disqualify-first ordering.
-- **Bug detection — a tie, and superpowers was slightly sharper.** On a planted-bug fixture
-  (path-traversal, swallowed-404, dead code, tautological test) **both caught all four.** Superpowers'
-  heavier two-stage review actually scored *better* on severity accuracy (3/4 vs 2/4 — `recheck`
-  under-rated the dead code) and gave deeper analysis. We treated that as the dogfooded loop working:
-  `recheck`'s severity calibration was hardened in response (over-engineering with latent risk is now
-  rated Important, and vuln findings must name the class + exploit vector).
+- **Bug detection — both catch the bugs; severity calibration was the real differentiator, and we
+  earned it.** On the first fixture (Python: path-traversal, swallowed-404, dead code, tautological
+  test) **both caught all four**, and superpowers' two-stage review was actually *sharper* on severity
+  (3/4 exact vs recheck's 2/4 — recheck under-rated the dead code). We treated that as the dogfooded
+  loop working and **hardened `recheck`'s calibration** (over-engineering with latent risk → Important;
+  vuln findings must name the class + exploit vector). On a **fresh, unseen second fixture**
+  (Node/Express: SQL injection, BOLA, an unbounded cache, a missing-`await` bug, a vacuous test) the
+  fix generalized: both still caught everything, and **recheck edged superpowers on severity accuracy,
+  4/5 exact vs 3/5** — correctly rating the over-engineering Important and naming SQLi/CWE-89 and
+  BOLA/CWE-639 with exploit vectors. It also honestly reported it *couldn't run* the tests (no
+  `package.json` in the sandbox) instead of faking green. **Honest caveat:** superpowers' output is
+  still the more polished, pedagogical artifact (spec table, explicit strengths, staged path-to-merge)
+  — at the cost of praise-padding and a strengths-before-criticals ordering; recheck stays leaner,
+  findings-only, one read-only pass.
 - **Where superpowers genuinely wins:** its more aggressive rationalization-resistance plausibly
   raises compliance for weaker models under pressure, and it ships executable tooling (graph
   rendering, a visual companion) that Compound V doesn't have.
 
-Net: leaner, denser, broader coverage, more discoverable, honest-by-design — not "catches strictly
-more bugs on a single diff." That's the truthful claim, and it's the one the kit makes.
+Net: leaner, denser, broader coverage, more discoverable, and honest-by-design — and after the
+calibration fix, *at least as accurate* on severity (it edged superpowers 4/5 vs 3/5 on the second,
+unseen fixture). What it doesn't win is reviewer polish/pedagogy. That's the truthful claim, and it's
+the one the kit makes — not "catches strictly more bugs."
 
 ## Install
 

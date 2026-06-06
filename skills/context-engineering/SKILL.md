@@ -19,9 +19,11 @@ Skip it for a short, single-shot task that comfortably fits — context engineer
 
 ## Why context degrades: rot and the attention budget
 
-As tokens grow, the model's ability to **accurately recall** any one fact *decreases*. The cause is architectural: attention scales as n² pairwise relationships across n tokens, so a fixed attention budget spreads thinner with every token you add. This is a gradient, not a cliff — but it means a bloated context is actively *worse* at the task, not just more expensive. Recall noticeably craters once context gets large (think tens of thousands of tokens of low-signal filler).
+As tokens grow, the model's ability to **accurately recall** any one fact *decreases*. The cause is architectural: attention scales as n² pairwise relationships across n tokens, so a fixed attention budget spreads thinner with every token you add. This is a gradient, not a cliff — but it means a bloated context is actively *worse* at the task, not just more expensive. Recall measurably degrades as the window fills — Chroma's *Context Rot* benchmark shows loss even on a trivial retrieval task, ~40% down by ~170K tokens on some tasks (and far sooner with low-signal filler).
 
 The practical consequence: every token you add spends from a shared budget. Spend it on signal.
+
+The flip side: context is also a **capability lever**, not only a cost. Loading the *right* large body of context — a whole codebase, a domain corpus — can make the model dramatically better at the task, comparable to a jump in model scale, because it's learning in-context. So the goal isn't "less," it's *all signal, no noise*: pay for the tokens that buy capability, cut the ones that don't.
 
 ## Just-in-time retrieval beats pre-loading
 
