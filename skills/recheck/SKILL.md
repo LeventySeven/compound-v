@@ -30,11 +30,11 @@ Run these in order. If a step disqualifies the work, **stop and report** — don
 
 3. **Bugs.** Read the diff. Logic errors, unhandled edge cases, error paths that swallow or mishandle, off-by-one, null/undefined, race conditions, resource leaks. Only flag bugs **introduced in this diff** — pre-existing bugs are out of scope (flag them separately at most, never as blockers for this batch).
 
-4. **Vulnerabilities** (first-class — most review skills omit this entirely). Check for: injection (SQL/command/template), broken authz (missing ownership/permission checks), secrets in code or logs, unsafe deserialization, SSRF, path traversal, and — for agent/LLM code — the **lethal trifecta** (private data + untrusted content + exfiltration channel in one flow). A security hole is at least Important, usually Critical.
+4. **Vulnerabilities** (first-class — most review skills omit this entirely). Check for: injection (SQL/command/template), broken authz (missing ownership/permission checks), secrets in code or logs, unsafe deserialization, SSRF, path traversal, and — for agent/LLM code — the **lethal trifecta** (private data + untrusted content + exfiltration channel in one flow). A security hole is at least Important, usually Critical. Name the class and the exact triggering input (path traversal / CWE-22 via `../`, BOLA/IDOR, SQL/command injection, SSRF), and call out the second-order or at-scale version — a named, reproducible exploit is what gets it fixed.
 
 5. **Re-test.** Actually run the test suite, the linter, and the typecheck/build. Read the full output and the exit code — count failures, don't trust "should pass". Confirm the tests are *real*: they exercise behavior, not mock-into-tautology assertions that pass no matter what the code does. Green only counts with fresh evidence in this pass.
 
-6. **Patterns / anti-patterns.** Does it follow the codebase's existing conventions and the canonical pattern for what it's doing (use compound-v:searching-patterns when the right pattern is non-obvious)? Flag known anti-patterns. And ask the question over-engineering hides from: **is there a materially simpler version that's just as correct?** If yes, that simpler-possible is a finding.
+6. **Patterns / anti-patterns.** Does it follow the codebase's existing conventions and the canonical pattern for what it's doing (use compound-v:searching-patterns when the right pattern is non-obvious)? Flag known anti-patterns. And ask the question over-engineering hides from: **is there a materially simpler version that's just as correct?** If yes, that simpler-possible is a finding — and rate it **Important**, not a throwaway Minor, when the extra machinery is unused/dead code, violates an explicit simplicity requirement, or carries latent risk (memory blowup, a cross-user leak if it were wired up, a maintenance trap). Minor only when it's genuinely cosmetic.
 
 ## Output
 
@@ -53,7 +53,7 @@ Then exactly one verdict:
 - **FIX_REQUIRED** — at least one Critical/Important; the implementer fixes, then re-check.
 - **ARCHITECTURE_CONCERN** — the approach itself is wrong (failed step 1 or 2, or fixes keep failing); escalate to a re-plan rather than patching.
 
-**Anti-sycophancy.** Report only newly-introduced, discrete, non-speculative issues. No praise padding, no "great job", no "you might consider…" hedging. "It is not enough to speculate that a change *may* disrupt another part of the codebase" — if you can't name the trigger, it isn't a finding. Severity must be honest: don't inflate a nit to Critical, don't bury a real bug as Minor. A clean diff gets a one-line APPROVED, not a manufactured list.
+**Anti-sycophancy.** Report only newly-introduced, discrete, non-speculative issues. No praise padding, no "great job", no "you might consider…" hedging. "It is not enough to speculate that a change *may* disrupt another part of the codebase" — if you can't name the trigger, it isn't a finding. Severity must be honest and calibrated by **impact, not by category label** — a "smell" / "style" / "nit" tag does not cap a finding at Minor if its real-world consequence is large. Don't inflate a true nit to Critical; don't bury a high-impact issue as Minor. A clean diff gets a one-line APPROVED, not a manufactured list.
 
 **Signal-density cap.** At most ~10-12 findings per pass. Returning 40 small findings buries the critical one. If there are more than a dozen real problems, the right finding is ARCHITECTURE_CONCERN.
 

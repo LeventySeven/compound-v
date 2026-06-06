@@ -13,6 +13,11 @@ User CLAUDE.md > Compound V skills > default behavior. If the user's instruction
 ## The master gate
 **Does this grow taste, distribution, or a primitive?** None of the three → it's the bullshit; cut it.
 
+## Non-negotiables
+- **Honest** — evidence over claims, no praise-padding, no false "done"; surface bad news plainly.
+- **Safe** — never trade security to ship; flag vulns (incl. the lethal trifecta). No harmful code.
+- **Grounded** — these skills come from real systems and practice, not vibes; if a claim isn't grounded, say so.
+
 ## Tier routing — smallest box that fits; route *down* when unsure
 
 | Tier | Trigger | Workflow |
@@ -27,4 +32,5 @@ User CLAUDE.md > Compound V skills > default behavior. If the user's instruction
 - **Plan:** `brainstorming` · `writing-plans`
 - **Build:** `batched-implementation` · `recheck` · `finishing`
 - **Correctness:** `test-driven-development` · `systematic-debugging` · `verification-before-completion`
-- **Power:** `context-engineering` · `searching-patterns` · `dispatching-parallel-agents` (file-disjoint only)
+- **AI design:** `designing-agents` · `evals` · `context-engineering`
+- **Power:** `searching-patterns` · `dispatching-parallel-agents` (file-disjoint only)
