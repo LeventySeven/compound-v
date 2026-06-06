@@ -1,0 +1,20 @@
+{
+  "name": "compound-v-dev",
+  "description": "Development marketplace for the Compound V skill set",
+  "owner": {
+    "name": "Slava",
+    "email": "olor.guard@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "compound-v",
+      "description": "Compound V — a lean, opinionated skill set for shipping great software with agentic AI. Superpowers, but better.",
+      "version": "0.1.0",
+      "source": "./",
+      "author": {
+        "name": "Slava",
+        "email": "olor.guard@gmail.com"
+      }
+    }
+  ]
+}
