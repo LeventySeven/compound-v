@@ -102,20 +102,14 @@ After the plan is complete, read it against the spec with fresh eyes. This is yo
 - **Placeholder scan** — hunt the patterns above and resolve every hit.
 - **Type consistency** — do signatures and names line up across tasks? `clearLayers()` in Task 3 and `clearFullLayers()` in Task 7 is a bug waiting to happen.
 
-Fix inline and move on. Save the plan to `docs/plans/YYYY-MM-DD-<feature>.md` (user's location preference wins), then hand off to `compound-v:batched-implementation` to execute it.
+Fix inline and move on. Save the plan to `docs/plans/YYYY-MM-DD-<feature>.md` (user's location preference wins), then hand off to `compound-v:batched-implementation` to execute it. Once approved, the plan is the **fixed decision record** — the problem, the signal, the cut, the approach, and the risks, made concrete as tasks. The implementer executes it; it does not redesign mid-build. If a load-bearing assumption turns out wrong, that's the divergence rule firing — stop and re-plan deliberately, never drift-edit the plan as you go.
 
-## Writing a PRD or design doc
+## Writing a PRD: the product's stable context doc
 
-A PRD is the product's **stable source of truth** — kept in `docs/` and *kept current* — that a person or an agent reads in one pass to get the durable context: what the product is, what it does, and what it's built on. Lead with that durable definition, then pin the per-build decisions (where **compound-v:startup-taste**'s gates become a document). Keep every section the shortest concrete thing.
+A PRD is **not a plan** — it's the product's **stable source of truth**, kept in `docs/` (e.g. `docs/PRD.md`) and read *first* by a fresh session to get ~80% of the context in one pass: what the product is, what it does, and what it's built on. The plan above answers "what am I building right now, and how?"; the PRD answers "what is this product?" — and it changes rarely. Keep it to three tight sections:
 
-The durable definition (changes rarely — this is what a teammate or an agent reads to get oriented):
 - **Goal** — what the product is, who it's for, and the one outcome it exists to deliver. Plain language, not a mission statement.
 - **Core functions** — the handful of capabilities that define the product (the feature spine, not a backlog), one line each.
-- **Tech stack & architecture** — the languages, frameworks, and services it runs on, a one-sentence shape of the system, and the key design decision(s) with the real alternatives you rejected.
+- **Tech stack & architecture** — the languages, frameworks, and services it runs on, a one-sentence shape of the system, and the load-bearing design decisions.
 
-The per-build decisions:
-- **The one verifiable signal** — the metric, eval, or observable outcome that says ship/don't-ship (startup-taste's verifier-first gate, written down). For an agent-built feature, make it *machine-checkable and tamper-resistant*: a feature list as an executable spec — a JSON list of requirements the agent may flip to `passes: true` but not rewrite (JSON resists accidental overwrite better than prose).
-- **Scope and the cut** — what's in, and explicitly what's out for v1. A doc that only adds is a backlog, not a plan.
-- **Risks, riskiest first** — the load-bearing assumptions, ordered by what would hurt most if wrong, each with how you'd test it cheaply.
-
-Keep it the single source of truth: when the product changes, edit the PRD in place — don't spawn a `prd-v2` — and prune what's no longer true; a stale doc an agent trusts as fact is worse than none (**compound-v:context-engineering** on keeping durable docs from rotting). Then run the same self-review: every claim concrete, no placeholders, effort in hours/days.
+The per-build decisions — the problem, the verifiable signal, the cut, the approach, the risks — do **not** go here; those are the *plan's* job (above), per build. Keep the PRD the single source of truth: edit it in place when the product genuinely changes (never a `prd-v2`), prune what's no longer true — a stale doc an agent trusts as fact is worse than none (**compound-v:context-engineering** on keeping durable docs from rotting). A good `CLAUDE.md`/`AGENTS.md` points the agent at it.
