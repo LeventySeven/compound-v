@@ -31,22 +31,11 @@ Prefer the library's own repo and docs over blog posts and forum answers — pri
 
 When the thing you're implementing ships an **official conformance suite** — a protocol, a wire format, a standard's test vectors — that suite *is* the primary source: precise, executable, and it doesn't drift the way prose docs do. Point the implementer at it and write code until those tests pass (Simon Willison; e.g. WebAssembly's spec test suite).
 
-### When you must navigate: agent-browser (optional)
+### When you must navigate: drive a real browser
 
-`WebFetch` reads one static URL; it can't drive a JS-rendered site, page through multi-section docs behind interaction, or operate a repo UI. For that, `agent-browser` drives a real browser deterministically through the accessibility tree (stable refs, not pixel-scraping). It is **not bundled with this kit** — install once, pinned: `npm i -g agent-browser@0.27.0` (the ref-loop below assumes that version's snapshot behavior; bump only after re-verifying it).
+`WebFetch` reads one static URL; it can't drive a JS-rendered site, page through multi-section docs behind interaction, or operate a repo UI. For that, reach for whatever **browser-automation tool your environment provides** — prefer one that works through the accessibility tree (stable element refs) over pixel-scraping.
 
-The core loop is snapshot-driven: refs (`@e1`, `@e2`, …) are assigned fresh per snapshot and go stale the moment the page changes, so re-snapshot after anything that navigates or re-renders.
-
-```bash
-agent-browser open <url>            # 1. navigate
-agent-browser snapshot -i           # 2. interactive elements, each tagged @eN
-agent-browser click @e3             # 3. act on a ref from THIS snapshot
-agent-browser snapshot -i           # 4. re-snapshot — refs from step 2 are now stale
-agent-browser get text @e5          # extract a region's text (get html @e5 for structure)
-agent-browser find text <text> <action>   # locate by visible text (find role <role> … for ARIA)
-```
-
-A typical lookup: `open` the docs or the canonical example file in the upstream repo → `snapshot -i` to orient → `get text` the section → if it spans pages, `find`/`open` your way through, re-snapshotting after each navigation. (`--session <name>` keeps an isolated reusable session across a multi-page lookup; `snapshot --json` emits machine-readable output.)
+The loop is snapshot-driven and tool-agnostic: **open** the page → **snapshot** the interactive elements (each gets a fresh ref) → **act** on a ref from *this* snapshot → **re-snapshot after anything that navigates or re-renders**, because refs go stale the moment the page changes. A typical lookup: open the docs or the canonical example in the upstream repo, snapshot to orient, read the section, then page through multi-section docs by re-snapshotting after each navigation.
 
 ## What to extract: pattern + anti-pattern + why
 
