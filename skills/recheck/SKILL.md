@@ -14,11 +14,11 @@ One Opus 4.8 reviewer reads the actual diff, runs the tests itself, and reports 
 - Any time you need a finished change verified by something other than the agent that wrote it.
 - Skip it for a typo, rename, or config flip — a Trivial-tier change goes straight to compound-v:verification-before-completion. Recheck is for changes with logic in them.
 
-## Two rules that make this work
+## Three rules that make this work
 
 **Read-only.** The reviewer gets read + run-tests tools, never Edit/Write. A reviewer that can edit can introduce its own bugs, and the bug it adds is the one nobody reviews. Every serious coding agent enforces this on its reviewer (Amp's `oracle` is read-only; Codex's review prompt never patches). The **implementer** applies fixes; recheck only finds them.
 
-**Don't trust the report — verify independently.** The implementer's summary may be optimistic, incomplete, or wrong. Read the actual VCS diff yourself (`git diff <base>..<head>`; if nothing is committed yet, the staged/working set via `git diff HEAD`; with no VCS at all, the changed files named in the handoff). Re-run the tests yourself. "Agent reports success" is not evidence; fresh output is. The same caution applies to the model's stated reasoning — a chain-of-thought can be edited to nonsense and still yield the right answer, so "show your reasoning" is not a correctness check. Judge the behavior and the diff, not the explanation.
+**Don't trust the report — verify independently.** The implementer's summary may be optimistic, incomplete, or wrong. Read the actual VCS diff yourself (`git diff <base>..<head>`; if nothing is committed yet, the staged/working set via `git diff HEAD`; with no VCS at all, the changed files named in the handoff). Re-run the tests yourself. "Agent reports success" is not evidence; fresh output is.
 
 **Give the reviewer the diff and the spec — not the implementer's reasoning transcript.** A reviewer that inherits the coder's chain-of-thought inherits its blind spots: the same wrong assumption that produced the bug rationalizes it on review. A clean context reasons *backward* from the diff and the goals, and is free to question a pattern the user asked for that turns out to be insecure or misaligned. (Cognition's Devin Review, run this way, catches an average of ~2 bugs/PR, about 58% of them severe — logic, edge-case, or security.) The findings then **filter back through the agent that holds the full user and spec context**, which decides scope — what's in this batch, what's a separate issue, what the user actually wants. Recheck is a two-way bridge, not a reviewer shouting at a coder.
 
