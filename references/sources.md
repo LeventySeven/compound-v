@@ -35,6 +35,7 @@ as skills are edited.
 | **N=3** fix↔recheck cap | `recheck:62` | PRIMARY (borderline recipe-knob) | Production agents converge on ~3 retries (CI-failure loops, lint-fix loops, retry caps). Owning skill is `systematic-debugging`; recheck cross-refs it. |
 | Lethal trifecta = private data + untrusted content + exfiltration channel | `recheck:33` | PRIMARY | Simon Willison, "The lethal trifecta for AI agents" — https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/. |
 | Signal-density cap **~10-12 findings/pass**; **N=3** cycle cap | `recheck:58,62` | JUDGMENT-CALL | Recipe knobs (signal-density + convergence). No citation needed beyond the N=3 row above. |
+| A reviewer must **not flag changes the author clearly made on purpose**, nor hold the diff to a **rigor bar the surrounding code doesn't meet** — a deliberate design choice is not a bug | `recheck:68` | PRIMARY | OpenAI Codex CLI review prompt — `codex-rs/core/review_prompt.md` (public openai/codex repo), review guidelines #8 ("the bug is clearly not just an intentional change by the original author") and #3 ("fixing the bug does not demand a level of rigor that is not present in the rest of the codebase"). |
 
 ---
 
@@ -52,6 +53,8 @@ as skills are edited.
 | Binary pass/fail not 1-5 Likert; align judge to human; **target >90%** agreement; P/R when imbalanced | `evals:41,44` | PRIMARY | Hamel "Your AI Product Needs Evals" — https://hamel.dev/blog/posts/evals/ + Shreya Shankar eval canon. |
 | Read **30-100** traces; align on **25-50** examples; grow the set toward hundreds-to-1,000 | `evals:28,44,79` | JUDGMENT-CALL | Recipe knobs (sample sizes for the loop). Directionally from Hamel; the exact ranges are practitioner defaults. No citation needed. |
 | Shipping an LLM feature with no eval = #1 cause of failed AI products | `evals:8` | PRIMARY | Hamel field-guide thesis — https://hamel.dev/blog/posts/field-guide/; restated as `startup-taste`'s verifier-first gate. |
+| The same aligned judge can be reused as a **runtime gate** via a generate→grade→revise loop (judge returns pass / needs-revision + critique; agent retries on needs-revision with the critique as a fix-list); the loop **must be bounded** (e.g. 3 attempts then accept-with-flag) because unbounded retry-until-pass spins forever | `evals:44` | PRIMARY | Anthropic public anthropic-cookbook evaluator-optimizer pattern (evaluator emits PASS / NEEDS_IMPROVEMENT / FAIL + `<feedback>`); public `anthropic` SDK managed-agents `define_outcome` grader ("Eval→revision cycles before giving up. Default 3, max 20"; verdicts satisfied / needs_revision / max_iterations_reached). Corroborated by Datadog's CrewAI/AI-growth talk: a high-quality grader "triggers second-pass refinement when quality is below threshold." |
+| Trajectory evals should pin **only the tool calls the task truly requires**; over-specifying the trajectory turns the eval into a brittle change-detector (breaks on a legitimate tool refactor; marks resourceful recovery as failure) — when the goal is reachable many ways, assert on the final result, not the path | `evals:91` | PRIMARY | Scott Yak, Datadog — DeepLearning.AI "MCP Server Evals Deep Dive" (trajectory strictness EXACT / IN_ORDER / ANY_ORDER; assert on result when the path is non-unique). |
 
 ---
 
@@ -119,6 +122,7 @@ anchors carry sources.
 | Snapchat runs at several deliberate taps/second (reduce cognitive load, not clicks) | `product-taste:69` | JUDGMENT-CALL (illustration) | Well-known product example; illustrative. No hard citation needed. |
 | Older Safari renders `outline` without following `border-radius` (use `box-shadow`) | `product-taste:31` | JUDGMENT-CALL / CANONICAL | Canonical front-end knowledge (focus-ring fix). No citation needed. |
 | Designers measurably improve; an 8-year-old's output ≠ a master's (taste is objective) | `product-taste:8` | JUDGMENT-CALL (stance) | The skill's argued stance that taste is learnable, not a cited datum. Thematic source: Chris Olah, "Research Taste" — https://colah.github.io/notes/taste/. |
+| Product judgment is domain-specific and does not transfer; strong practitioners are good at saying when they don't have it — so in an unlived domain, flag missing calibration rather than bluffing a crisp verdict | `product-taste:22` | PRIMARY | Paul Adams (CPO, Intercom), "Product Judgment" — https://www.intercom.com/blog/product-judgment/. |
 
 ---
 
@@ -139,6 +143,7 @@ sources.
 | Swarm demos (200k-LOC browser, C compiler) have a verifiable success criterion; real software scales human taste | `designing-agents` (stance) | PRIMARY | Cognition, "Multi-Agents: What's Actually Working" — https://cognition.ai/blog/multi-agents-working. |
 | "You're a senior software engineer" / "think for longer" = gimmicky prompt-engineering | (cross-kit red flag) | PRIMARY | Cognition, "Multi-Agents: What's Actually Working" — https://cognition.ai/blog/multi-agents-working. |
 | When retrying a flaky LLM/agent step, retrying with the same model often reproduces the failure; failing over to a different model (cross-model fallback chain) fixes it | `designing-agents:78` | PRIMARY | Warp engineering blog — https://www.warp.dev/blog/swe-bench-verified ("We originally attempted to retry with the same model, and found that this often produced repeat failures" → cross-model fallback chain: Sonnet → Claude 3.7 → Gemini 2.5 Pro → GPT-4.1). |
+| **≈10** is a sane default turn ceiling for an agentic loop (bound the loop; on the last step force-finish) | `designing-agents:84` | PRIMARY | OpenAI Agents SDK — run configuration's documented default `DEFAULT_MAX_TURNS = 10` (the framework's own shipped default max-turns value; raises `MaxTurnsExceeded` once exceeded). |
 
 ---
 
@@ -162,6 +167,7 @@ sources.
 | Build failures cluster at the **edges** — setup (environment/dependencies, first ~5%) and the finish (deploy/env-vars/prod-config, last ~5%) — while the middle application logic is reliable; front-load setup and deploy tasks | `writing-plans:30` | PRIMARY | Amjad Masad (Replit CEO) on the a16z podcast — https://www.youtube.com/watch?v=g-WeCOUYBrk. |
 | When a load-bearing assumption proves false mid-build, the implementer **stops and reports back** rather than improvising or looping, with an explicit attempt budget (surface after ~3 failed attempts) — an execution→planning backtrack | `writing-plans:73` | PRIMARY | Cognition Devin (published/leaked system prompt): "Return to PLANNING if you discover unexpected complexity" and "ask the user for help if CI does not pass after the third attempt." Google Antigravity agent formalizes the same EXECUTION→PLANNING backtrack. Shares the **N=3** budget with the recheck table. |
 | A plan must **forbid editing a test to make it pass**: when a test fails the suspect is the code under test, not the test; change the test only if the task is explicitly about the test | `writing-plans:95` | PRIMARY | Cognition Devin (published/leaked system prompt): "never modify the tests themselves, unless your task explicitly asks … Always first consider that the root cause might be in the code you are testing rather than the test itself." |
+| Plans must **flag destructive/irreversible actions up front** in the preamble (a User-Review flag) so the human signs off before the implementer executes autonomously | `writing-plans:73` | PRIMARY | Google Antigravity's leaked `implementation_plan.md` template mandates a `## User Review Required` section as the plan's second block: "Document anything that requires user review or clarification, for example, breaking changes or significant design decisions. Use GitHub alerts (IMPORTANT/WARNING/CAUTION) to highlight critical items." |
 
 ---
 
@@ -184,6 +190,8 @@ sources.
 | The test is **"five tokens"** of instruction and the model spins on it (Willison) | `test-driven-development:10` | PRIMARY | Simon Willison, "Engineering practices that make coding agents work" (talk) — https://www.youtube.com/watch?v=owmJyKVu5f8. Agentic-coding writing also at https://simonwillison.net/tags/ai-assisted-programming/. |
 | TDD bounds the work / is the verifiable signal (the leash for autonomous agents) | `test-driven-development:12-13` | JUDGMENT-CALL (stance) | The kit's reframing of TDD for agents; reasoning, not a cited datum. No citation needed. |
 | Tests-after "ratify whatever you wrote, bugs included" | `test-driven-development:92` | JUDGMENT-CALL | Standard TDD rationale. No citation needed. |
+| Testing intensity should scale **inversely with how easily a bug is observed**: test database and business-logic layers rigorously (corruption hides for weeks), test the visible frontend lightly (bugs show up in the browser) | `test-driven-development:25` | PRIMARY | Andrew Ng, DeepLearning.AI talk on AI-era engineering. |
+| When verifying tests, start with the **narrowest test** for the code you changed (fastest signal), then **widen to the full suite** to confirm nothing else broke | `test-driven-development:65` | PRIMARY | OpenAI Codex CLI agent instructions, published "Testing Philosophy." |
 
 ---
 
@@ -206,6 +214,7 @@ sources.
 |---|---|---|---|
 | **~4** is the practical optimal for a typical task; beyond a handful, workers step on each other ("Claude Code cyber psychosis") | `dispatching-parallel-agents:45` | PRIMARY (directional) | YC Light Cone (the "cyber psychosis" coinage). The ~4 figure is directional, not a measured optimum. |
 | Each sub-agent is a context firewall; fan-out buys isolation, not just throughput | `dispatching-parallel-agents:10` | JUDGMENT-CALL | Owned by `context-engineering` (sub-agents-as-firewalls). No separate citation needed. |
+| Managers/orchestrators default to over-prescription when delegating to agents; brief the **what and constraints, not the how**, line-by-line | `dispatching-parallel-agents:32-35` | PRIMARY | Cognition, "Multi-Agents: What's Actually Working" — https://cognition.ai/blog/multi-agents-working (already cited PRIMARY above for the writes-single-threaded finding). |
 
 ---
 
@@ -214,6 +223,23 @@ sources.
 | Claim (short) | skill:line | Category | Source / note |
 |---|---|---|---|
 | When a repo already has an established shape (house wrapper, AGENTS.md/CLAUDE.md rule, neighboring-file pattern), that **local convention overrides** the external canonical pattern — match the local shape, don't import a clashing "correct" one | `searching-patterns:25` | PRIMARY | AGENTS.md spec — https://agents.md (AGENTS.md carries code-style guidelines for in-scope code; "explicit user chat prompts override everything" — a local instruction layer that governs the diff). OpenAI Codex / Cursor system prompts: "If working within an existing website or design system, preserve the established patterns, structure, and visual language." |
+
+---
+
+## verification-before-completion
+
+| Claim (short) | skill:line | Category | Source / note |
+|---|---|---|---|
+| The reason agents confidently ship broken work is an **observation gap, not an action gap**; closing the feedback loop (e.g. a browser-screenshot channel for a UI the agent cannot otherwise see) is one of the biggest unlocks for autonomous task length | `verification-before-completion:14` | PRIMARY | Tanveer Mittal & Utkarsh Lamba (Anthropic), "Claude Agent SDK Deep Dive" (DeepLearning.AI): developers over-optimize for the action pillar and under-invest in the feedback pillar — Claude builds a React app for 20 minutes, the layout is wrong, but it cannot observe this without a browser-screenshot mechanism; closing that loop is one of the biggest unlocks for autonomous task length. |
+
+---
+
+## finishing
+
+| Claim (short) | skill:line | Category | Source / note |
+|---|---|---|---|
+| **Local-green is not CI-green:** a post-push concern worth a dedicated step — monitor remote PR checks rather than declaring done at PR creation | `finishing:35` | PRIMARY | Warp's production coding agent ships a public `diagnose-ci-failures` skill, and Claude Code provides autonomous PR-check monitoring — both encode local-green ≠ CI-green as a first-class post-push concern. |
+| Before a destructive discard, the at-risk work to surface is precisely **uncommitted changes, untracked files, and unpushed commits** | `finishing:39` | PRIMARY | Anthropic's published Claude Code worktree auto-cleanup refuses to remove a worktree unless it has no uncommitted changes, no untracked files, and no unpushed commits — the same three categories that define unrecoverable work. |
 
 ---
 
@@ -270,6 +296,16 @@ The recurring public primary URLs, for quick verification:
 - **Paul Graham — How to Think for Yourself (felt-certainty; conventional minds are surest they think for themselves):** https://paulgraham.com/think.html — grounds `critical-thinking` gate 1.
 - **Charlie Munger — steelman standard ("you don't own an opinion until you can argue the other side better than its proponent"):** widely attributed (Munger, USC Law 2007 / Poor Charlie's Almanack) — maxim; grounds `critical-thinking` gate 2.
 - **Karl Popper (falsification — a claim must state what would refute it) + Sébastien Bubeck et al., "Sparks of AGI" (probe breadth-first for the limit, not for demos):** Popper canonical; Bubeck https://arxiv.org/abs/2303.12712 — grounds `critical-thinking` gate 3.
+- **OpenAI Codex CLI — review prompt (`codex-rs/core/review_prompt.md`, don't-flag-intentional / no-extra-rigor):** public openai/codex repo — grounds `recheck:68`.
+- **OpenAI Codex CLI — published "Testing Philosophy" (narrowest test first, then widen):** OpenAI Codex agent instructions — grounds `test-driven-development:65`.
+- **OpenAI Agents SDK — `DEFAULT_MAX_TURNS = 10` (shipped default turn cap):** framework run-config default — grounds `designing-agents:84`.
+- **Paul Adams (Intercom) — "Product Judgment" (domain-specific, doesn't transfer):** https://www.intercom.com/blog/product-judgment/ — grounds `product-taste:22`.
+- **Google Antigravity — leaked `implementation_plan.md` template (`## User Review Required` second block):** grounds `writing-plans:73` (also corroborates the EXECUTION→PLANNING backtrack above).
+- **Anthropic — "Claude Agent SDK Deep Dive" (DeepLearning.AI; Mittal & Lamba — observation gap, feedback-loop unlock):** grounds `verification-before-completion:14`.
+- **Datadog / Scott Yak — DeepLearning.AI "MCP Server Evals Deep Dive" (trajectory strictness; second-pass refinement below threshold):** grounds `evals:91` and the judge-as-runtime-gate row.
+- **Anthropic — anthropic-cookbook evaluator-optimizer pattern + `anthropic` SDK `define_outcome` grader (bounded generate→grade→revise, default 3 / max 20):** https://github.com/anthropics/anthropic-cookbook — grounds `evals:44`.
+- **Warp — `diagnose-ci-failures` skill + Claude Code PR-check monitoring (local-green ≠ CI-green):** grounds `finishing:35`.
+- **Anthropic — Claude Code worktree auto-cleanup (no uncommitted/untracked/unpushed = removable):** grounds `finishing:39`.
 
 ### Removed / do-not-cite
 

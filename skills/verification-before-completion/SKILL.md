@@ -19,6 +19,8 @@ This is one half of the generation–verification loop: the model generates, the
 
 Skipping any step is asserting something you haven't checked.
 
+**No command proves it yet? Build the observation channel before you claim — don't skip the gate.** The reason agents confidently ship broken work is an *observation* gap, not an action gap: the files were written, the tool returned no error, but the result was never sensed. When step 1 has no answer, add the missing sense — a screenshot, an assertion, a structured-output check — then run *that*. A claim with no way to observe the outcome is a guess wearing a checkmark. [Anthropic "Claude Agent SDK Deep Dive", DeepLearning.AI: closing the feedback loop — e.g. a browser-screenshot channel for a UI the agent can't otherwise see — is one of the biggest unlocks for autonomous task length.]
+
 ## What each claim actually requires
 
 | Claim | Requires (evidence) | Not sufficient |

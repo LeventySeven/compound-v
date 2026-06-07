@@ -22,6 +22,8 @@ The cost of tests used to be the writing and the maintenance. For an agent that'
 
 Skip it for genuinely throwaway code (a one-off script, a scratch HTML page) where "it either works or it doesn't" and nobody maintains it. Quality is a choice you make per context, not a ritual.
 
+Tune testing intensity to how hard bugs are to spot: test database and business-logic layers rigorously (corruption hides for weeks), test the visible frontend lightly (bugs show up in the browser) — intensity scales inversely with how easily a bug is observed (Andrew Ng, DeepLearning.AI).
+
 ## The loop: red → green → refactor
 
 ```dot
@@ -60,7 +62,7 @@ def total(items, currency="USD", rounding="bankers", discount=None):
     ...  # YAGNI — delete it until a test needs it
 ```
 
-**Verify GREEN.** Run the new test *and the whole suite* — confirm you didn't break something else.
+**Verify GREEN.** Start with the narrowest test for the code you changed (fastest signal), then widen to the whole suite — confirm you didn't break something else (OpenAI Codex CLI, "Testing Philosophy").
 
 **REFACTOR.** Now clean up (extract, rename, dedupe) with the green suite as your safety net. Behavior unchanged, tests stay green.
 

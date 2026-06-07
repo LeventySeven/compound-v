@@ -27,7 +27,7 @@ The default tools need zero setup. Reach for the heaviest one that fits, lightes
 - **`WebFetch`** — read one known page (a docs section, a guide). The common case.
 - **`gh`** — read the upstream repo directly: `gh api` for file contents, releases, or the `CHANGELOG`; `gh search code` to see how the library itself uses a thing. This is how you reach the *real* source and private/authed pages.
 
-Prefer the library's own repo and docs over blog posts and forum answers — primary sources outrank secondary ones. **Pin the version**: default docs often render an older major than you're on, so read the docs for the version in your lockfile and note which version the pattern applies to.
+Prefer the library's own repo and docs over blog posts and forum answers — primary sources outrank secondary ones. **Pin the version**: default docs often render an older major than you're on, so read the docs for the version in your lockfile and note which version the pattern applies to. And don't stop at the first hit — the top search result is often a stale major or an SEO blog, so run a second query with different wording and prefer the result that matches your lockfile version. (Cursor's agent prompt: "look past the first seemingly relevant result"; run multiple searches with different wording, and include version numbers in technical queries.)
 
 ### When you must navigate: agent-browser (optional)
 
