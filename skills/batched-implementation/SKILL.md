@@ -22,15 +22,16 @@ WARP's finding is the counterweight that makes this safe: for coupled, latency-s
 ## The loop
 
 **Setup (once):**
-1. Confirm you're not on `main`/`master`. If you are, branch first (or set up an isolated worktree) — never implement directly on the default branch.
-2. Read the plan file **once**. Extract every task with its full text and context. Build a TodoWrite with one entry per task.
-3. Group tasks into batches of **2-3 by coupling** — tasks that share files, types, or a feature surface go together. A task that's independent of everything else can be its own batch.
+1. **Sanity-check the environment** before building — confirm the verify commands (test/lint/typecheck/build) actually run here. A plan that can't be verified in this session is a plan you'll finish blind.
+2. Confirm you're not on `main`/`master`; if you are, branch first. If the harness already gave you an isolated workspace (a worktree, a fresh clone, a sandbox), use it — don't nest a second one. If it didn't and the work wants isolation, prefer a native worktree, and always branch before the first edit.
+3. Read the plan file **once**. Extract every task with its full text and context. Build a TodoWrite with one entry per task.
+4. Group tasks into batches of **2-3 by coupling** — tasks that share files, types, or a feature surface go together. A task that's independent of everything else can be its own batch.
 
 **Per batch:**
 1. Dispatch **one implementer subagent** (Task tool, `general-purpose`, Opus 4.8) for the batch.
    - **Paste the full task text** into the prompt. Never tell the subagent to "read task 3 from the plan file" — it costs a read and risks it grabbing the wrong context. The dispatch prompt is the contract; it must stand alone.
    - Include: the pasted tasks, scene-setting context (what exists, what the batch fits into), the relevant file paths, and **how to verify** (the exact test/lint/typecheck commands). An implementer told how to check its own work produces far less for recheck to catch.
-   - Mandate the discipline: follow existing conventions, never assume a library is present without checking the manifest, write tests (compound-v:test-driven-development), keep changes minimal, and self-review before reporting.
+   - Mandate the discipline: follow existing conventions, never assume a library is present without checking the manifest, write tests (compound-v:test-driven-development), keep changes minimal, and self-review before reporting. If the env can't run the verify commands, the implementer must **say so** in its report — an honest "couldn't run the suite here" beats a fabricated green.
 2. Read the subagent's report. It must end in one of **four statuses**:
 
    | Status | What it means | What you do |
@@ -41,33 +42,34 @@ WARP's finding is the counterweight that makes this safe: for coupled, latency-s
    | `BLOCKED` | Can't proceed | Assess: too large → split the batch; plan is wrong → escalate to the user; genuinely ambiguous → ask. Don't re-dispatch unchanged. |
 
    The status is a clean state machine — act on it, don't re-parse the prose.
-3. Hand the batch to **compound-v:recheck** (one Opus read-only pass over the batch's diff). Recheck returns findings + a verdict — one of three values; branch on all three (recheck can emit `ARCHITECTURE_CONCERN` on the *first* pass when the approach fails its goals/plan check, before any fix cycle, so don't treat it as only a 3-cycles-exhausted outcome).
+3. Hand the batch to **compound-v:recheck** (one Opus read-only pass over **this batch's diff** — see "Track the batch's range" below) for the verdict and the fix↔recheck cycle; that skill owns the three verdicts and the N=3 cap. The one routing rule that lives *here*: an `ARCHITECTURE_CONCERN` (whether on the first pass or after 3 cycles) **stops the loop** — escalate to re-plan (compound-v:writing-plans), never re-dispatch the same batch, and never hand to finishing. Finishing is reachable only from `APPROVED`.
+4. On `APPROVED`, **commit the batch** (mark its tasks done in TodoWrite first). One commit per green, rechecked batch makes git the state machine: each commit is a known-good point, so a later batch that breaks the build rolls back to the last green without losing earlier work. Keep the tree mergeable as you go — small, coherent commits, not one giant end-of-plan blob.
 
-   | Verdict | What you do |
-   |---|---|
-   | `APPROVED` | Mark the batch's tasks complete in TodoWrite. Next batch. |
-   | `FIX_REQUIRED` | Hand the findings back to the **same implementer** to fix (the implementer edits; recheck never does), then re-check. Cap at **3 fix↔recheck cycles** — still failing at 3 means recheck returns `ARCHITECTURE_CONCERN`, not attempt #4. |
-   | `ARCHITECTURE_CONCERN` | The approach itself is wrong. **Stop the loop** and escalate to re-plan (compound-v:writing-plans). Do **not** re-dispatch the same batch, and do **not** hand to finishing — finishing is reachable only from `APPROVED`. |
+### Track the batch's range
+Before dispatching a batch, note the current `HEAD` (`git rev-parse HEAD`). After the implementer reports, the batch's diff is exactly `that-SHA..HEAD` (or the changed-file list from `git diff --name-only that-SHA`). Hand recheck *that* range, so it reviews only this batch and not the whole accumulated branch. The per-batch commit at the end gives you a clean range marker for the next batch.
 
 ## Serial by default; parallel only when file-disjoint
 
-Run implementers **serially**. Two implementers editing overlapping files in parallel produce merge conflicts and silent clobbers — the cost of untangling that erases the speedup.
-
-The exception: batches that are **genuinely file-disjoint** (no shared files, no shared state) can run concurrently. When they qualify, dispatch them in one message and see **compound-v:dispatching-parallel-agents** for the fan-out + conflict-check-on-return discipline. When unsure whether two batches are disjoint, run them serially — it's the safe default.
+Run implementers **serially**; the one exception is batches that are genuinely file-disjoint (no shared files or state), which may fan out — but the gating test and conflict-check-on-return belong to **compound-v:dispatching-parallel-agents**, so defer to it and run serially when unsure.
 
 ## Continuous execution
 
 Do not pause between batches to ask "should I continue?" — it wastes the user's turn. The only legal stops are: a `BLOCKED` you can't resolve, a recheck `ARCHITECTURE_CONCERN` (stop the loop, escalate to re-plan), a genuine ambiguity that changes scope, or all batches done and rechecked. Keep going until the plan is built and every batch is APPROVED, then hand off to **compound-v:finishing**.
+
+## Responding to findings
+
+When recheck (or the user) hands back findings for the implementer to fix, the findings are *input to judgment*, not orders to type out:
+
+- **Verify before implementing.** Confirm the finding is real against the actual code — a reviewer can be wrong about what the code does. Fixing a phantom bug adds a real one.
+- **Clarify an ambiguous finding before acting** rather than guessing at its intent; a wrong guess costs a whole fix↔recheck cycle.
+- **Scan suggestions for scope creep.** A "while you're here, do it properly / handle the general case / add a config for this" finding is often YAGNI — implement what the plan needs, not the gold-plated version, and say why you're deferring it.
+- **No performative agreement.** Don't "you're absolutely right" a finding you haven't checked. If a finding is wrong or out of scope, push back with the reason; that's the value of the loop, not a failure of it.
 
 ## Red flags
 
 | Smell | Why it's wrong |
 |---|---|
 | Implementing on `main`/`master` | No isolation; a bad batch dirties the default branch. Branch first. |
-| Telling a subagent to read the plan file | It may grab the wrong section or stale context. Paste the full task text. |
-| One subagent per single task | The 1:1 ratio you're here to avoid — batch coupled tasks 2-3 at a time. |
-| Two implementers on shared files in parallel | Merge conflicts and clobbers. Serial unless file-disjoint. |
-| Skipping recheck "because the batch was simple" | Recheck is the only quality gate in this loop; skipping it removes the gate. |
 | Re-dispatching a `BLOCKED` batch unchanged | Same input → same block. Change the context, split the batch, or escalate. |
-| Looping fix↔recheck past 3 cycles | The architecture or plan is wrong; recheck returns `ARCHITECTURE_CONCERN` — stop and re-plan, don't grind. |
-| Proceeding or re-dispatching after an `ARCHITECTURE_CONCERN` | The approach is rejected; re-running the same batch reproduces it. Stop the loop and escalate to re-plan — never hand to finishing. |
+| Skipping recheck "because the batch was simple" | Recheck is the only quality gate in this loop; skipping it removes the gate. |
+| Two implementers on shared files in parallel | Merge conflicts and clobbers. Serial unless file-disjoint. |

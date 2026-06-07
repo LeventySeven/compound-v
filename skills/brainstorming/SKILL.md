@@ -21,7 +21,7 @@ For a Standard-or-larger build, do not write code, scaffold, or invoke an implem
 
 The reason is leverage: a wrong assumption caught in conversation costs a sentence; the same assumption caught after implementation costs the whole branch. "This is too simple to need a design" is the trap — the simple-looking builds are where unexamined assumptions do the most damage, because nobody slowed down. A design can be three sentences for a small feature; it still gets presented and approved.
 
-This is a real gate, not a suggestion, because skipping it is the single most common way agents waste a session building the wrong thing.
+The gate's strongest form is a **capability lock**, not a politeness rule. When you're running autonomously (no human turn between you and the editor), stay in read/search/plan tools only — Read, Grep, Glob, the design write-up — until the design is approved. Treat "design approved" as the event that unlocks Edit/Write/Bash-that-mutates, the way exiting plan mode does. A soft "please ask first" you can rationalize past at 2am; a tool you don't reach for, you can't.
 
 ## The flow
 
@@ -48,13 +48,13 @@ After writing the spec, check it for the failures that quietly become bugs later
 - **Scope** — is this one coherent implementation, or did it quietly grow into something that needs splitting?
 - **Ambiguity** — could a requirement be read two ways? Pick one and write it explicitly. An agent reading it later will pick the other one.
 
-Fix inline and move on — no re-review loop.
+Fix inline and move on — no re-review loop. But if a fix changed anything material — you resolved a placeholder by *deciding* something, narrowed an ambiguous requirement, or split the scope — surface that change back to the user before handing off. They approved the design section by section; a silent edit during self-review means they're now approving something they never saw.
 
 ## Principles that shape good questions
 
-- **YAGNI, ruthlessly.** Every feature in the design costs forever. Cut anything not serving the named purpose; the strongest designs name what they leave out, not just what they include.
-- **Design for boundaries.** Break the system into units with one clear job each, talking through well-defined interfaces. The test: can someone use a unit without reading its internals, and can you change the internals without breaking callers? If not, the boundaries need work — and focused units are easier for an agent to implement reliably.
-- **In existing code, follow existing patterns.** Explore the structure before proposing changes. Fix problems that genuinely block the work (a file grown unwieldy on the path you're touching); don't bolt on unrelated refactors.
+- **Notice, don't ideate.** The best feature ideas come from naming a real friction the user already hit, not from brainstorming what *could* be cool. Anchor every question on the actual problem in front of you; a feature nobody felt the lack of is the bullshit, however clever.
+- **Would you want to use v1?** The bar for the first version isn't "complete," it's "good enough that you'd reach for it yourself." If the honest answer is no, you're either solving the wrong problem or padding it with things that should be cut — find the smaller thing you *would* use.
+- **Cut to the named purpose, design for boundaries.** YAGNI and clean unit boundaries are how the design earns its keep — see **compound-v:startup-taste** for what to cut and **compound-v:writing-plans** for the file-level decomposition that locks it in.
 - **Be flexible.** If an answer reveals you misunderstood, go back. The flow is a spine, not a script.
 
 ## Next step

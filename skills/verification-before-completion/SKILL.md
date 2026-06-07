@@ -7,7 +7,7 @@ description: Run the command that proves a claim and read its output before asse
 
 If you haven't run the verifying command *in this turn*, you can't claim it passed. "Should pass," "looks right," and "I fixed it" are predictions, not evidence — and the cheapest way to break a user's trust is to confidently report a green that was actually red.
 
-This is one half of the generation–verification loop: the model generates, then something *verifies*. Your job is to make that verification real and fast, not to skip it because the change "obviously" works. The whole leash that lets work proceed without re-reading every line is the evidence at the end.
+This is one half of the generation–verification loop: the model generates, then something *verifies*. Your job is to make that verification real and fast, not to skip it because the change "obviously" works. The whole leash that lets work proceed without re-reading every line is the evidence at the end. When the verifier fails, feed its output *back into context* and act on it — the failure message is the next input to reason from, not a wall you read once and re-guess past.
 
 ## The gate (run before any completion claim)
 
@@ -31,6 +31,8 @@ Skipping any step is asserting something you haven't checked.
 | "The subagent finished it" | **You read the VCS diff yourself** and ran the suite | The agent reported success · its summary says DONE |
 
 That last row is the one that bites most: a subagent (or a prior you) reporting success is a *claim*, not proof. Run `git diff` and read what actually changed, then run the tests yourself. Agents make systematic errors and optimistic summaries — trust the diff, not the report.
+
+For anything a user touches, "it runs" means **end-to-end as a real user** — boot the app and click through the actual flow, not just `curl` one endpoint or watch the unit tests pass. The gap between "the API returns 200" and "the feature works in the browser" is exactly where the bugs you'd ship live.
 
 ## Red flags — stop before you type the claim
 

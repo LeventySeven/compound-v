@@ -15,9 +15,9 @@ Confirm the work is actually green, then let the user choose how to land it — 
 
 ## Step 1 — Verify green, fresh, yourself
 
-Run the **full** test suite (plus lint/typecheck/build if the project has them) right now, in this turn. Read the exit code and the failure count — not "they passed earlier", not the implementer's word. This is the compound-v:verification-before-completion gate: no integration decision on top of unverified work.
+Run the full suite this turn and read the exit code yourself — the **compound-v:verification-before-completion** gate, applied to integration: no merge/PR decision rides on "they passed earlier" or the implementer's word.
 
-If anything fails, **stop** — surface the failure and route back to fixing (compound-v:systematic-debugging). Don't present finish options on a red suite.
+The finishing-specific rule: a red suite is **not** a finishing situation. **Stop**, surface the failure, and route back to **compound-v:systematic-debugging** — never present the finish menu on red, because every option below assumes a green branch.
 
 ## Step 2 — Present the options, let the user pick
 
@@ -32,19 +32,10 @@ Pick the base branch deliberately (the branch this work forked from, usually `ma
 
 ## Step 3 — Execute the choice safely
 
-**Merge / PR:** run the merge (or push + `gh pr create`), then **re-run the suite on the merged result** — a clean merge can still produce a broken combination.
+**Merge / PR:** run the merge (or push + `gh pr create`), then **re-run the suite on the merged result** — a clean merge can still produce a broken combination. If the merge hits a **conflict**, **stop and surface it** — resolve it deliberately (or hand it back), never `-X theirs`/`--force` your way through. The PR path needs the branch pushed first (`git push -u origin <branch>`) and `gh` authenticated; check both before `gh pr create` rather than after it fails.
+
+**The PR body is an artifact, not a title.** It carries: what changed and why; the **verification evidence** — the actual command you ran plus its result line (e.g. `pytest -q → 214 passed`), not "tests pass"; the recheck verdict (`APPROVED`); and any known follow-ups you deliberately deferred. A reviewer should be able to trust the branch from the body alone.
 
 **Discard or any destructive cleanup:** require a **typed confirmation** ("type `discard` to confirm"). A yes/no is too easy to fire by reflex; destroying work needs a deliberate keystroke.
 
 **Worktree cleanup order** (the footgun): merge → **`cd` out of the worktree** → remove the worktree → then delete the branch. Removing a worktree while you're inside it fails silently, and deleting the branch before removing its worktree errors. Only remove worktrees you created (under a gitignored `.worktrees/` or similar) — never one the harness owns.
-
-## Red flags
-
-| Smell | Why it's wrong |
-|---|---|
-| Presenting options on an unverified suite | You might be shipping red. Run the full suite this turn first. |
-| Auto-merging or auto-discarding | The user owns the integration decision. Present, then act on their pick. |
-| Discarding on a bare yes/no | Too easy to fire by accident. Require a typed `discard`. |
-| Deleting a branch before removing its worktree | Git errors out. Remove the worktree first. |
-| Running `worktree remove` from inside the worktree | Fails silently. `cd` out first. |
-| Skipping the post-merge re-test | A clean merge can still break the combined tree. |

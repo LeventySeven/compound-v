@@ -7,7 +7,7 @@ description: Write a failing test before the implementation, watch it fail, then
 
 Write the test first. The failing test is the spec; the implementation exists only to turn it green.
 
-For an agent, TDD is no longer the slow tax it was for humans. The test is "five tokens" of instruction and the model spins on it without complaining (Willison). Its real payoff is two things you can't get from tests-after:
+For an agent, TDD is no longer the slow tax it was for humans. The test is "five tokens" of instruction and the model spins on it without complaining (Willison, "Engineering practices that make coding agents work"). Its real payoff is two things you can't get from tests-after:
 
 - **It bounds the work.** A failing test defines *exactly* what "done" means, so the model writes the minimum to pass and stops — instead of gold-plating or drifting. ("TDD stops the agent writing more than it needs.")
 - **It is the verifiable signal.** A green suite you watched go red-then-green is the evidence that lets you trust code without reading every line. This is the leash that makes an autonomous agent safe to run.
@@ -73,7 +73,7 @@ The point of a test is to exercise the actual behavior. Mocks that assert on the
 - **No test-only methods in production classes.** If a class needs a `reset_for_test()` hatch to be testable, the design is wrong — fix the seam, don't add the hatch.
 - **Prefer real collaborators** (a real in-memory DB, a real temp file, a real local server) over mocks wherever it's cheap. It's cheaper than ever to spin one up — ask the model to seed realistic fixtures ("create 100 users with made-up names").
 
-A passing test suite still doesn't prove the system *runs*. After green, exercise it for real — boot the server in the background and `curl` the endpoint you just built. Tests miss "the web server won't even start."
+A passing test suite still doesn't prove the system *runs* — tests miss "the web server won't even start." After green, exercise it for real: **compound-v:verification-before-completion**.
 
 ## The bug-fix loop
 
@@ -90,7 +90,6 @@ Writing the reproduction first is also how you *understand* the bug. If you can'
 | Thought | Why it's wrong |
 | --- | --- |
 | "I'll add tests after it works." | Tests-after pass on the first run and prove nothing — they ratify whatever you wrote, bugs included. You also lose the scope-bounding that writing the test first gives you. |
-| "This is too simple to test." | Simple code with no test is exactly where silent regressions live. The test is cheap now; write it. |
 | "The test passed immediately, good." | A test that never failed is unverified — it might assert nothing, or the behavior already existed. Make it go red first. |
 | "I'll mock the database to keep it fast." | A mock encodes your assumption of the dependency; use a real (in-memory/temp) collaborator so the test exercises the real contract. |
 | "Tests are green, so I'm done." | Green is necessary, not sufficient — the suite can pass while the app won't boot. Verify for real before claiming done: **compound-v:verification-before-completion**. |

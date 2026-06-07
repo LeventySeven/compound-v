@@ -24,7 +24,8 @@ You don't always need all four, but you may not skip *ahead* of a phase you have
 ### Phase 1 — Find the root cause
 - **Read the actual error.** The full message, the full stack trace, the exit code. Not the gist — the literal text. The answer is often in a line people skip.
 - **Reproduce it consistently.** A bug you can't trigger on demand, you can't verify you fixed. Find the exact inputs/steps. If it's flaky, make it deterministic before going further (e.g. control the timing/seed/ordering that makes it intermittent).
-- **Check what recently changed.** `git diff`, `git log` on the touched files. Most new bugs entered with recent edits.
+- **Shrink to the simplest failing case.** Strip the input down to the smallest instance that still fails — and check the system passes the *single simplest* instance (one item, empty list, one request) before you debug the broad case. If the simplest case already fails, the bug is upstream of everything you were looking at; debug *that* first.
+- **Check what recently changed.** `git diff`, `git log` on the touched files. Most new bugs entered with recent edits. If the regression's onset is unclear, `git bisect` (ideally `git bisect run <failing-test>`) pins the exact commit that introduced it.
 - **Trace backward from the symptom to its source.** Don't fix where the error *surfaces*; follow the data back to where it first goes wrong. In a multi-component flow, log (or inspect) the value at each boundary between components — the boundary where good input becomes bad output is your suspect. The error message location is a clue, not usually the cause.
 
 ### Phase 2 — Find a working reference
@@ -44,7 +45,7 @@ You don't always need all four, but you may not skip *ahead* of a phase you have
 
 ## The 3-attempt rule — stop digging, question the design
 
-Track your fix attempts. The empirical cap before escalating is **three** (it shows up independently across production agents: CI retries, lint-fix loops, and iteration mediators all stop at ~3).
+Track your fix attempts. The empirical cap before escalating is **three** — production agents converge on it independently: Devin gives up after 3 CI failures, Cursor stops after 3 lint-fix loops, WARP hard-codes `MAX_RETRIES=3`. This is the canonical home of the 3-attempt rule; **compound-v:recheck** and **compound-v:batched-implementation** cross-ref here for their fix↔recheck cap rather than restating it.
 
 ```dot
 digraph debug {
@@ -80,5 +81,4 @@ A signal you've already crossed this line: you're adding defensive checks, retri
 | "I'll reinstall deps / bump the version and hope." | Diagnose before mutating the environment — read the error and the lockfile first (Phase 2). |
 | "It might be one of these few things, I'll fix all of them." | One hypothesis, one variable. Fixing several at once hides which was real and may add bugs. |
 | Wrapping the symptom in a try/except or a retry to make it pass | That's concealment, not a fix. Find why it throws. |
-| Attempt #4, #5, #6 on the same bug… | Stop. After 3, the design or your understanding is wrong — question that, don't tweak again. |
 | "The error message is long, I'll skim it." | Read it fully — the exact cause is often in the part you'd skip. |

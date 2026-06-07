@@ -37,6 +37,23 @@ One-sentence core principle.
 - **One excellent example beats five mediocre ones.** Pick the most relevant language; make it real
   and runnable, not a fill-in-the-blank template.
 
+## Authoring checklist (the rules the kit follows but rarely states)
+- **Description = WHAT + WHEN, never the steps** — Ruling A above is the single most load-bearing
+  authoring rule; encoding the flow makes the model follow the description and skip the body.
+- **Refs one level deep.** A SKILL points to `references/x.md`; that file does not point to a third
+  hop the model has to chase. Any reference material over ~100 lines lives outside the SKILL (see
+  progressive disclosure) — a long doc in the body burns context on every load whether it's needed
+  or not.
+- **One default, not a menu.** Give the recommended path; mention an alternative only when the choice
+  is real and the trade-off is named. A menu makes the model pick (often wrong); a default makes it act.
+- **Consistent terminology.** Pick one term per concept and reuse it verbatim across the SKILL and
+  its refs — synonyms read as distinct things and dilute retrieval.
+- **Match specificity to fragility.** Rigid step-by-step gates only for documented failure modes
+  (verification, design-before-code, root-cause-before-fix); everywhere else give the reasoning and
+  trust judgment (Ruling C). Over-specifying a robust step is the same defect as overkill.
+- **Mind validation.** `name`/`description` are the only required keys; any other top-level key fails
+  validation. `name` must match `^[a-z0-9-]+$`, ≤64 chars, and equal the directory name.
+
 ## Ruling B — tier-routing is the anti-overkill law
 Match effort to the task. A trivial change never triggers the full pipeline. The router
 (`using-compound-v`) owns the tier table; every workflow skill respects it and routes *down* when
@@ -58,9 +75,16 @@ Refer by name with an explicit marker: `**REQUIRED:** Use compound-v:recheck`. N
 links — they force-load the file and burn context before it's needed.
 
 ## The no-bullshit / no-overkill bar (apply to every skill before shipping)
+- **Target is Opus 4.8.** Write for a model with strong theory-of-mind — do *not* pad for weaker
+  ones. No Iron-Law liturgy, no rationalization tables, no all-caps reinforcement walls. And no
+  mandatory pressure-test-before-every-edit gate: that ceremony would turn a one-line deepen into a
+  multi-day exercise and break the kit's ship-in-hours discipline. Test a *new* skill or a risky
+  change; don't gate every word.
 - Every section answers: would a senior engineer be *worse off* without it? If not, cut it.
 - No ceremony, no triple-reinforced rationalization walls, no dated "in session X we…" narratives,
   no motivational filler, no model cost-tiering (we run Opus 4.8).
 - Estimate work in hours/days, never weeks/months — and never let a skill imply otherwise.
-- Every claim of fact traces to a real source (a `skills_research/NN_*.md` notes file, BAD_GUIDE, or
-  a primary URL). If you can't cite it, cut it or mark it clearly as a judgment call.
+- Every claim of fact traces to a real source. The grounding map is `references/sources.md` — it
+  maps each load-bearing numeric/factual claim to its public primary URL and marks the recipe-knob
+  judgment calls that need none. If a number isn't in that map, add a row citing its primary source
+  (a real URL) or cut it; if you can't ground it, mark it clearly as a judgment call.
