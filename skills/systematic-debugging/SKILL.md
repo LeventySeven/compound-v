@@ -38,6 +38,7 @@ You don't always need all four, but you may not skip *ahead* of a phase you have
 - State it explicitly: **"X is the root cause, because Y."** Writing it forces the causal claim into the open where you can check it.
 - **One hypothesis, one variable at a time.** Changing three things at once and seeing it pass tells you nothing about which mattered — and one of the other two may now be a latent bug.
 - If you genuinely don't know, say "I don't know" and go gather more evidence. A confident wrong hypothesis is worse than an admitted gap.
+- **If you can't state what "correct" would even look like, the bug is underspecification, not a code defect.** Pin the expected behavior down first — otherwise you chase a symptom that keeps shifting as your notion of "right" drifts (Hamel Husain on *criteria drift*).
 
 ### Phase 4 — Fix and verify
 - **Write a failing test that reproduces the bug first**, then fix until it passes (this is the bug-fix loop in **compound-v:test-driven-development**). The test is your proof the fix landed and your guard against regression.

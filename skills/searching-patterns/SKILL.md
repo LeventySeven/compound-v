@@ -29,6 +29,8 @@ The default tools need zero setup. Reach for the heaviest one that fits, lightes
 
 Prefer the library's own repo and docs over blog posts and forum answers — primary sources outrank secondary ones. **Pin the version**: default docs often render an older major than you're on, so read the docs for the version in your lockfile and note which version the pattern applies to. And don't stop at the first hit — the top search result is often a stale major or an SEO blog, so run a second query with different wording and prefer the result that matches your lockfile version. (Cursor's agent prompt: "look past the first seemingly relevant result"; run multiple searches with different wording, and include version numbers in technical queries.)
 
+When the thing you're implementing ships an **official conformance suite** — a protocol, a wire format, a standard's test vectors — that suite *is* the primary source: precise, executable, and it doesn't drift the way prose docs do. Point the implementer at it and write code until those tests pass (Simon Willison; e.g. WebAssembly's spec test suite).
+
 ### When you must navigate: agent-browser (optional)
 
 `WebFetch` reads one static URL; it can't drive a JS-rendered site, page through multi-section docs behind interaction, or operate a repo UI. For that, `agent-browser` drives a real browser deterministically through the accessibility tree (stable refs, not pixel-scraping). It is **not bundled with this kit** — install once, pinned: `npm i -g agent-browser@0.27.0` (the ref-loop below assumes that version's snapshot behavior; bump only after re-verifying it).

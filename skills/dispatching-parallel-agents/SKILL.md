@@ -44,6 +44,8 @@ More workers means more overhead and more reconciliation, not linearly more valu
 
 **~4 is the practical optimal for a typical task** (e.g. a frontend / backend / tests / infra split). Beyond a handful you hit the named failure mode YC's Light Cone calls "Claude Code cyber psychosis" — workers stepping on each other's edits and generating incompatible implementations of the same interface, faster than you can reconcile them (the coinage is YC's Light Cone; the ~4 figure is directional, not a measured optimum). The fix is the file-ownership discipline above, but the cheaper fix is *not spawning the extra workers in the first place*.
 
+The right count also scales with the *kind* of task — roughly one worker for a fact-find, a few for a comparison, more only for genuinely broad search — and a lead left to size its own fan-out over-invests: Anthropic's research lead "spawned 50 subagents for simple queries" until the budget was written into its prompt. Put the worker budget in the brief; don't trust the model to set it (Anthropic, multi-agent research system).
+
 ## Runtime budgets and the synthesis barrier
 
 An unbounded worker is a hang waiting to happen. Give each one a budget and make the barrier tolerant of a worker that blows it:

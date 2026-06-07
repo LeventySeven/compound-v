@@ -45,7 +45,7 @@ digraph tdd {
 }
 ```
 
-**RED — one minimal test.** Name it for the behavior (`rejects_expired_token`, not `test1`). Test against **real code, not mocks** — see the anti-patterns below.
+**RED — one minimal test.** Name it for the behavior (`rejects_expired_token`, not `test1`). Test against **real code, not mocks** — see the anti-patterns below. The model writes the assertion for free; choosing *what* it should assert is the judgment that's now yours — a flawlessly-written test against the wrong spec is a worthless suite (Andrew Ng, DeepLearning.AI).
 
 **Verify RED — and read *why* it failed.** A test that fails because of an import error or a typo proved nothing. It must fail because the behavior is genuinely missing. If it passes immediately, the test is wrong (or the behavior already exists) — fix that before writing any implementation.
 

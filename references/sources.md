@@ -145,6 +145,7 @@ sources.
 | "You're a senior software engineer" / "think for longer" = gimmicky prompt-engineering | (cross-kit red flag) | PRIMARY | Cognition, "Multi-Agents: What's Actually Working" — https://cognition.ai/blog/multi-agents-working. |
 | When retrying a flaky LLM/agent step, retrying with the same model often reproduces the failure; failing over to a different model (cross-model fallback chain) fixes it | `designing-agents:78` | PRIMARY | Warp engineering blog — https://www.warp.dev/blog/swe-bench-verified ("We originally attempted to retry with the same model, and found that this often produced repeat failures" → cross-model fallback chain: Sonnet → Claude 3.7 → Gemini 2.5 Pro → GPT-4.1). |
 | **≈10** is a sane default turn ceiling for an agentic loop (bound the loop; on the last step force-finish) | `designing-agents:84` | PRIMARY | OpenAI Agents SDK — run configuration's documented default `DEFAULT_MAX_TURNS = 10` (the framework's own shipped default max-turns value; raises `MaxTurnsExceeded` once exceeded). |
+| Before adding agents, look at where cost/variance go: **three factors explain ~95% of agent-performance variance, token spend alone ~80%** — "spend more tokens on the hard part" beats "add another agent" | `designing-agents:80` | PRIMARY | Anthropic, "How we built our multi-agent research system" — https://www.anthropic.com/engineering/multi-agent-research-system (verbatim: "three factors explained 95% of the performance variance"; "token usage by itself explains 80% of the variance"). Same datum as the context-engineering row above. |
 
 ---
 
@@ -158,6 +159,7 @@ sources.
 | Writes stay single-threaded; agents contribute *intelligence*, not *actions*; serial unless file-disjoint | `batched-implementation:52-56` | PRIMARY | Cognition, "Don't Build Multi-Agents" + "Multi-Agents: What's Actually Working" — https://cognition.ai/blog/dont-build-multi-agents, https://cognition.ai/blog/multi-agents-working. |
 | **N=3** fix↔recheck cycle cap | `batched-implementation:49` | PRIMARY (borderline recipe) | Same N=3 as `recheck`/`systematic-debugging` (see recheck table). |
 | When a convention matters, **paste the exemplar** (the file/snippet to imitate) into the dispatch prompt, not a bare "follow conventions" — a fresh-context agent regresses to model defaults for any convention it wasn't shown | `batched-implementation:34` | PRIMARY | Anthropic, "Building effective agents" — https://www.anthropic.com/engineering/building-effective-agents ("a good tool definition often includes example usage"; examples anchor behavior). Corroborated by the leaked OpenAI Codex system prompt's anti-default rules (no purple/dark-mode bias, no default `useMemo`/`useCallback`) — models default to generic patterns absent a local anchor. |
+| A batch of **structurally similar** tasks risks a few-shot rut — a fresh-context implementer "falls into a rhythm" and adapts later tasks from earlier ones; the brief must name what *differs* per task | `batched-implementation:28` | PRIMARY | Manus, "Context Engineering for AI Agents" — https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus (verbatim: "the agent often falls into a rhythm—repeating similar actions… leads to drift, overgeneralization, or sometimes hallucination"; "don't few-shot yourself into a rut"). |
 
 ---
 
@@ -195,6 +197,7 @@ sources.
 | AI/agent code fails silently — a passing-looking result you cannot account for is a bug lead, not a finish; never trust an output you can't explain | `systematic-debugging:18` (Phase 1) | PRIMARY | Andrej Karpathy, "A Recipe for Training Neural Networks" — http://karpathy.github.io/2019/04/25/recipe/ ("neural nets fail silently… never trust a result you can't explain"). |
 | A nondeterministic agent/LLM bug that fires intermittently has no single reproducible stack trace; build a small graded example set and treat where it fails across runs as the repro and regression guard — the role a failing test plays for deterministic code | `systematic-debugging:19` (Phase 1) | PRIMARY | Hamel Husain, "Your AI Product Needs Evals" — https://hamel.dev/blog/posts/evals/ (from 30+ production builds; "no eval system" is the #1 reason AI products fail). Cross-refs `compound-v:evals`. |
 | Classify a failure before spending a retry: deterministic reds (validation/type/missing-arg/auth) are guaranteed to recur on the same inputs so get zero retries; reserve the retry budget for transient faults (network blip, 503, rate limit) | `systematic-debugging:68` | PRIMARY | Standard production resilience practice (transient-fault handling), e.g. Microsoft Azure Architecture Center "Transient fault handling": retry only faults expected to be short-lived; do not retry faults guaranteed to recur. |
+| If you can't state what "correct" looks like, the bug is **underspecification, not a code defect** — pin the expected behavior first, or the symptom shifts as your notion of "right" drifts | `systematic-debugging:41` | PRIMARY | Hamel Husain, "A Field Guide to Rapidly Improving AI Products" — https://hamel.dev/blog/posts/field-guide/ (*criteria drift*: evaluation criteria can't be fully fixed before you look at real outputs). |
 
 ---
 
@@ -207,6 +210,7 @@ sources.
 | Tests-after "ratify whatever you wrote, bugs included" | `test-driven-development:92` | JUDGMENT-CALL | Standard TDD rationale. No citation needed. |
 | Testing intensity should scale **inversely with how easily a bug is observed**: test database and business-logic layers rigorously (corruption hides for weeks), test the visible frontend lightly (bugs show up in the browser) | `test-driven-development:25` | PRIMARY | Andrew Ng, DeepLearning.AI talk on AI-era engineering. |
 | When verifying tests, start with the **narrowest test** for the code you changed (fastest signal), then **widen to the full suite** to confirm nothing else broke | `test-driven-development:65` | PRIMARY | OpenAI Codex CLI agent instructions, published "Testing Philosophy." |
+| The model writes the assertion for free; **choosing what to assert (spec fidelity) is the human judgment that now differentiates** — a flawless test against the wrong spec is a worthless suite | `test-driven-development:48` | PRIMARY | Andrew Ng, DeepLearning.AI panel — AI writes tests trivially, so test-spec fidelity becomes the differentiating skill. (Same Ng talk grounding the test-intensity row above.) |
 
 ---
 
@@ -230,6 +234,7 @@ sources.
 | **~4** is the practical optimal for a typical task; beyond a handful, workers step on each other ("Claude Code cyber psychosis") | `dispatching-parallel-agents:45` | PRIMARY (directional) | YC Light Cone (the "cyber psychosis" coinage). The ~4 figure is directional, not a measured optimum. |
 | Each sub-agent is a context firewall; fan-out buys isolation, not just throughput | `dispatching-parallel-agents:10` | JUDGMENT-CALL | Owned by `context-engineering` (sub-agents-as-firewalls). No separate citation needed. |
 | Managers/orchestrators default to over-prescription when delegating to agents; brief the **what and constraints, not the how**, line-by-line | `dispatching-parallel-agents:32-35` | PRIMARY | Cognition, "Multi-Agents: What's Actually Working" — https://cognition.ai/blog/multi-agents-working (already cited PRIMARY above for the writes-single-threaded finding). |
+| The right worker count **scales with task class** (≈1 for a fact-find, a few for a comparison, more for broad search); a lead left to size its own fan-out over-invests — put the budget in the brief | `dispatching-parallel-agents:47` | PRIMARY | Anthropic, "How we built our multi-agent research system" — https://www.anthropic.com/engineering/multi-agent-research-system (verbatim: "spawning 50 subagents for simple queries"; "Simple fact-finding requires just 1 agent with 3-10 tool calls, direct comparisons might need 2-4 subagents with 10-15 calls each"). |
 
 ---
 
@@ -238,6 +243,7 @@ sources.
 | Claim (short) | skill:line | Category | Source / note |
 |---|---|---|---|
 | When a repo already has an established shape (house wrapper, AGENTS.md/CLAUDE.md rule, neighboring-file pattern), that **local convention overrides** the external canonical pattern — match the local shape, don't import a clashing "correct" one | `searching-patterns:25` | PRIMARY | AGENTS.md spec — https://agents.md (AGENTS.md carries code-style guidelines for in-scope code; "explicit user chat prompts override everything" — a local instruction layer that governs the diff). OpenAI Codex / Cursor system prompts: "If working within an existing website or design system, preserve the established patterns, structure, and visual language." |
+| An official **conformance suite** (a protocol, wire format, standard's test vectors) is the strongest primary source — precise, executable, drift-free; point the implementer at it and write code until it passes | `searching-patterns:32` | PRIMARY | Simon Willison, "Engineering practices that make coding agents work" (talk) — https://www.youtube.com/watch?v=owmJyKVu5f8 ("if there's an existing language-agnostic test suite… WebAssembly has a very detailed specification which includes hundreds of tests… write code until this test suite passes, and it kind of will"). |
 
 ---
 
@@ -267,6 +273,8 @@ sources.
 | Source-trust hierarchy (system > developer > user > tool > page) as the constructive defense | PRIMARY | Source-trust primitive convergent across production deep-research agents. |
 | Sandbox model-written code (AST-walk before exec; microVM > container); SSRF/RCE defenses; secret-redaction; deploy-endpoint auth-gate | PRIMARY | Convergent across production agent frameworks (SSRF proxies, deploy-endpoint auth-gates, secret-redaction). |
 | Reviewer can question an insecure pattern the user asked for | PRIMARY | Cognition, "Multi-Agents: What's Actually Working" — https://cognition.ai/blog/multi-agents-working. |
+| Credentials never enter the model's context (not prompt, args, or results); the model passes a **handle** (session ID / secret name) and the tool resolves it out of view | PRIMARY | Google ADK security workshop (Adam Idelman) — https://www.youtube.com/watch?v=jZXvqEqJT7o ("authentication should happen as much as possible within a specific tool… you don't want the agent to handle credentials directly"; agent passes a session ID, the tool fetches the token). |
+| Apply the trifecta at **tool-selection** time: one tool — an MCP server especially — can hold all three legs at once, so vet each before enabling it | PRIMARY | Simon Willison, "The lethal trifecta" — https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/ (MCP "encourages users to mix and match tools"; GitHub MCP exploit — https://simonwillison.net/2025/May/26/github-mcp-exploited/). |
 
 ---
 

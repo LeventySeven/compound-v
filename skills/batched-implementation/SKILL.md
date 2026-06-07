@@ -25,7 +25,7 @@ WARP's finding is the counterweight that makes this safe: for coupled, latency-s
 1. **Sanity-check the environment** before building — confirm the verify commands (test/lint/typecheck/build) actually run here. A plan that can't be verified in this session is a plan you'll finish blind.
 2. Confirm you're not on `main`/`master`; if you are, branch first. If the harness already gave you an isolated workspace (a worktree, a fresh clone, a sandbox), use it — don't nest a second one. If it didn't and the work wants isolation, prefer a native worktree, and always branch before the first edit.
 3. Read the plan file **once**. Extract every task with its full text and context. Build a TodoWrite with one entry per task.
-4. Group tasks into batches of **2-3 by coupling** — tasks that share files, types, or a feature surface go together. A task that's independent of everything else can be its own batch.
+4. Group tasks into batches of **2-3 by coupling** — tasks that share files, types, or a feature surface go together. A task that's independent of everything else can be its own batch. When a batch's tasks are *structurally similar* (say three near-identical endpoints), the brief must spell out what **differs** per task — a fresh-context implementer falls into a rhythm and adapts the third from the first two, inheriting their assumptions (Manus, on few-shot rut).
 
 **Per batch:**
 1. Dispatch **one implementer subagent** (Task tool, `general-purpose`, Opus 4.8) for the batch.
