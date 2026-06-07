@@ -10,6 +10,7 @@ The moment a conclusion feels *obviously* right and nobody is pushing back is th
 ## When to use
 - You're about to commit to a conclusion, recommendation, design rationale, or "this is the answer" — and your own confidence is the main thing backing it.
 - The call is load-bearing or hard to reverse, or you notice you've only gathered evidence that agrees with you.
+- You're converging on a design in **compound-v:brainstorming** — pressure-test the approach you're about to recommend instead of confirming your first instinct (it should beat the *real* alternative, not a strawman). This is the discipline's prime home during design.
 - **Skip it** for trivial or reversible calls — red-teaming a rename is its own overkill. This is for reasoning with consequences.
 - This is in-flight self-skepticism over your OWN current reasoning. **compound-v:recheck** is a separate reviewer over finished work; **compound-v:verification-before-completion** runs the command that proves an output; **compound-v:startup-taste** judges whether to build at all.
 
