@@ -85,32 +85,35 @@ We ran a neutral head-to-head (a neutral judge, told not to favor either side). 
   `references/skill-format.md`) — vs superpowers' ~8,474 (3,207 skill lines + 5,267 in supporting
   files) for near-identical coverage. The reference files load only when needed (progressive
   disclosure), so the always-on cost is the router alone.
-- **Discoverability — 100%.** On a 15-query trigger eval (12 should-fire, 3 near-miss should-not),
-  the descriptions routed correctly 15/15.
+- **Discoverability — 100% (re-run at v0.2).** On a 22-query trigger eval over the v0.2 descriptions —
+  17 should-fire (one per skill, including the new `agent-security`), 2 adjacency traps ("how many
+  agents?" → `designing-agents`, not `dispatching`; "did the agent do it right?" → `recheck`, not
+  `verification`), and 3 out-of-scope should-not — every query routed correctly, **22/22**, with no
+  collisions. Each query was judged by an independent fresh agent from the descriptions alone.
 - **Review process — Compound V wins.** 1 read-only pass vs 2 dispatches; findings-only vs
   superpowers' *mandated* praise; cleaner disqualify-first ordering.
-- **Bug detection — both catch the bugs; severity calibration was the real differentiator, and we
-  earned it.** On the first fixture (Python: path-traversal, swallowed-404, dead code, tautological
-  test) **both caught all four**, and superpowers' two-stage review was actually *sharper* on severity
-  (3/4 exact vs recheck's 2/4 — recheck under-rated the dead code). We treated that as the dogfooded
-  loop working and **hardened `recheck`'s calibration** (over-engineering with latent risk → Important;
-  vuln findings must name the class + exploit vector). On a **fresh, unseen second fixture**
-  (Node/Express: SQL injection, BOLA, an unbounded cache, a missing-`await` bug, a vacuous test) the
-  fix generalized: both still caught everything, and **recheck edged superpowers on severity accuracy,
-  4/5 exact vs 3/5** — correctly rating the over-engineering Important and naming SQLi/CWE-89 and
-  BOLA/CWE-639 with exploit vectors. It also honestly reported it *couldn't run* the tests (no
-  `package.json` in the sandbox) instead of faking green. **Honest caveat:** superpowers' output is
-  still the more polished, pedagogical artifact (spec table, explicit strengths, staged path-to-merge)
-  — at the cost of praise-padding and a strengths-before-criticals ordering; recheck stays leaner,
-  findings-only, one read-only pass.
+- **Bug & vuln detection.** *v0.1 head-to-head:* on two fixtures (Python: path-traversal,
+  swallowed-404, dead code, tautological test; Node/Express: SQL injection, BOLA, unbounded cache,
+  missing-`await`, vacuous test) **both kits caught the bugs** — the differentiator was severity
+  calibration. superpowers was sharper on the first (3/4 vs 2/4 exact); after we hardened `recheck`'s
+  calibration, recheck edged it on the second, unseen fixture (4/5 vs 3/5). *v0.2 re-validation (our
+  side only — superpowers was not re-run this pass):* on a fresh Node/Express fixture (three
+  SQL-injection sites, a missing authorization check, an auth token logged in plaintext, a
+  missing-`await` race, two vacuous tests) `recheck` returned **FIX_REQUIRED** and caught every
+  security and correctness issue — naming **CWE-89 ×3, CWE-639, and CWE-532**, the race, and both weak
+  tests, each severity-calibrated (security/authz → Critical; race/vacuous tests → Important) — while
+  **missing one** low-severity issue (an unbounded in-process cache). Zero false Criticals. The miss is
+  reported because that's the rule. **Honest caveat:** superpowers' review output is still the more
+  polished, pedagogical artifact; recheck stays leaner, findings-only, one read-only pass.
 - **Where superpowers genuinely wins:** its more aggressive rationalization-resistance plausibly
   raises compliance for weaker models under pressure, and it ships executable tooling (graph
   rendering, a visual companion) that Compound V doesn't have.
 
-Net: leaner, denser, broader coverage, more discoverable, and honest-by-design — and after the
-calibration fix, *at least as accurate* on severity (it edged superpowers 4/5 vs 3/5 on the second,
-unseen fixture). What it doesn't win is reviewer polish/pedagogy. That's the truthful claim, and it's
-the one the kit makes — not "catches strictly more bugs."
+Net: leaner, denser, broader coverage, more discoverable (22/22 at v0.2), and honest-by-design — and
+at least as accurate on severity as superpowers in the v0.1 head-to-head. What it doesn't win is
+reviewer polish/pedagogy. That's the truthful claim the kit makes — not "catches strictly more bugs."
+(The cross-kit head-to-head is from v0.1; v0.2 re-validated Compound V's own side — discoverability and
+recheck — as reported above; superpowers was not re-run this pass.)
 
 ## Install
 
