@@ -1,6 +1,6 @@
 ---
 name: writing-plans
-description: Turns an approved design or spec into a step-by-step implementation plan with exact files, real code, and runnable verification — or into a PRD/design doc. Use when you have requirements for a multi-step task and are about to start building, when an agent will execute the work task-by-task, or when asked to write a PRD, spec, or product doc.
+description: Turns an approved design or spec into a step-by-step implementation plan with exact files, real code, and runnable verification. Use when you have requirements for a multi-step task and are about to start building, or when an agent will execute the work task-by-task.
 ---
 
 # Writing Plans
@@ -11,7 +11,7 @@ A plan is where most of the quality is decided. Get the research and the plan ri
 
 - You have an approved design (from `compound-v:brainstorming`) or a clear spec, and the work is more than one obvious edit.
 - An implementer — a subagent or a fresh session — will execute the plan without your current context.
-- You're asked for a PRD, design doc, or product spec (use the PRD template near the end).
+- Producing the product's stable PRD instead? That's its own skill — **compound-v:writing-prd**.
 
 **Skip the plan doc** for trivial and small changes per the `using-compound-v` tier table — make the change and verify. The plan earns its cost on Standard-or-larger work.
 
@@ -102,14 +102,7 @@ After the plan is complete, read it against the spec with fresh eyes. This is yo
 - **Placeholder scan** — hunt the patterns above and resolve every hit.
 - **Type consistency** — do signatures and names line up across tasks? `clearLayers()` in Task 3 and `clearFullLayers()` in Task 7 is a bug waiting to happen.
 
-Fix inline and move on. Save the plan to `docs/plans/YYYY-MM-DD-<feature>.md` (user's location preference wins), then hand off to `compound-v:batched-implementation` to execute it. Once approved, the plan is the **fixed decision record** — the problem, the signal, the cut, the approach, and the risks, made concrete as tasks. The implementer executes it; it does not redesign mid-build. If a load-bearing assumption turns out wrong, that's the divergence rule firing — stop and re-plan deliberately, never drift-edit the plan as you go.
+Fix inline and move on. Save the plan to `docs/plans/YYYY-MM-DD-<feature>.md` (user's location preference wins), then hand off to `compound-v:batched-implementation` to execute it.
 
-## Writing a PRD: the product's stable context doc
-
-A PRD is **not a plan** — it's the product's **stable source of truth**, kept in `docs/` (e.g. `docs/PRD.md`) and read *first* by a fresh session to get ~80% of the context in one pass: what the product is, what it does, and what it's built on. The plan above answers "what am I building right now, and how?"; the PRD answers "what is this product?" — and it changes rarely. Keep it to three tight sections:
-
-- **Goal** — what the product is, who it's for, and the one outcome it exists to deliver. Plain language, not a mission statement.
-- **Core functions** — the handful of capabilities that define the product (the feature spine, not a backlog), one line each.
-- **Tech stack & architecture** — the languages, frameworks, and services it runs on, a one-sentence shape of the system, and the load-bearing design decisions.
-
-The per-build decisions — the problem, the verifiable signal, the cut, the approach, the risks — do **not** go here; those are the *plan's* job (above), per build. Keep the PRD the single source of truth: edit it in place when the product genuinely changes (never a `prd-v2`), prune what's no longer true — a stale doc an agent trusts as fact is worse than none (**compound-v:context-engineering** on keeping durable docs from rotting). A good `CLAUDE.md`/`AGENTS.md` points the agent at it.
+## A product PRD is a different artifact
+A PRD is the product's *stable* source of truth (goal, core functions, tech stack), read first for context — not a per-build plan. It has its own skill: **compound-v:writing-prd**. This skill owns the plan; that one owns the durable product doc.

@@ -172,6 +172,18 @@ sources.
 
 ---
 
+## writing-prd
+
+| Claim (short) | skill:line | Category | Source / note |
+|---|---|---|---|
+| The durable PRD section grammar — problem/context, goal, core functions, **non-goals**, architecture — is convergent across the canonical engineering-doc formats | `writing-prd` | PRIMARY | Google Engineering Practices "Design Docs / Context and Scope"; Rust RFC template (guide-level explanation, unresolved questions); ADR (alternatives considered); Amazon PR-FAQ. Cross-format convergence, not one source. |
+| A PRD is **institutional memory** — the durable record of what the product is and why, captured once so a cold reader (human or fresh AI session) doesn't reverse-engineer it | `writing-prd:8` | PRIMARY | prd-pipeline — https://github.com/Timmy-Lane/prd-pipeline ("spec as institutional memory"). Its build machinery (tier routing, multi-critic grill, 9-pass gates, a CLI) is deliberately NOT adopted — that's per-build process, not PRD content. |
+| **Prose over bullets** where precision matters (writing forces the thinking a bullet skips); ~2-page cap | `writing-prd` | PRIMARY | Amazon working-backwards / PR-FAQ (narrative memos, no bullets). |
+| On supersede, leave a **one-line forward pointer** rather than deleting (cheap decision genealogy), decoupled from any code lifecycle | `writing-prd` | JUDGMENT-CALL | Oxide RFD process (status frontmatter + decision genealogy), adapted as a light touch. |
+| Single-source-of-truth, edit-in-place, prune-on-cadence | `writing-prd` | (see context-engineering) | Reuses the AGENTS.md-spec + Anthropic "Effective context engineering" maintenance rules grounded in the context-engineering section; the PRD links to them, doesn't re-derive. |
+
+---
+
 ## systematic-debugging
 
 | Claim (short) | skill:line | Category | Source / note |

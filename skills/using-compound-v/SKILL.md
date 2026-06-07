@@ -33,7 +33,7 @@ The kit's bet is that adaptive effort is something the model is increasingly goo
 
 ## Other skills
 - **Judgment:** `startup-taste` · `product-taste`
-- **Plan:** `brainstorming` · `writing-plans`
+- **Plan:** `brainstorming` · `writing-plans` (per-build plan) · `writing-prd` (the product's stable source-of-truth doc)
 - **Thinking:** `critical-thinking` (red-team your own reasoning before you commit — steelman + disconfirm)
 - **Build:** `batched-implementation` · `recheck` · `finishing`
 - **Correctness:** `test-driven-development` · `systematic-debugging` · `verification-before-completion`
