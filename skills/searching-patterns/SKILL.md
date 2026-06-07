@@ -22,6 +22,7 @@ Don't search for trivial, well-trodden code you'd write correctly from memory (a
 
 The default tools need zero setup. Reach for the heaviest one that fits, lightest first:
 
+- **Check the local convention first.** If the repo already has an established shape for this — a house wrapper, an AGENTS.md/CLAUDE.md rule, a pattern in neighboring files — that overrides the external canonical one. Match the local shape; don't import a clashing "correct" pattern. Only reach outward when the repo has no precedent. (AGENTS.md spec; Codex/Cursor system prompts: preserve an existing design system's established patterns.)
 - **`WebSearch`** — find the current canonical page when you don't have the URL ("`<lib> <version>` retry middleware docs").
 - **`WebFetch`** — read one known page (a docs section, a guide). The common case.
 - **`gh`** — read the upstream repo directly: `gh api` for file contents, releases, or the `CHANGELOG`; `gh search code` to see how the library itself uses a thing. This is how you reach the *real* source and private/authed pages.

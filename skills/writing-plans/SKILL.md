@@ -27,6 +27,8 @@ The leverage runs uphill. A bad line of code is one bad line. A bad decision in 
 
 Sequence the work so the riskiest assumption gets tested first, with the cheapest task that resolves it — don't lay scaffolding or build the fun part while the load-bearing assumption sits unexamined. (Identifying *which* assumption is load-bearing is **compound-v:startup-taste**'s job; this is where that judgment becomes task order.)
 
+The risk clusters at the edges: setup (environment, dependencies, scaffolding) and the finish (deploy, env vars, prod config) are where builds fail; the middle application logic is the reliable part (Amjad Masad / Replit, a16z podcast). Add setup and deploy tasks early instead of trusting them to fall out at the end.
+
 ## Write for an implementer with zero context
 
 Assume the implementer is a capable engineer who knows nothing about this codebase or problem domain and has questionable taste. Everything they need is in the plan: which files to touch, the actual code, how to test it, what "done" looks like. They may read tasks out of order, so each task stands alone.
@@ -68,7 +70,7 @@ Each task produces a self-contained, testable change. Within a task, the steps f
 - [ ] Commit: `git commit -am "feat: reject expired tokens"`
 ```
 
-Start the plan with a **preamble** the implementer inherits before any task: a one-line goal, a plan-level `Done = <machine-checkable signal>` (the command or eval that says the whole plan is finished — each task has its own test, but the plan as a whole needs one too), two-to-three sentences on the approach with key libraries, and a **distilled fold-in of the research** — the real files, the line ranges, the data-flow facts, and the canonical/anti-pattern you found. The implementer has none of your context; whatever you learned and don't write here, they re-discover from scratch or guess.
+Start the plan with a **preamble** the implementer inherits before any task: a one-line goal, a plan-level `Done = <machine-checkable signal>` (the command or eval that says the whole plan is finished — each task has its own test, but the plan as a whole needs one too), two-to-three sentences on the approach with key libraries, and a **distilled fold-in of the research** — the real files, the line ranges, the data-flow facts, and the canonical/anti-pattern you found. The implementer has none of your context; whatever you learned and don't write here, they re-discover from scratch or guess. Add a **divergence rule** too — if a load-bearing assumption proves false mid-build, the implementer stops and reports back rather than improvising in code or looping; give an explicit budget (e.g. after ~3 failed attempts at the same thing, surface it instead of grinding) (Cognition Devin; Google Antigravity formalize this execution→planning backtrack).
 
 ## No placeholders
 
@@ -89,6 +91,8 @@ End the plan with how the finished work gets checked — the per-task tests prov
 
 - **Automated** — the exact commands a fresh session runs to confirm done: the full test suite, the type check, the lint, the build, any end-to-end command. Write them runnable (`pytest -q && ruff check . && npm run build`), not described. This is the plan-level `Done =` signal, made executable.
 - **Manual** — what a machine can't assert: the thing to click, the screen to eyeball, the case to try by hand. Keep it to what genuinely needs a human; if a step *can* be automated, move it up.
+
+The tests *are* the done-signal, so the plan must forbid editing a test to make it pass: when a test fails the suspect is the code under test, not the test — change the test only if the task is explicitly about the test (Cognition Devin).
 
 ## Self-review the plan
 

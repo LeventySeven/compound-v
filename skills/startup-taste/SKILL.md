@@ -18,6 +18,8 @@ Building stopped being the long pole around 2026: a product that took a quarter 
 ## The master gate
 **Does this grow taste, distribution, or a primitive?** None of the three → it's the bullshit; cut it or say why it's exempt. Run this first; most bad scope dies here.
 
+**Suspect the safe-feeling default.** Inaction is a hidden risk that feels safe — it's often easier to do a hard thing that matters than an easy thing that doesn't (Sam Altman, "What I Wish Someone Had Told Me"). When choosing what to build, the comfortable low-stakes option is frequently the actual risk.
+
 ## The gates (run the relevant ones, name what you find)
 
 This skill **owns** the scoping discipline the rest of the kit defers to: YAGNI / "every feature costs you forever" (name-the-cut), no premature machinery, de-risk the load-bearing assumption first, and verifier-first. **compound-v:brainstorming** and **compound-v:writing-plans** point here rather than re-deriving them.
@@ -44,8 +46,14 @@ You have a primitive only when you can state it in one sentence — "the search 
 **Contrarian insight + a timing leg.**
 A real opportunity has three parts: the conventional wisdom, a contrarian truth you believe that most don't, *and* a tech enabler that makes it doable **now**. If your insight leads you to the same architecture as the incumbents, it isn't contrarian enough — that's cosplay, not an edge. Most people with a contrarian take stop at part two; the timing leg is where theses die. So name the enabler: what changed recently (a model capability, a cost curve, a platform shift) that makes this buildable now and wasn't a year or two ago? No honest answer → either right-idea-wrong-decade, or there's no insight at all. The decisive bet usually looks irrational at the time — ask which of your "obviously wrong" ideas is wrong because it's *early*, not because it's *bad*.
 
+**Noticed, not brainstormed.**
+The best ideas are *noticed* by someone who has lived in a domain for years, not *produced* in a list-making session (Paul Graham, "How to Do Great Work"). Provenance is a tell independent of how contrarian the idea sounds: if it came from a brainstorm rather than a problem you keep bumping into, that's the finding. Find the one you noticed, not the one you generated.
+
 **Tar-pit filter.**
 Some markets are graveyards — saturated, perennially attempted, historically resistant to solving (the calendar app, the universal inbox, the "Slack but better"). They look appealing precisely *because* the need is obvious, which is why everyone walks in and dies. Ask: is this a tar pit people keep stepping into? If so, the burden of proof is the *timing leg above* — what is finally different now — not enthusiasm.
+
+**Persist on the goal, not the means.**
+The scoping gates judge *starting*; this judges *continuing*. Persistence and obstinacy look identical from outside and split on one axis: the persistent are fixed on the goal and flexible on means, updating on evidence; the obstinate are fixed on the means, driven by ego (Paul Graham, "The Right Kind of Stubborn"). At a wall, ask whether the evidence still backs the goal — or only your pride does.
 
 **Bounded beats unbounded.**
 A bounded problem with a proprietary data flywheel (one narrow job done end-to-end) is how a small team owns a category; an unbounded problem (general intelligence, "an assistant for everything") is how it wraps a model and competes with the lab. Prefer the bounded scope where you can own the flywheel.

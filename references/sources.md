@@ -90,6 +90,9 @@ public primary source.
 | Perplexity outgrew the Bing API; Cursor forked VS Code (extension API blocked speculative edit) | `startup-taste:60` | PRIMARY | Aravind Srinivas (YC) + Michael Truell, Cursor talks. Historical/architectural fact about owning the ceiling layer. |
 | Building stopped being the long pole ~2026 (quarter-in-2021 → weekend now) | `startup-taste:10` | JUDGMENT-CALL | The kit's stated thesis/stance (estimate hygiene), not a measured datum. No citation needed. |
 | Verifier-first: no eval = #1 cause of failed AI products | `startup-taste:65-66` | PRIMARY | Hamel field-guide — https://hamel.dev/blog/posts/field-guide/ (same as `evals:8`). |
+| Inaction is a hidden risk that feels safe; often easier to do a hard thing that matters than an easy thing that doesn't | `startup-taste:21` | PRIMARY | Sam Altman, "What I Wish Someone Had Told Me" — https://blog.samaltman.com/what-i-wish-someone-had-told-me. |
+| The best ideas are *noticed* by someone who has lived in a domain for years, not produced in a list-making session; provenance is a tell | `startup-taste:50` | PRIMARY | Paul Graham, "How to Do Great Work" — https://paulgraham.com/greatwork.html. |
+| Persistence vs obstinacy split on one axis: persistent = fixed on the goal, flexible on means; obstinate = fixed on means, driven by ego | `startup-taste:56` | PRIMARY | Paul Graham, "The Right Kind of Stubborn" — https://paulgraham.com/persistence.html. |
 
 ---
 
@@ -108,6 +111,9 @@ anchors carry sources.
 | Durations **200–300ms**, `ease-out` for enter/exit | `product-taste:56` | JUDGMENT-CALL / CANONICAL | Canonical motion-design constant. No citation needed. |
 | Latency: **<200ms** instant / **>500ms** slow / **<50ms** the bar (Linear) / Cursor tab ~**260ms** | `product-taste:62-64` | JUDGMENT-CALL + PRIMARY anchors | The perceptual cliffs (<200/<500/<50) are canonical HCI constants — no citation. Named anchors: Linear (Karri Saarinen, "How We Redesigned the Linear UI" — https://linear.app/now/how-we-redesigned-the-linear-ui); Cursor ~260ms tab completion (Cursor talks). |
 | Linear collapsed **98 color variables → 3** | `product-taste:74` | PRIMARY | Karri Saarinen, "How We Redesigned the Linear UI" — https://linear.app/now/how-we-redesigned-the-linear-ui (also "Inside Linear" talk — https://www.youtube.com/watch?v=4muxFVZ4XfM). |
+| The 98→3 collapse works because the palette is built in **LCH, not HSL**: LCH is perceptually uniform (same lightness looks equally light across hues), so one base/accent/contrast triple generates every theme incl. high-contrast a11y; HSL's lightness lies, forcing per-color hand-tuning | `product-taste:76` | PRIMARY | Linear, "How We Redesigned the Linear UI" — https://linear.app/now/how-we-redesigned-the-linear-ui (extends the 98→3 row above). |
+| Habituation blinds you to normalized flows; the worst flaws are the ones you've stopped seeing — view your own product as a first-time user / stay a beginner | `product-taste:19` | PRIMARY | Tony Fadell, "The first secret of design is … noticing" (TED) — https://www.ted.com/talks/tony_fadell_the_first_secret_of_design_is_noticing. |
+| Open menus/dropdowns on **`mousedown`** not `click` — firing on press-down shaves perceptible delay, makes the menu feel instant | `product-taste:45` | PRIMARY | Rauno Freiberg, Web Interface Guidelines — https://github.com/raunofreiberg/interfaces. |
 | Teenage Engineering's fixed palettes as a generative force | `product-taste:74` | PRIMARY (illustration) | "Config 2024: A Look Inside Teenage Engineering." Illustration. |
 | Snapchat runs at several deliberate taps/second (reduce cognitive load, not clicks) | `product-taste:69` | JUDGMENT-CALL (illustration) | Well-known product example; illustrative. No hard citation needed. |
 | Older Safari renders `outline` without following `border-radius` (use `box-shadow`) | `product-taste:31` | JUDGMENT-CALL / CANONICAL | Canonical front-end knowledge (focus-ring fix). No citation needed. |
@@ -143,6 +149,17 @@ sources.
 | For coupled, latency-sensitive work, one strong agent beats planner→executor→critic fan-out | `batched-implementation:20` | PRIMARY | Convergent finding from production orchestration practice; corroborated by Cognition (below). |
 | Writes stay single-threaded; agents contribute *intelligence*, not *actions*; serial unless file-disjoint | `batched-implementation:52-56` | PRIMARY | Cognition, "Don't Build Multi-Agents" + "Multi-Agents: What's Actually Working" — https://cognition.ai/blog/dont-build-multi-agents, https://cognition.ai/blog/multi-agents-working. |
 | **N=3** fix↔recheck cycle cap | `batched-implementation:49` | PRIMARY (borderline recipe) | Same N=3 as `recheck`/`systematic-debugging` (see recheck table). |
+| When a convention matters, **paste the exemplar** (the file/snippet to imitate) into the dispatch prompt, not a bare "follow conventions" — a fresh-context agent regresses to model defaults for any convention it wasn't shown | `batched-implementation:34` | PRIMARY | Anthropic, "Building effective agents" — https://www.anthropic.com/engineering/building-effective-agents ("a good tool definition often includes example usage"; examples anchor behavior). Corroborated by the leaked OpenAI Codex system prompt's anti-default rules (no purple/dark-mode bias, no default `useMemo`/`useCallback`) — models default to generic patterns absent a local anchor. |
+
+---
+
+## writing-plans
+
+| Claim (short) | skill:line | Category | Source / note |
+|---|---|---|---|
+| Build failures cluster at the **edges** — setup (environment/dependencies, first ~5%) and the finish (deploy/env-vars/prod-config, last ~5%) — while the middle application logic is reliable; front-load setup and deploy tasks | `writing-plans:30` | PRIMARY | Amjad Masad (Replit CEO) on the a16z podcast — https://www.youtube.com/watch?v=g-WeCOUYBrk. |
+| When a load-bearing assumption proves false mid-build, the implementer **stops and reports back** rather than improvising or looping, with an explicit attempt budget (surface after ~3 failed attempts) — an execution→planning backtrack | `writing-plans:73` | PRIMARY | Cognition Devin (published/leaked system prompt): "Return to PLANNING if you discover unexpected complexity" and "ask the user for help if CI does not pass after the third attempt." Google Antigravity agent formalizes the same EXECUTION→PLANNING backtrack. Shares the **N=3** budget with the recheck table. |
+| A plan must **forbid editing a test to make it pass**: when a test fails the suspect is the code under test, not the test; change the test only if the task is explicitly about the test | `writing-plans:95` | PRIMARY | Cognition Devin (published/leaked system prompt): "never modify the tests themselves, unless your task explicitly asks … Always first consider that the root cause might be in the code you are testing rather than the test itself." |
 
 ---
 
@@ -187,6 +204,14 @@ sources.
 
 ---
 
+## searching-patterns
+
+| Claim (short) | skill:line | Category | Source / note |
+|---|---|---|---|
+| When a repo already has an established shape (house wrapper, AGENTS.md/CLAUDE.md rule, neighboring-file pattern), that **local convention overrides** the external canonical pattern — match the local shape, don't import a clashing "correct" one | `searching-patterns:25` | PRIMARY | AGENTS.md spec — https://agents.md (AGENTS.md carries code-style guidelines for in-scope code; "explicit user chat prompts override everything" — a local instruction layer that governs the diff). OpenAI Codex / Cursor system prompts: "If working within an existing website or design system, preserve the established patterns, structure, and visual language." |
+
+---
+
 ## agent-security
 
 | Claim (short) | Category | Source / note |
@@ -210,6 +235,7 @@ The recurring public primary URLs, for quick verification:
 - **Anthropic — Claude Cookbooks (tool-use context management, 335K→173K):** https://github.com/anthropics/claude-cookbooks
 - **Cognition — Don't Build Multi-Agents:** https://cognition.ai/blog/dont-build-multi-agents
 - **Cognition — Multi-Agents: What's Actually Working (2 bugs/PR, ~58% severe; clean-context reviewer; verifiable-criterion):** https://cognition.ai/blog/multi-agents-working
+- **Cognition Devin — published/leaked system prompt (test-protection; EXECUTION→PLANNING backtrack; third-attempt CI rule):** judgment-call / canonical (published agent prompt; corroborated by Google Antigravity's EXECUTION→PLANNING backtrack)
 - **Manus — Context Engineering for AI Agents (100:1, 10×, cache discipline):** https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus
 - **Chroma — Context Rot (~40% by ~170K):** https://research.trychroma.com/context-rot
 - **arXiv 2508.21433 — The Complexity Trap (observation masking 52%/+2.6%):** https://arxiv.org/abs/2508.21433
@@ -220,6 +246,12 @@ The recurring public primary URLs, for quick verification:
 - **Simon Willison — Engineering practices that make coding agents work (talk, "five tokens"):** https://www.youtube.com/watch?v=owmJyKVu5f8
 - **Karpathy — Dwarkesh interview ("march of nines"):** https://www.dwarkesh.com/p/andrej-karpathy
 - **ghuntley — How to build a coding agent:** https://ghuntley.com/agent/
+- **Sam Altman — What I Wish Someone Had Told Me (inaction is a hidden risk):** https://blog.samaltman.com/what-i-wish-someone-had-told-me
+- **Paul Graham — How to Do Great Work (best ideas are noticed, not brainstormed):** https://paulgraham.com/greatwork.html
+- **Paul Graham — The Right Kind of Stubborn (persistence vs obstinacy):** https://paulgraham.com/persistence.html
+- **Tony Fadell — The first secret of design is … noticing (TED; habituation/beginner):** https://www.ted.com/talks/tony_fadell_the_first_secret_of_design_is_noticing
+- **Amjad Masad / Replit — a16z podcast (build failures cluster at the edges):** https://www.youtube.com/watch?v=g-WeCOUYBrk
+- **AGENTS.md spec (local convention overrides external canonical):** https://agents.md
 - **Linear — How We Redesigned the Linear UI (98→3 colors, <50ms):** https://linear.app/now/how-we-redesigned-the-linear-ui
 - **Rauno Freiberg — interfaces (16px, 0.8/0.96, tabular-nums — canonical UI constants):** https://github.com/raunofreiberg/interfaces
 - **Vercel — Lessons from building v0 and d0 (~65%→94%):** https://www.youtube.com/watch?v=_f2WpsmW76Y
