@@ -221,9 +221,6 @@ sources.
 | The three compounds: **taste, distribution, a primitive** (master gate) | `using-compound-v:13-14` | JUDGMENT-CALL (kit thesis) | The kit's founding stance, distilled from practitioner founder talks and the top-1% founder canon. Reinforced at `startup-taste:18`, `recheck:27`. Not a single-source empirical claim. No citation needed. |
 | Lethal trifecta (flag vulns incl.) | `using-compound-v:18` | PRIMARY | Simon Willison — https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/ (same as `recheck:33`). |
 | Tier routing / "overkill is a defect" | `using-compound-v:8,21-28` | JUDGMENT-CALL | The kit's anti-overkill law (constitution Ruling B). No citation needed. |
-| README: **1,347 skill lines** across 17 skills | `README.md` | PRIMARY (in-repo, honest within rounding) | Verify in-repo: `wc -l skills/*/SKILL.md \| tail -1`. Honest within rounding. |
-| README: **17 skills** | `README.md` | PRIMARY (in-repo) | Verify in-repo: `ls -d skills/*/ \| wc -l`. |
-| README: **190 lines of on-demand reference** (interface-checklist + skill-format) | `README.md` | PRIMARY (in-repo) | Verify in-repo: `wc -l references/*.md \| tail -1`; these load only on demand. |
 
 ---
 
