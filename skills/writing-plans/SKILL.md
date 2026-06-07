@@ -106,12 +106,16 @@ Fix inline and move on. Save the plan to `docs/plans/YYYY-MM-DD-<feature>.md` (u
 
 ## Writing a PRD or design doc
 
-When the deliverable is a product doc rather than a code plan, the discipline is the same — concrete over vague — but the sections differ. A PRD is where **compound-v:startup-taste**'s gates stop being a stance and become a document: the verifier-first signal, the one cut, and the riskiest assumption each get a named place on the page. Keep it to the shortest thing that makes the decision:
+A PRD is the product's **stable source of truth** — kept in `docs/` and *kept current* — that a person or an agent reads in one pass to get the durable context: what the product is, what it does, and what it's built on. Lead with that durable definition, then pin the per-build decisions (where **compound-v:startup-taste**'s gates become a document). Keep every section the shortest concrete thing.
 
-- **Problem** — the specific problem and who has it, in plain language. Not a mission statement.
+The durable definition (changes rarely — this is what a teammate or an agent reads to get oriented):
+- **Goal** — what the product is, who it's for, and the one outcome it exists to deliver. Plain language, not a mission statement.
+- **Core functions** — the handful of capabilities that define the product (the feature spine, not a backlog), one line each.
+- **Tech stack & architecture** — the languages, frameworks, and services it runs on, a one-sentence shape of the system, and the key design decision(s) with the real alternatives you rejected.
+
+The per-build decisions:
 - **The one verifiable signal** — the metric, eval, or observable outcome that says ship/don't-ship (startup-taste's verifier-first gate, written down). For an agent-built feature, make it *machine-checkable and tamper-resistant*: a feature list as an executable spec — a JSON list of requirements the agent may flip to `passes: true` but not rewrite (JSON resists accidental overwrite better than prose).
 - **Scope and the cut** — what's in, and explicitly what's out for v1. A doc that only adds is a backlog, not a plan.
-- **Approach** — the chosen design and the real alternatives you rejected, with why. One sentence stating the core idea — if you can't state it in one sentence, the design isn't settled.
 - **Risks, riskiest first** — the load-bearing assumptions, ordered by what would hurt most if wrong, each with how you'd test it cheaply.
 
-Then run the same self-review: every claim concrete, no placeholders, effort in hours/days.
+Keep it the single source of truth: when the product changes, edit the PRD in place — don't spawn a `prd-v2` — and prune what's no longer true; a stale doc an agent trusts as fact is worse than none (**compound-v:context-engineering** on keeping durable docs from rotting). Then run the same self-review: every claim concrete, no placeholders, effort in hours/days.

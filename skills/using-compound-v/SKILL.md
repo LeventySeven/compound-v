@@ -7,6 +7,8 @@ description: Routes any task to the right Compound V skill and the right effort 
 
 Match effort to the task, and only build what compounds. Overkill is a defect, not a safety margin.
 
+You don't have to remember what each skill does — match the **task** to a trigger and invoke that skill with the `Skill` tool **before acting**, even for a question, even when the user didn't name it. The descriptions fire on intent, not keywords; when a skill might apply, invoke it and let it bow out if it doesn't fit. Silently skipping a skill that applies is the failure this kit exists to prevent.
+
 ## Instruction priority
 User CLAUDE.md > Compound V skills > default behavior. If the user's instructions contradict a skill (e.g. "don't use TDD here"), the user wins — always.
 
