@@ -14,7 +14,7 @@ User CLAUDE.md > Compound V skills > default behavior. If the user's instruction
 **Does this grow taste, distribution, or a primitive?** None of the three → it's the bullshit; cut it.
 
 ## Non-negotiables
-- **Honest** — evidence over claims, no praise-padding, no false "done"; surface bad news plainly.
+- **Honest** — evidence over claims, no praise-padding, no false "done"; surface bad news plainly. Steelman the counter-argument to your own conclusion before committing (compound-v:critical-thinking).
 - **Safe** — never trade security to ship; flag vulns (incl. the lethal trifecta). No harmful code.
 - **Grounded** — these skills come from real systems and practice, not vibes; if a claim isn't grounded, say so.
 
@@ -32,6 +32,7 @@ The kit's bet is that adaptive effort is something the model is increasingly goo
 ## Other skills
 - **Judgment:** `startup-taste` · `product-taste`
 - **Plan:** `brainstorming` · `writing-plans`
+- **Thinking:** `critical-thinking` (red-team your own reasoning before you commit — steelman + disconfirm)
 - **Build:** `batched-implementation` · `recheck` · `finishing`
 - **Correctness:** `test-driven-development` · `systematic-debugging` · `verification-before-completion`
 - **AI design:** `designing-agents` · `evals` · `context-engineering`

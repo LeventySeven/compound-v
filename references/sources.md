@@ -267,6 +267,9 @@ The recurring public primary URLs, for quick verification:
 - **Dylan Field / Figma (~4yr renderer, taste-as-moat):** https://www.latent.space/p/figma
 - **Google — Securing Your AI Agents:** https://cloud.google.com/transform/securing-your-ai-agents
 - **Superpowers skill set (audited for the leanness comparison):** https://github.com/obra/superpowers
+- **Paul Graham — How to Think for Yourself (felt-certainty; conventional minds are surest they think for themselves):** https://paulgraham.com/think.html — grounds `critical-thinking` gate 1.
+- **Charlie Munger — steelman standard ("you don't own an opinion until you can argue the other side better than its proponent"):** widely attributed (Munger, USC Law 2007 / Poor Charlie's Almanack) — maxim; grounds `critical-thinking` gate 2.
+- **Karl Popper (falsification — a claim must state what would refute it) + Sébastien Bubeck et al., "Sparks of AGI" (probe breadth-first for the limit, not for demos):** Popper canonical; Bubeck https://arxiv.org/abs/2303.12712 — grounds `critical-thinking` gate 3.
 
 ### Removed / do-not-cite
 

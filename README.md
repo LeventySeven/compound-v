@@ -29,6 +29,7 @@ Two pieces carry most of the weight:
 | Foundation | `using-compound-v`: the router. Tiering, the taste/distribution/primitive gate, the non-negotiables. |
 | Taste | `startup-taste` (whether and what to build) and `product-taste` (how it feels) |
 | Plan | `brainstorming` (design before code) and `writing-plans` (a plan or PRD with real code, no placeholders) |
+| Thinking | `critical-thinking` (red-team your own reasoning before you commit — steelman it, hunt disconfirming evidence) |
 | Build | `batched-implementation`, `recheck`, `finishing` |
 | Correctness and security | `test-driven-development`, `systematic-debugging`, `verification-before-completion`, and `agent-security` (build-time defense: the lethal trifecta, source-trust, sandboxing model-written code) |
 | AI design | `designing-agents` (a call, a workflow, or an agent?), `evals` (does the AI actually work?), `context-engineering` |
