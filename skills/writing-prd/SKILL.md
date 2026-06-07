@@ -19,7 +19,7 @@ Keep the whole thing to roughly two pages — if it doesn't fit, the scope is to
 - **Problem & primitive** — the friction the product removes, anchored in something real, plus the one-sentence primitive the product is a consequence of ("the search result, from links to a cited answer"; "speculative editing"; "the sync engine"). Finding the primitive is **compound-v:startup-taste**'s job — record it here, don't re-derive it.
 - **Goal** — what the product is, who it's for, and the one outcome it exists to deliver. Plain language, not a mission statement.
 - **Core functions** — the handful of capabilities that define the product (the feature *spine*, not a backlog), one line each.
-- **Non-goals** — what the product explicitly is *not* and won't do. Bounds scope, pre-empts the most common pushback, and survives a model upgrade because it encodes a human judgment a fresh model can't reconstruct.
+- **Non-goals** — what the product explicitly is *not* and won't do. Bounds scope, pre-empts the most common pushback, and survives a model upgrade because it encodes a human judgment a fresh model can't reconstruct. Include the **support boundary**: for inputs past the edge of scope, say what the product does — reject or escalate, not silently guess — because an unsure agent won't ask, it'll assume and proceed (a16z / Steinhardt).
 - **Tech stack & architecture** — the languages, frameworks, and services it runs on, a one-sentence shape of the system, and the load-bearing design decisions. The slow-changing *what* and *why* — never the per-build *how*.
 
 ## What does NOT go here

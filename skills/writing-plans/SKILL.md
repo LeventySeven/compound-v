@@ -92,7 +92,7 @@ End the plan with how the finished work gets checked — the per-task tests prov
 - **Automated** — the exact commands a fresh session runs to confirm done: the full test suite, the type check, the lint, the build, any end-to-end command. Write them runnable (`pytest -q && ruff check . && npm run build`), not described. This is the plan-level `Done =` signal, made executable.
 - **Manual** — what a machine can't assert: the thing to click, the screen to eyeball, the case to try by hand. Keep it to what genuinely needs a human; if a step *can* be automated, move it up.
 
-The tests *are* the done-signal, so the plan must forbid editing a test to make it pass: when a test fails the suspect is the code under test, not the test — change the test only if the task is explicitly about the test (Cognition Devin).
+The tests *are* the done-signal, so the plan must forbid editing a test to make it pass: when a test fails the suspect is the code under test, not the test — change the test only if the task is explicitly about the test (Cognition Devin). Defend the criterion from the other side too: pair each one with the negative constraint that rules out the cheat — *tests pass* **and** no assertion weakened, no expected output hardcoded — because an agent rewarded only for green tests will hardcode the green (a16z / Steinhardt, specification gaming).
 
 ## Self-review the plan
 
