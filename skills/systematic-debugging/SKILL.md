@@ -23,7 +23,8 @@ You don't always need all four, but you may not skip *ahead* of a phase you have
 
 ### Phase 1 — Find the root cause
 - **Read the actual error.** The full message, the full stack trace, the exit code. Not the gist — the literal text. The answer is often in a line people skip.
-- **Reproduce it consistently.** A bug you can't trigger on demand, you can't verify you fixed. Find the exact inputs/steps. If it's flaky, make it deterministic before going further (e.g. control the timing/seed/ordering that makes it intermittent).
+- **A green you can't explain is a defect, not a pass.** AI/agent code fails silently — the loop exits 0 with a confidently-wrong answer and no error ever fires, so a passing-looking result you cannot account for is a bug *lead*, not a finish. Go simple-to-complex and never trust an output you can't explain; distrust the passing signal, don't just chase visible crashes. (Karpathy, *A Recipe for Training Neural Networks*: "neural nets fail silently… never trust a result you can't explain.")
+- **Reproduce it consistently.** A bug you can't trigger on demand, you can't verify you fixed. Find the exact inputs/steps. If it's flaky, make it deterministic before going further (e.g. control the timing/seed/ordering that makes it intermittent). For a nondeterministic agent/LLM there is no single reproducible stack trace — a bug that fires 1-in-5 runs defeats both "reproduce on demand" and "write one failing test." Build a small graded example set (**compound-v:evals**) and treat *where it fails across runs* as your repro and your regression guard — the same role a failing test plays for deterministic code. (Hamel Husain, *Your AI Product Needs Evals* — "no eval system" is the #1 reason AI products fail.)
 - **Shrink to the simplest failing case.** Strip the input down to the smallest instance that still fails — and check the system passes the *single simplest* instance (one item, empty list, one request) before you debug the broad case. If the simplest case already fails, the bug is upstream of everything you were looking at; debug *that* first.
 - **Check what recently changed.** `git diff`, `git log` on the touched files. Most new bugs entered with recent edits. If the regression's onset is unclear, `git bisect` (ideally `git bisect run <failing-test>`) pins the exact commit that introduced it.
 - **Trace backward from the symptom to its source.** Don't fix where the error *surfaces*; follow the data back to where it first goes wrong. In a multi-component flow, log (or inspect) the value at each boundary between components — the boundary where good input becomes bad output is your suspect. The error message location is a clue, not usually the cause.
@@ -63,6 +64,8 @@ digraph debug {
   count -> stop  [label=yes];
 }
 ```
+
+Classify the failure before you spend a retry. A **deterministic** red — validation error, missing/typed arg, auth revoked, type error — is guaranteed to fail again on the same inputs: **zero retries**, go straight to root cause or ask. Reserve the retry budget for genuinely **transient** faults (network blip, 503, rate limit). The retry-cap is for non-determinism, not for hoping a deterministic bug disappears — and a try/except-retry around a deterministic red is just that anti-pattern wearing a loop. (Standard transient-fault practice, e.g. Azure Architecture Center: retry only faults expected to be short-lived; never retry one guaranteed to recur.)
 
 After three failed fixes, the problem is almost never the next tweak — your model of the system is wrong. **Do not attempt fix #4.** Stop and challenge a level-up assumption:
 

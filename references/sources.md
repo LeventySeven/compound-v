@@ -138,6 +138,7 @@ sources.
 | Read-only subagents "mostly resemble tool calls rather than true multi-agent collaboration" | `designing-agents:39` | PRIMARY | Cognition, "Multi-Agents: What's Actually Working" — https://cognition.ai/blog/multi-agents-working (verbatim). |
 | Swarm demos (200k-LOC browser, C compiler) have a verifiable success criterion; real software scales human taste | `designing-agents` (stance) | PRIMARY | Cognition, "Multi-Agents: What's Actually Working" — https://cognition.ai/blog/multi-agents-working. |
 | "You're a senior software engineer" / "think for longer" = gimmicky prompt-engineering | (cross-kit red flag) | PRIMARY | Cognition, "Multi-Agents: What's Actually Working" — https://cognition.ai/blog/multi-agents-working. |
+| When retrying a flaky LLM/agent step, retrying with the same model often reproduces the failure; failing over to a different model (cross-model fallback chain) fixes it | `designing-agents:78` | PRIMARY | Warp engineering blog — https://www.warp.dev/blog/swe-bench-verified ("We originally attempted to retry with the same model, and found that this often produced repeat failures" → cross-model fallback chain: Sonnet → Claude 3.7 → Gemini 2.5 Pro → GPT-4.1). |
 
 ---
 
@@ -170,6 +171,9 @@ sources.
 |---|---|---|---|
 | **3-attempt rule** before questioning the design ("production agents converge on ~3 across CI retries, lint-fix loops") | `systematic-debugging:45-47` | PRIMARY (borderline recipe-knob) | This is the **owning skill** for the N=3 claim. Convergent across production coding agents (CI-failure loops, lint-fix loops, retry caps). recheck and batched-implementation cross-ref here. |
 | Don't thrash the environment before diagnosing; write a failing reproduction first | `systematic-debugging:33,41` | JUDGMENT-CALL | Standard debugging discipline (root-cause-before-fix); cross-refs `test-driven-development`. No empirical claim. No citation needed. |
+| AI/agent code fails silently — a passing-looking result you cannot account for is a bug lead, not a finish; never trust an output you can't explain | `systematic-debugging:18` (Phase 1) | PRIMARY | Andrej Karpathy, "A Recipe for Training Neural Networks" — http://karpathy.github.io/2019/04/25/recipe/ ("neural nets fail silently… never trust a result you can't explain"). |
+| A nondeterministic agent/LLM bug that fires intermittently has no single reproducible stack trace; build a small graded example set and treat where it fails across runs as the repro and regression guard — the role a failing test plays for deterministic code | `systematic-debugging:19` (Phase 1) | PRIMARY | Hamel Husain, "Your AI Product Needs Evals" — https://hamel.dev/blog/posts/evals/ (from 30+ production builds; "no eval system" is the #1 reason AI products fail). Cross-refs `compound-v:evals`. |
+| Classify a failure before spending a retry: deterministic reds (validation/type/missing-arg/auth) are guaranteed to recur on the same inputs so get zero retries; reserve the retry budget for transient faults (network blip, 503, rate limit) | `systematic-debugging:68` | PRIMARY | Standard production resilience practice (transient-fault handling), e.g. Microsoft Azure Architecture Center "Transient fault handling": retry only faults expected to be short-lived; do not retry faults guaranteed to recur. |
 
 ---
 
@@ -246,6 +250,8 @@ The recurring public primary URLs, for quick verification:
 - **Simon Willison — The lethal trifecta:** https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/
 - **Simon Willison — Engineering practices that make coding agents work (talk, "five tokens"):** https://www.youtube.com/watch?v=owmJyKVu5f8
 - **Karpathy — Dwarkesh interview ("march of nines"):** https://www.dwarkesh.com/p/andrej-karpathy
+- **Karpathy — A Recipe for Training Neural Networks (neural nets fail silently; never trust a result you can't explain):** http://karpathy.github.io/2019/04/25/recipe/
+- **Warp — SWE-bench Verified eng. blog (same-model retry → repeat failures; cross-model fallback chain):** https://www.warp.dev/blog/swe-bench-verified
 - **ghuntley — How to build a coding agent:** https://ghuntley.com/agent/
 - **Sam Altman — What I Wish Someone Had Told Me (inaction is a hidden risk):** https://blog.samaltman.com/what-i-wish-someone-had-told-me
 - **Paul Graham — How to Do Great Work (best ideas are noticed, not brainstormed):** https://paulgraham.com/greatwork.html
