@@ -31,6 +31,19 @@ Prefer the library's own repo and docs over blog posts and forum answers — pri
 
 When the thing you're implementing ships an **official conformance suite** — a protocol, a wire format, a standard's test vectors — that suite *is* the primary source: precise, executable, and it doesn't drift the way prose docs do. Point the implementer at it and write code until those tests pass (Simon Willison; e.g. WebAssembly's spec test suite).
 
+### Know the canonical exemplar for your stack
+
+For a stack you hit repeatedly, skip the discovery and go straight to its **canonical exemplar** — the reference the community already agrees on. Only two kinds qualify: the **maintainer's own** docs/examples (they track the current version; a blog doesn't), or a **large, actively-maintained real-world codebase** that uses the stack in anger.
+
+| Stack | Go straight to |
+|---|---|
+| React / Next.js | Vercel's official **`vercel-labs/agent-skills`** → its `react-best-practices` skill (70 perf rules from Vercel Engineering, same `SKILL.md` format as this kit) + `nextjs.org/docs` |
+| tRPC | `trpc.io/docs` for the API; `calcom/cal.com` for a large real Next + tRPC + Prisma app (read its `packages/trpc` end-to-end) |
+| FastAPI (Python) | `fastapi.tiangolo.com` — the official docs *are* the reference, examples included |
+| DOM / React testing | `testing-library.com` — the canonical query/interaction patterns (pairs with compound-v:test-driven-development) |
+
+The bar that stops this from rotting into a link farm: add a stack **only** if it's popular enough to recur *and* has *one* widely-agreed reference. No clear canonical exemplar → leave it out — the "primary source over a blog" rule above already covers the long tail, and a mediocre pointer is worse than none. That deliberately excludes the contested layers (state management, auth, the ORM wars, any "best-practices" listicle): no single right answer there, so a named pick is just an opinion aging into wrong. And these are **starting points, not pins** — still read the version in your lockfile, because even the canonical exemplar moves.
+
 ### When you must navigate: drive a real browser
 
 `WebFetch` reads one static URL; it can't drive a JS-rendered site, page through multi-section docs behind interaction, or operate a repo UI. For that, reach for whatever **browser-automation tool your environment provides** — prefer one that works through the accessibility tree (stable element refs) over pixel-scraping.
