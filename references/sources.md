@@ -28,7 +28,7 @@ as skills are edited.
 
 | Claim (short) | skill:line | Category | Source / note |
 |---|---|---|---|
-| Cross-model reviewer closes **~74.7%** of a same-model quality gap | `recheck` | **REMOVED** | **Do not cite.** The "cross-model reviewer" section was cut: the decimal was unsourced and contradicts the all-Opus identity the README repeats. If ever re-added: one sentence, no decimal, with a real cite. |
+| Cross-model reviewer closes **~74.7%** of a same-model quality gap | `recheck` | **REMOVED** | **Do not cite.** The "cross-model reviewer" section was cut: the decimal was unsourced and contradicts the kit's single-strong-model identity (implementer and reviewer both run on your strongest model). If ever re-added: one sentence, no decimal, with a real cite. |
 | Reviewer must be **read-only** (the canonical safe reviewer mutates nothing) | `recheck:19` | PRIMARY | Convergent across production coding agents whose review/oracle paths are read-only by construction. Attribute as "production reviewers are read-only." Mechanism corroborated by Cognition (below). |
 | Clean-context reviewer is *smarter* (attention math / Context Rot) and reasons backward from the diff | `recheck:19-21` | PRIMARY | Cognition, "Multi-Agents: What's Actually Working" — https://cognition.ai/blog/multi-agents-working. |
 | Devin Review catches **avg 2 bugs/PR, ~58% severe** (logic/edge/security) | `recheck` (vuln-step) | PRIMARY | Cognition, "Multi-Agents: What's Actually Working" — https://cognition.ai/blog/multi-agents-working. The grounded replacement for the removed 74.7% line. |
@@ -211,6 +211,7 @@ sources.
 | Testing intensity should scale **inversely with how easily a bug is observed**: test database and business-logic layers rigorously (corruption hides for weeks), test the visible frontend lightly (bugs show up in the browser) | `test-driven-development:25` | PRIMARY | Andrew Ng, DeepLearning.AI talk on AI-era engineering. |
 | When verifying tests, start with the **narrowest test** for the code you changed (fastest signal), then **widen to the full suite** to confirm nothing else broke | `test-driven-development:65` | PRIMARY | OpenAI Codex CLI agent instructions, published "Testing Philosophy." |
 | The model writes the assertion for free; **choosing what to assert (spec fidelity) is the human judgment that now differentiates** — a flawless test against the wrong spec is a worthless suite | `test-driven-development:48` | PRIMARY | Andrew Ng, DeepLearning.AI panel — AI writes tests trivially, so test-spec fidelity becomes the differentiating skill. (Same Ng talk grounding the test-intensity row above.) |
+| Wait on a **condition**, not a fixed delay, for async work in tests (poll until true with a timeout cap; never a bare `setTimeout`/`sleep`) | `test-driven-development:99` | JUDGMENT-CALL | Standard async-test discipline; the canonical fix for clock-based test flakiness (Testing Library's `waitFor`/`findBy` polling utilities replace arbitrary timeouts). No empirical decimal claimed. |
 
 ---
 

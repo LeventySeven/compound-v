@@ -1,11 +1,11 @@
 ---
 name: recheck
-description: Dispatch one read-only Opus pass over a finished batch of work to catch misalignment, bugs, security holes, and over-engineering before it ships, returning severity-tagged findings and a verdict. Use after an implementer reports DONE, before finishing or merging, or whenever you want a finished change independently verified — phrases like "review this", "check the diff", "is this ready", "did the agent actually do it right".
+description: Dispatch one read-only review pass over a finished batch of work to catch misalignment, bugs, security holes, and over-engineering before it ships, returning severity-tagged findings and a verdict. Use after an implementer reports DONE, before finishing or merging, or whenever you want a finished change independently verified — phrases like "review this", "check the diff", "is this ready", "did the agent actually do it right".
 ---
 
 # Recheck
 
-One Opus 4.8 reviewer reads the actual diff, runs the tests itself, and reports discrete findings with a verdict. It is **read-only** — it never edits — and it runs a fixed pass ordered cheapest-disqualifying-first so a wrong feature is caught before anyone grades its style.
+One reviewer on your strongest model reads the actual diff, runs the tests itself, and reports discrete findings with a verdict. It is **read-only** — it never edits — and it runs a fixed pass ordered cheapest-disqualifying-first so a wrong feature is caught before anyone grades its style.
 
 ## When to use
 

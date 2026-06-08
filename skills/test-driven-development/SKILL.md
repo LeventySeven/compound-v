@@ -96,3 +96,4 @@ Writing the reproduction first is also how you *understand* the bug. If you can'
 | "I'll mock the database to keep it fast." | A mock encodes your assumption of the dependency; use a real (in-memory/temp) collaborator so the test exercises the real contract. |
 | "Tests are green, so I'm done." | Green is necessary, not sufficient — the suite can pass while the app won't boot. Verify for real before claiming done: **compound-v:verification-before-completion**. |
 | "I wrote the code first, I'll just keep it." | Then you can't know the test actually tests it. Delete or set it aside, write the test, watch it fail, restore. |
+| Waiting for async work with a fixed delay (`setTimeout`, `sleep(500)`) | Flaky by construction — too short is a false red, too long crawls the suite. Wait on the *condition* (poll until the state holds, with a timeout cap), never a bare clock delay. |

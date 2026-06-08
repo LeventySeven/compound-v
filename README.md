@@ -8,7 +8,7 @@ The bet is that code got cheap and judgment didn't. So most of these skills are 
 
 Every session starts at the router. `using-compound-v` loads up front and sizes the task first, so a typo just gets fixed and a real feature earns the full pipeline. A one-line change never spawns four agents.
 
-For a real feature the path is short: pin the design with `brainstorming`, turn it into a plan an implementer with no prior context can follow with `writing-plans`, build it with `batched-implementation` (one fresh subagent per two or three related tasks, all on Opus 4.8), and review each batch with `recheck` before the next one starts. A five-task plan lands in about four dispatches.
+For a real feature the path is short: pin the design with `brainstorming`, turn it into a plan an implementer with no prior context can follow with `writing-plans`, build it with `batched-implementation` (one fresh subagent per two or three related tasks, all on your strongest model), and review each batch with `recheck` before the next one starts. A five-task plan lands in about four dispatches.
 
 ## The workflow
 
@@ -19,7 +19,7 @@ using-compound-v → brainstorming → writing-plans → batched-implementation 
 
 Two pieces carry most of the weight:
 
-- `batched-implementation` runs one implementer per two or three related tasks, all on Opus 4.8. It keeps going instead of stopping to ask permission, and reports each batch with a four-status contract.
+- `batched-implementation` runs one implementer per two or three related tasks, all on your strongest model. It keeps going instead of stopping to ask permission, and reports each batch with a four-status contract.
 - `recheck` is a single read-only pass, ordered cheapest-disqualifying-first: goals, plan, bugs, vulnerabilities, re-test, over-engineering. It returns severity-tagged findings and one verdict, and caps the fix loop at three rounds. It stays read-only because a reviewer that can edit ships its own unreviewed bug.
 
 ## The skills
