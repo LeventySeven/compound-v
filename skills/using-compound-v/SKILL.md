@@ -32,11 +32,16 @@ The kit's bet is that adaptive effort is something the model is increasingly goo
 | **Large** | multiple subsystems | split into sub-projects; each runs its own Standard cycle. |
 
 ## Other skills
+
+*The two design-heavy groups marked **opt-in** below are invoked only when the user explicitly asks for that help or names a skill — the auto-invoke rule above does not apply to them. Every other skill auto-invokes on intent as usual.*
+
+- **Solve any goal (opt-in — invoke when the user asks for it or names a skill):** `frame-the-goal` (turn the goal into a testable success check) → `simplest-thing-that-works` (the simplest mechanism that passes it — below "use a model," climb only when forced, as high as a hard goal needs) → `make-it-stable` (make the chosen mechanism hold every time). Caps the machinery, never the goal.
 - **Judgment:** `startup-taste` · `product-taste`
 - **Plan:** `brainstorming` · `writing-plans` (per-build plan) · `writing-prd` (the product's stable source-of-truth doc)
 - **Thinking:** `critical-thinking` (red-team your own reasoning before you commit — steelman + disconfirm)
 - **Build:** `batched-implementation` · `recheck` · `finishing`
 - **Correctness:** `test-driven-development` · `systematic-debugging` · `verification-before-completion`
-- **AI design:** `designing-agents` · `evals` · `context-engineering`
+- **AI design (one feature):** `designing-agents` · `evals` · `context-engineering`
+- **AI systems (architecture — opt-in, invoke on explicit request or by name):** `architecting-ai-systems` (the shape around the model — harness-as-moat, primitive-not-wrapper, build for the model ~18 months out) · `ai-system-reliability` (keep a built system from corrupting its own state; chain a constellation past one model's ceiling)
 - **Security:** `agent-security` (lethal trifecta, untrusted input, model-written code)
 - **Power:** `searching-patterns` (pull the canonical pattern + its anti-pattern) · `dispatching-parallel-agents` (file-disjoint only)

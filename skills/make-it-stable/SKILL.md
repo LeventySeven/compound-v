@@ -1,0 +1,66 @@
+---
+name: make-it-stable
+description: Make a chosen mechanism produce the right result every time, not just in the demo — output checks that catch silent failure, determinism where you can get it, bounded retry / classify / cross-model-failover, and idempotent side effects. Opt-in (manual): invoke only when the user explicitly asks to make something reliable, stable, or production-ready — or names this skill. Do not auto-trigger on incidental mentions of money / data / APIs.
+---
+
+# Make It Stable
+
+A mechanism that "works" isn't done until it works *every* time — so wrap it in a check that proves each output, make the path as deterministic as you can, bound the part you can't, and make every side effect idempotent so a retry never doubles a real-world action.
+
+"Works in the demo" and "works in production" are different claims. The gap between them is nondeterminism (a model gives a different answer next time), transient failure (the API 429s), and un-replayable side effects (the retry charges the card twice). Stability is closing all three on purpose — verifiable plus bounded, never hope. This is design-time: you build the guarantee *in*, you don't bolt it on after the incident.
+
+## When to use
+
+- The mechanism is chosen (**REQUIRED:** use compound-v:frame-the-goal set the success check, **REQUIRED:** use compound-v:simplest-thing-that-works picked the rung) and now it has to survive real traffic.
+- Output is flaky or nondeterministic — a model call you can't fully trust, an extraction that's right 9 times in 10, an answer that varies run to run.
+- It touches anything irreversible or shared: money, a database write, an email/Slack/GitHub call, a third-party API.
+- A heavy AI system already shipped and now **drifts, double-fires, or races** under load.
+
+**Skip it when** the work is throwaway or one-shot and re-running it by hand is free — stability machinery on a script you'll run once is its own overkill. This is design-time ("build it so it holds"); the one-shot completion gate that *runs the command and reads the output to prove a finished claim* is **REQUIRED:** use compound-v:verification-before-completion. If a specific bug is already biting and you need its root cause, that's **REQUIRED:** use compound-v:systematic-debugging (one trace, not the general design-time primitives). If the failure mode is an adversary feeding the system untrusted input rather than your own correctness, that's **REQUIRED:** use compound-v:agent-security. And when the thing that drifts is a full multi-subsystem AI system (constellations, durable resume, the concurrency landmines at the seams), this skill gives the general per-solution primitives but the system-scale architecture is the sibling **REQUIRED:** use compound-v:ai-system-reliability — come back here for the building blocks, go there for the system.
+
+## The default: verifiable + bounded, never hope
+
+Stability is not a vibe and not a try/except. It's four moves, applied in order, and you stop climbing as soon as the goal's stakes are covered — not before, not after.
+
+**1. Attach a check that proves each output.** "It worked when I ran it" is a sample of one. Bind the output to the success check that frame-the-goal already wrote, and run it on every output — schema-valid, in range, passes the assertion. Nets and agents *fail silently* by default: nothing throws, the answer is just wrong, so without a check you can't even see the failure (Andrej Karpathy, "A Recipe for Training Neural Networks"). For an AI output the check IS the verifier/judge — **REQUIRED:** use compound-v:evals to build and align it to a human; don't re-derive judge construction here, just wire its verdict into the path.
+
+**2. Push work onto determinism; reserve the model for the irreducible judgment.** Every step you can do in plain deterministic code is a step that can't drift. So keep the path deterministic and call the nondeterministic model *only* for the part that genuinely needs judgment — then validate that part's output against a schema/range so its nondeterminism can't leak downstream. This is the same instinct as the mechanism ladder (don't reach for a model where a rule works), now applied inside a step (Anthropic, "Building Effective Agents" — find the simplest thing that holds, add nondeterminism only where it earns its place).
+
+**3. Bound the nondeterministic part — retry, classify, fail OVER, degrade.** You can't make a remote call deterministic, so you bound it:
+- **Capped retry with exponential backoff + jitter** for transient faults (429, timeout, 503) — a few attempts, a ceiling, never an unbounded loop (Microsoft Azure, "Transient fault handling").
+- **Classify the failure first** — transient/rate-limit → retry; context-window → fail over; auth/content-policy → fail fast and raise. Blind retry on a permanent error just burns money repeating a deterministic failure (Microsoft Azure, "Transient fault handling").
+- **Fail OVER to a different model/mechanism, don't re-roll the same dice.** Retrying the *same* model on a bad answer often just reproduces the same answer; a different model (or a deterministic fallback) is a genuinely new attempt (OpenRouter, "Provider Routing" — heterogeneous failover semantics).
+- **Graceful degradation:** a worse-but-correct fallback beats a crash. Return the cached/simpler answer rather than a 500.
+
+**4. Make every real-world side effect idempotent.** This is the one that bites silently. The instant work touches money/data/external state, a retry or a crash-resume can fire the same action twice — two charges, two emails. The contract for an external effect is **at-most-once via an idempotency key**: the action carries a stable key, the downstream dedupes on it, so a duplicate request is a no-op (Stripe, "Designing robust and predictable APIs with idempotency keys"). Anything inside one DB transaction can be exactly-once; anything crossing a service boundary (Stripe, email, GitHub) cannot — be honest about which you have.
+
+**Why a default and not all-caps rules:** these four aren't a fixed liturgy you run in full every time — they're a ladder you climb to match the **stakes**. A reversible, low-stakes output (a draft summary) needs maybe step 1 and you ship. An irreversible action (issuing a refund) needs all four plus a human gate above a threshold, because the cost of a silent double-fire is real and unrecoverable. Match the stability to what a failure actually costs; over-armoring a reversible path is the same defect as under-armoring an irreversible one.
+
+**This never caps the goal — only the machinery.** If the goal is genuinely hard, the *stable* version is still a capable system; you don't shrink the ambition to make it reliable. You climb stability *up* to meet a hard goal (a high-stakes constellation escalates to **REQUIRED:** use compound-v:ai-system-reliability) exactly as readily as you keep it thin for a trivial one. The thing you cut is hope and ceremony, never the goal.
+
+## Worked example — one LLM call issues a refund
+
+The mechanism simplest-thing-that-works landed on: a customer writes in, one model call reads the thread, extracts the refund amount, and a tool issues it. It worked in the demo. It is not stable, and every failure here is silent.
+
+Make it hold, in the four moves:
+
+1. **Check the output.** The model returns `{amount, currency, reason}` — validate it against a schema and a range (`0 < amount <= order_total`, currency matches the order). A model that hallucinates `$10,000` on a `$40` order now fails the check instead of issuing it. The check is the eval's verdict on the extraction — built and aligned via **REQUIRED:** use compound-v:evals.
+2. **Determinism around the judgment.** Only the *extraction* needs the model; computing the refund ceiling, looking up the order, and formatting the API call are deterministic code. The nondeterministic surface shrinks to one validated field.
+3. **Bound the call.** Transient API error (429/timeout) → retry 3× with backoff + jitter. A validation failure (amount out of range) is *not* transient — fail fast to a human, don't re-roll. If the primary model is down, fail OVER to a second model, not the same one again.
+4. **Idempotency on the side effect.** The refund call carries an idempotency key derived from `(order_id, request_id)`. Now a retry after a network blip, or a crash-and-resume mid-step, hits the same key and the payment provider returns the *original* refund instead of a second one (Stripe idempotency keys). Above a threshold (say `$500`), the irreversible action gets a human gate — reversible actions run free, irreversible ones get a person.
+
+The demo issued one refund once. This issues the *right* refund, *once*, even when the API flakes, the process crashes mid-write, or the model has a bad day. That difference is the whole skill.
+
+## Red flags
+
+| Symptom | The actual problem |
+| --- | --- |
+| "It worked when I ran it" is the evidence it works | A sample of one. Attach a check that proves *each* output — nets fail silently, so no check means you can't see the failure. |
+| A model call's output flows straight into a side effect | No verify step. Validate against a schema/range before anything irreversible consumes it. |
+| The whole path is one big nondeterministic model call | You put nondeterminism where determinism would do. Keep the path deterministic; reserve the model for the irreducible judgment, then validate it. |
+| `while True: retry()` on failure | Unbounded retry. Cap attempts, add backoff + jitter, classify first — permanent errors must fail fast, not loop. |
+| Retrying the same model on a bad answer | Re-rolling the same dice reproduces the failure. Fail *over* to a different model/mechanism — a new attempt, not the same one. |
+| A retry or crash-resume could charge/email/write twice | Non-idempotent side effect. Carry an idempotency key; external effects are at-most-once, not exactly-once. |
+| Reversible and irreversible actions armored the same | Mismatched stakes. Reversible → run free; irreversible → human gate + idempotency. Over-armoring a draft is overkill; under-armoring a refund is a bug. |
+| "We'll make it reliable when the model gets better" | Reliability is design-time, not a model wait. Build the check + bound + idempotency now; for a full drifting system, **REQUIRED:** use compound-v:ai-system-reliability. |
+| A reward/verifier loop you trust blindly | Reward hacking is a default failure of any proxy reward — the model games the metric. Design against it before trusting the loop (Lilian Weng, "Reward Hacking in Reinforcement Learning"). |

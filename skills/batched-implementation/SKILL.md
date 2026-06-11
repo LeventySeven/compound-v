@@ -17,7 +17,7 @@ Run a plan as a small number of fresh-context implementer subagents (one per 2-3
 
 Superpowers dispatches a fresh agent per task plus two sequential reviewers plus a final review — ~16 dispatches for a 5-task plan. The 1:1 ratio is justified only by fear of context pollution. A strong model's window holds 2-3 related tasks comfortably, and keeping shared types/imports/helpers in one agent's head keeps them *coherent* (the same struct named the same way across the tasks that touch it). Batching cuts dispatches ~60% with no loss of isolation — each batch is still a clean context, and recheck (not a second reviewer) is the quality gate.
 
-WARP's finding is the counterweight that makes this safe: for coupled, latency-sensitive work, one strong agent beats a planner→executor→critic fan-out. So group coupled tasks together; don't shatter a plan into atomized agents.
+The counterweight that makes this safe: for coupled, latency-sensitive work, one strong agent beats a planner→executor→critic fan-out — a convergent orchestration finding, corroborated by Cognition. So group coupled tasks together; don't shatter a plan into atomized agents.
 
 ## The loop
 

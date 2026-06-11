@@ -1,0 +1,65 @@
+---
+name: simplest-thing-that-works
+description: Pick the simplest mechanism that provably passes a goal's success check — start below "use a model" (existing tool / rule / SQL / code), climb the ladder only when the cheaper rung provably fails and as high as a hard goal forces; anti-overkill AND anti-underkill, it caps the machinery not the goal. Opt-in (manual): invoke only when the user explicitly asks for the simplest approach or which mechanism to use — e.g. "what's the simplest way to do this", "script, rule, one call, or agent?" — or names this skill. Do not auto-trigger.
+---
+
+# Simplest Thing That Works
+
+For any goal, the right mechanism is the simplest one that **provably** passes its success check — and "simplest" means the simplest mechanism that *solves it*, which for a hard goal is a capable system, not a toy.
+
+The default is the lowest rung that works, and the burden of proof sits on complexity: you climb a rung only when you can name a concrete case the cheaper rung fails. This isn't a bias toward small — it's a bias toward *fit*. Under-building a hard goal is the same defect as over-building a trivial one; both ignore what "works" actually demands.
+
+## When to use
+
+- The goal is framed and you're choosing the mechanism: "what's the simplest way to do X", "script, rule, one call, or agent?"
+- A plan smells heavy — multi-agent, a vector DB, a fine-tune — and nothing has yet proven the cheaper thing fails.
+- A genuinely hard goal needs a *capable-but-minimal* system and you're guarding against both under- and over-building.
+- Someone reached for AI reflexively and you haven't asked whether the goal needs a model at all.
+
+**Skip it when** "works" isn't defined yet — you can't pick the simplest thing that *works* until "works" is a check (**REQUIRED:** use compound-v:frame-the-goal first). Skip the rung-by-rung walk when the mechanism is obvious and trivial (a one-line lookup needs no ladder). Sizing the *effort of the coding task* — not the mechanism for the goal — is the router's tier table (**REQUIRED:** use compound-v:using-compound-v).
+
+## The mechanism ladder — default the lowest rung that works
+
+Climb only when the rung below **provably** fails the check. Most goals stop far lower than the reflex picks.
+
+1. **Existing tool / rule / lookup / SQL / regex** — a config change, a heuristic, a query. "No AI needed" is a common, correct answer.
+2. **Deterministic code** — plain logic with no model in the path. Predictable, testable, free.
+3. **One model call** — a single LLM call where genuine open-ended judgment is the irreducible core.
+4. **Tool-augmented call** — one call plus tools/retrieval when the model needs facts or actions it can't hold.
+5. **Workflow** — a fixed chain of steps (prompt-chaining, routing) when the task decomposes predictably.
+6. **Agent** — a model in a loop with tools when the path can't be predicted in advance.
+7. **Multi-agent / full AI system** — a constellation or compound system when one agent provably can't carry the goal.
+
+Two rules make this honest, both from primary practice:
+
+- **The burden of proof is on the higher rung.** "Find the simplest solution; add complexity only when it demonstrably improves outcomes — don't build agents for everything" (Erik Schluntz & Barry Zhang, Anthropic, "Building Effective Agents"). This is the AI restatement of the XP rule: "do the simplest thing that could possibly work," plus YAGNI (Ward Cunningham / Kent Beck). The matching restraint: spend your scarce novel-tech budget only on the part that's genuinely new and pick boring, proven tech for everything around it (Dan McKinley, "Choose Boring Technology" — innovation tokens).
+- **Never cap the goal — only the machinery.** A complex system that works grew from a simple system that worked (John Gall, *Systemantics* — Gall's Law), so for a hard goal you climb *because the goal forces it*, then keep every rung you don't need off the build. Anti-underkill matters as much as anti-overkill: when the goal genuinely demands rungs 6–7, build them — and stability scales up with them (**REQUIRED:** use compound-v:make-it-stable, and at full-system scale **REQUIRED:** use compound-v:ai-system-reliability).
+
+The single biggest cost lever is *which rung*, not micro-optimizing an expensive one — a goal solved by a SQL query costs nothing a tuned agent can match. Cost is a mechanism choice; once a rung is chosen, its token mechanics are **REQUIRED:** use compound-v:context-engineering.
+
+**Why a default, not a rule:** the ladder is a strong prior, not a law. A model with good judgment should skip rungs when the goal obviously lands higher — you don't trial a regex for "resolve billing disputes end-to-end." The default exists to stop the *reflex* jump to complexity, not to force a literal climb through every rung.
+
+## Routing into the AI specialists
+
+Rungs 3–7 are AI features, and their internal shape is already owned. Once the goal lands on a model, the agent-vs-workflow choice and how-many-agents live in **REQUIRED:** use compound-v:designing-agents (this skill starts one rung *below* it — "does this need a model at all?" — and hands off). When the mechanism is a whole compound system around a model — harness thickness, the one hard primitive, which retrieval shape — that's **REQUIRED:** use compound-v:architecting-ai-systems. Before writing the unfamiliar mechanism, look up how it's actually built: **REQUIRED:** use compound-v:searching-patterns. And whether to build *at all* is upstream of mechanism entirely — **REQUIRED:** use compound-v:startup-taste owns that verdict.
+
+## Worked example — "categorize incoming support emails"
+
+The reflex answer is "fine-tune a classifier" or "build an agent." Walk the ladder against the framed check (correct category on a held-out set of real emails):
+
+- **Rung 1 — rules.** A keyword/sender table ("refund/charge → Billing", "reset/login → Account") is tried first. Measured on real traffic it lands ~90% of the volume correctly. That tier ships today: zero model cost, fully deterministic, instantly debuggable. Climbing higher for this 90% would be pure overkill — the cheaper rung did **not** provably fail it.
+- **Rung 3 — one model call, for the tail only.** The ~10% the rules can't place (ambiguous, multi-topic) is the case that *proves* rung 1 fails. So only that slice escalates to a single classification call, with a check on its output. You did not replace the rules; you added one rung exactly where the lower one broke.
+- **Rung 6 — agent, only if the goal grows.** If the goal were "categorize *and* draft a resolution that may need a refund lookup, a policy check, and a reply," that's a multi-step path you can't pre-script — now an agent legitimately earns its place, and you climb because *the goal forced it*, not for fun. At that point its loop/tool shape is compound-v:designing-agents and its reliability is compound-v:make-it-stable.
+
+The whole skill in one line: the simplest thing that works for the 90% was *no AI*, for the tail was *one call*, and for the hard version was *an agent* — each rung chosen because the one below it provably couldn't carry that part of the goal, and not one rung higher.
+
+## Red flags
+
+| Symptom | The actual problem |
+| --- | --- |
+| Reached for an agent / vector DB / fine-tune before naming a case the simpler rung fails | Burden of proof is on complexity. Default the lowest rung; climb only on proof. |
+| Picking the mechanism before "works" is a check | You can't pick the simplest thing that *works* yet. (compound-v:frame-the-goal first.) |
+| Hard goal shaved down to a toy because "simplest" | Anti-underkill: simplest = simplest that *solves it*. Climb as high as the goal forces. |
+| Optimizing the cost of an expensive rung instead of dropping a rung | The rung is the cost lever, not the micro-optimization. |
+| Resolving agent/workflow/topology here | That's compound-v:designing-agents — this picks whether a model is needed at all. |
+| Walking literally every rung for an obviously-high goal | The ladder is a prior, not a law. Skip to the rung the goal lands on. |

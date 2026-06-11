@@ -47,7 +47,7 @@ You don't always need all four, but you may not skip *ahead* of a phase you have
 
 ## The 3-attempt rule — stop digging, question the design
 
-Track your fix attempts. The empirical cap before escalating is **three** — production agents converge on it independently: Devin gives up after 3 CI failures, Cursor stops after 3 lint-fix loops, WARP hard-codes `MAX_RETRIES=3`. This is the canonical home of the 3-attempt rule; **compound-v:recheck** and **compound-v:batched-implementation** cross-ref here for their fix↔recheck cap rather than restating it.
+Track your fix attempts. The empirical cap before escalating is **three** — production coding agents converge on it independently — across CI-failure loops, lint-fix loops, and retry caps. This is the canonical home of the 3-attempt rule; **compound-v:recheck** and **compound-v:batched-implementation** cross-ref here for their fix↔recheck cap rather than restating it.
 
 ```dot
 digraph debug {

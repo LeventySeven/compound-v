@@ -101,6 +101,22 @@ public primary source.
 
 ---
 
+## architecting-ai-systems
+
+| Claim (short) | skill:line | Category | Source / note |
+|---|---|---|---|
+| AI task horizon (length of task finished autonomously at **>50%**) doubles roughly every **~7 months** | `architecting-ai-systems:26,79` | PRIMARY | METR, "Measuring AI Ability to Complete Long Tasks" — https://arxiv.org/abs/2503.14499 (~7-month doubling of the >50%-success task horizon). |
+| A better harness on the **same** model moved Opus 4.5 from **50.2% → 55.4%** on SWE-bench Pro via context management + tool orchestration alone | `architecting-ai-systems:59` | PRIMARY | Anthropic Applied AI, "Effective harnesses for long-running agents" (Opus 4.5; harness-only gain, no model swap). |
+| **Code-over-tools** (agent calls tools as code in a sandbox vs. each tool a direct call) — measured **~98% token reduction** on a realistic workflow | `architecting-ai-systems:66` | PRIMARY | Anthropic, "Code Execution with MCP" — ~98% token cut on a realistic multi-tool workflow. |
+| v0 took one model to error-free via four engineering layers (**a ~30-point jump, no model swap**) | `architecting-ai-systems:52` | PRIMARY (directional) | "Lessons from building Vercel v0 and the d0 agent" — https://www.youtube.com/watch?v=_f2WpsmW76Y. The exact `65→94%` figure is not pinned; skill says "a ~30-point jump." Same datum as `startup-taste:69`. |
+| Perplexity built its own ~200B-URL index → **near-zero URL overlap** with competitors on the same queries; owns the layer that sets its ceiling | `architecting-ai-systems:32` | PRIMARY (directional) | Aravind Srinivas, "How To Build The Future: Aravind Srinivas" (YC). The precise "1.4%" decimal is not pinned to a public line; skill says "near-zero." Same datum as `startup-taste:60`. |
+| Quality of the verifiable signal beats quantity of data — **a few thousand verifiable examples beat millions of low-quality RLHF ones** | `architecting-ai-systems:46` | JUDGMENT-CALL (maxim) | Stat-shaped bitter-lesson taste residue (quality + verifiability > quantity); illustrative, not a measured Qwen-3 result. Same maxim as `startup-taste:66`. |
+| The compound-system thesis (engineer the system around a swappable frontier model; "vaccinated against the Bitter Lesson") | `architecting-ai-systems:24,67` | PRIMARY | Zaharia/Frankle et al., "The Shift from Models to Compound AI Systems," BAIR 2024 — https://bair.berkeley.edu/blog/2024/02/18/compound-ai-systems/. |
+| The Bitter Lesson — don't build the edge more compute will erase; ~99% of agent-framework value lives in the RL'd model | `architecting-ai-systems:63` | PRIMARY | Richard Sutton, "The Bitter Lesson" — http://www.incompleteideas.net/IncIdeas/BitterLesson.html; applied to agent frameworks by Gregor Zunic, browser-use, "The Bitter Lesson of Agent Frameworks." |
+| Innovation tokens — roughly **three** novel-tech bets before operational complexity sinks you; make the AI primitive the novel part, everything else boring tech | `architecting-ai-systems:32` | PRIMARY | Dan McKinley, "Choose Boring Technology" — https://mcfunley.com/choose-boring-technology. |
+
+---
+
 ## product-taste
 
 The numeric checklist here is the **opposite** of ungrounded — these are testable,
@@ -277,6 +293,25 @@ sources.
 
 ---
 
+## ai-system-reliability
+
+| Claim (short) | skill:line | Category | Source / note |
+|---|---|---|---|
+| **95%-reliable beats 70%-capable** — users leave after two failures, so dependability is worth trading raw capability for | `ai-system-reliability:13,90` | PRIMARY | Amjad Masad (Replit), "The Future of Software Creation" — same Masad/Replit primary as the deduped index; the reliability-over-capability framing for customer-facing AI. |
+| **Self-error-detection + supervisor**: models catch their own errors better than they avoid making them; a primary agent is watched by "supervisor" agents | `ai-system-reliability:26,27` | PRIMARY | Clay Bavor (Sierra), "Making Customer-Facing AI Agents Delightful" (Sequoia *Training Data*) — https://www.youtube.com/watch?v=RAZFDY_jGio (verbatim: LLMs are better at detecting errors in their own output than at not making them; "supervisor" agents review the primary agent). |
+| **Constellation topology**: a stateful primary agent supervised by specialist agents plus human escalation, for high-stakes domains one model can't be trusted in alone | `ai-system-reliability:27` | PRIMARY | Munjal Shah / Hippocratic AI — "Polaris: A Safety-focused LLM Constellation Architecture for Healthcare" — https://arxiv.org/abs/2403.13313 (primary agent + specialist support agents to increase safety / reduce hallucination). |
+| Parallelize reading/searching/analysis; **keep every write single-threaded** — multi-agent should add intelligence (a review/supervisor loop), not parallel writers | `ai-system-reliability:30` | PRIMARY | Walden Yan, Cognition, "Don't Build Multi-Agents" — https://cognition.ai/blog/dont-build-multi-agents (deduped index); corroborated by Anthropic, "How we built our multi-agent research system" — https://www.anthropic.com/engineering/multi-agent-research-system. |
+| The failure reflex: ask **which capability the agent lacked, then make the fix enforceable in the harness** — how a team ships **1M+ LOC with zero pre-merge-reviewed human code** | `ai-system-reliability:34` | PRIMARY | Ryan Lopopolo, OpenAI Frontier — "Extreme Harness Engineering" (latent.space — https://www.latent.space/p/harness-eng) + OpenAI "Harness engineering: leveraging Codex in an agent-first world" — https://openai.com/index/harness-engineering/ (verbatim: >1M LOC, 0% human-written / 0% human-reviewed-before-merge; on failure, ask "what capability/context/structure is missing?" not "try harder"). |
+| **Reinforce the objective on every tool return** (current goal/status/what failed), not once up front; **isolate failure-prone work in throwaway sub-agents** that report only the outcome | `ai-system-reliability:38,39` | PRIMARY | Armin Ronacher, "Agent Design Is Still Hard" — https://lucumr.pocoo.org/2025/11/21/agents-are-hard/ (verbatim: each tool return is a chance to "remind the agent about the overall objective and the status"; run iteration-prone tasks "in a subagent until they succeed and only report back the success"). |
+| Treat every weird failure as a **research lead, not a bug ticket** — nets/agents fail *silently*, so the loop must surface and explain anomalies | `ai-system-reliability:41` | PRIMARY | Sholto Douglas & Trenton Bricken on Dwarkesh Patel — https://www.dwarkesh.com/p/sholto-douglas-trenton-bricken (zero-to-frontier by staying close to where models break); Andrej Karpathy, "A Recipe for Training Neural Networks" — http://karpathy.github.io/2019/04/25/recipe/ (deduped index; "neural nets fail silently"). |
+| Character.AI serving moat: **int8-native training**, KV-cache reduced **>20X**, a **95%-hit prefix cache**, serving cost cut **~33x** | `ai-system-reliability:45` | PRIMARY | Character.AI engineering, "Optimizing AI Inference at Character.AI" — https://blog.character.ai/optimizing-ai-inference-at-character-ai-2/ (verbatim: "natively train our models in int8 precision"; "reduce KV cache size by more than 20X"; "95% cache rate"; "reduced serving costs by a factor of 33"). |
+| **Reward hacking is a default failure mode of any proxy reward** — design against it before trusting a verifiable-reward / self-improving loop | `ai-system-reliability:71` | PRIMARY | Lilian Weng, "Reward Hacking in Reinforcement Learning" — https://lilianweng.github.io/posts/2024-11-28-reward-hacking/ (an RL agent exploits flaws/ambiguities in the reward function to score high without doing the task). |
+| Simulator-as-regression — every fix becomes a permanent regression case (case generation only; judge/eval construction is `compound-v:evals`) | `ai-system-reliability:28` | (see evals) | Mechanism owned by `evals`; this skill only generates the captured-failure case and hands it off. No separate citation. |
+| The **correctness invariants** (errors-are-data `{ok,data,error}`; named `StopReason`; compaction masks not truncates; classify-failure retry-vs-failover; fallback that drops `tools` is a bug) | `ai-system-reliability:51-55` | JUDGMENT-CALL / INTERNAL | The Verso agent-framework adversarial-verification corpus (LeventySeven) — internal seam-contract findings, framed as judgment calls (same internal-corpus treatment as the verso rows elsewhere). The retry-vs-failover axis corroborated by Warp — https://www.warp.dev/blog/swe-bench-verified. |
+| The **seam landmines** (async re-fire of non-idempotent step; two co-authoritative logs; `MAX(seq)+1` race; crash-resume re-fires external write; reask rewrites the call; multi-attempt cost; budget TOCTOU; `threading.Lock` in asyncio; TTFB-not-wall-clock) + the async-default worked example | `ai-system-reliability:61-69,73-84` | JUDGMENT-CALL / INTERNAL | Adversarial pass verified each against freshly-cloned upstreams (DBOS, Google AX, Instructor, Tower, Helicone, LangGraph `Durability` literal) — Verso failures corpus (LeventySeven). Internal adversarial-verification corpus, judgment-call (same treatment as verso rows in `startup-taste`/elsewhere). |
+
+---
+
 ## Primary-source index (deduplicated)
 
 The recurring public primary URLs, for quick verification:
@@ -310,6 +345,12 @@ The recurring public primary URLs, for quick verification:
 - **Linear — How We Redesigned the Linear UI (98→3 colors, <50ms):** https://linear.app/now/how-we-redesigned-the-linear-ui
 - **Rauno Freiberg — interfaces (16px, 0.8/0.96, tabular-nums — canonical UI constants):** https://github.com/raunofreiberg/interfaces
 - **Vercel — Lessons from building v0 and d0 (~65%→94%):** https://www.youtube.com/watch?v=_f2WpsmW76Y
+- **METR — Measuring AI Ability to Complete Long Tasks (~7-month task-horizon doubling):** https://arxiv.org/abs/2503.14499 — grounds `architecting-ai-systems:26,79`.
+- **Anthropic — Effective harnesses for long-running agents (Opus 4.5 50.2%→55.4% SWE-bench Pro, harness-only):** grounds `architecting-ai-systems:59`.
+- **Anthropic — Code Execution with MCP (~98% token reduction):** grounds `architecting-ai-systems:66`.
+- **Zaharia/Frankle et al. — The Shift from Models to Compound AI Systems (BAIR 2024):** https://bair.berkeley.edu/blog/2024/02/18/compound-ai-systems/ — grounds `architecting-ai-systems:24,67`.
+- **Richard Sutton — The Bitter Lesson:** http://www.incompleteideas.net/IncIdeas/BitterLesson.html — grounds `architecting-ai-systems:63`.
+- **Dan McKinley — Choose Boring Technology (innovation tokens):** https://mcfunley.com/choose-boring-technology — grounds `architecting-ai-systems:32`.
 - **Aravind Srinivas / Perplexity (owned index, near-zero URL overlap):** YC "How To Build The Future: Aravind Srinivas"
 - **Jake Heller / CoCounsel (matches-word-X, very high pass bar):** YC "Context Engineering: Lessons from Scaling CoCounsel"
 - **Dylan Field / Figma (~4yr renderer, taste-as-moat):** https://www.latent.space/p/figma
@@ -328,6 +369,13 @@ The recurring public primary URLs, for quick verification:
 - **Anthropic — anthropic-cookbook evaluator-optimizer pattern + `anthropic` SDK `define_outcome` grader (bounded generate→grade→revise, default 3 / max 20):** https://github.com/anthropics/anthropic-cookbook — grounds `evals:44`.
 - **Warp — `diagnose-ci-failures` skill + Claude Code PR-check monitoring (local-green ≠ CI-green):** grounds `finishing:35`.
 - **Anthropic — Claude Code worktree auto-cleanup (no uncommitted/untracked/unpushed = removable):** grounds `finishing:39`.
+- **Character.AI — Optimizing AI Inference at Character.AI (int8-native, KV >20X, 95% prefix cache, ~33x cost):** https://blog.character.ai/optimizing-ai-inference-at-character-ai-2/ — grounds `ai-system-reliability:45`.
+- **Armin Ronacher — Agent Design Is Still Hard (reinforce objective per tool return; iteration in throwaway sub-agents):** https://lucumr.pocoo.org/2025/11/21/agents-are-hard/ — grounds `ai-system-reliability:38,39`.
+- **Ryan Lopopolo / OpenAI Frontier — Extreme Harness Engineering (1M+ LOC, 0% human-reviewed; capability-gap failure reflex):** https://www.latent.space/p/harness-eng + https://openai.com/index/harness-engineering/ — grounds `ai-system-reliability:34`.
+- **Clay Bavor / Sierra — Making Customer-Facing AI Agents Delightful (self-error-detection → supervisor):** https://www.youtube.com/watch?v=RAZFDY_jGio — grounds `ai-system-reliability:26,27`.
+- **Munjal Shah / Hippocratic AI — Polaris constellation (primary + specialist agents, safety-first):** https://arxiv.org/abs/2403.13313 — grounds `ai-system-reliability:27`.
+- **Sholto Douglas & Trenton Bricken — Dwarkesh Patel (every weird failure is a research lead; close to the run):** https://www.dwarkesh.com/p/sholto-douglas-trenton-bricken — grounds `ai-system-reliability:41`.
+- **Lilian Weng — Reward Hacking in Reinforcement Learning (proxy-reward exploitation as default failure):** https://lilianweng.github.io/posts/2024-11-28-reward-hacking/ — grounds `ai-system-reliability:71`.
 
 ### Removed / do-not-cite
 
@@ -336,3 +384,43 @@ The recurring public primary URLs, for quick verification:
   categories / 94.87% from the Mastra source above.
 - **evals NurtureBoss "33% → 95%" / "60%+ from three"** — unverified at the cited source; keep
   directional only.
+
+
+## frame-the-goal
+| Claim in skill | Line | Tier | Source |
+| --- | --- | --- | --- |
+| Nets/agents fail silently — an undefined goal has no tripwire; you can't check what you can't define | `frame-the-goal:10,25` | PRIMARY | Andrej Karpathy, "A Recipe for Training Neural Networks" — http://karpathy.github.io/2019/04/25/recipe/ (reused) |
+| Criteria drift — a measurable proxy that diverges from the real goal silently rewards the wrong thing | `frame-the-goal:32` | PRIMARY | Hamel Husain, "A Field Guide to Rapidly Improving AI Products" — https://hamel.dev/blog/posts/field-guide/ (reused) |
+| For an auto-checkable domain the verifier is what a later RL/self-improvement loop optimizes; its quality sets the ceiling | `frame-the-goal:34` | PRIMARY | Jason Wei, "Asymmetry of Verification and Verifier's Law" — https://www.jasonwei.net/blog/asymmetry-of-verification-and-verifiers-law (reused) |
+| A complex system that works is grown from a simple system that worked → decompose a hard goal | `frame-the-goal:38` | PRIMARY (canonical maxim) | John Gall, *Systemantics* (Gall's Law) — https://en.wikipedia.org/wiki/Systemantics |
+| Understand → plan → execute → check; restate and split into verifiable sub-problems | `frame-the-goal:38` | PRIMARY (canonical) | George Pólya, *How to Solve It* — https://en.wikipedia.org/wiki/How_to_Solve_It |
+| De-risk the load-bearing assumption first (order work by info gained per unit effort) | `frame-the-goal:40` | JUDGMENT-CALL | Research-process discipline; recipe knob, no citation needed. |
+| The four-part frame + one-line success check | `frame-the-goal:22-32` | JUDGMENT-CALL | The kit's define-success-first default; recipe knob. |
+
+## simplest-thing-that-works
+| Claim in skill | Line | Tier | Source |
+| --- | --- | --- | --- |
+| Find the simplest solution; add complexity only when it demonstrably improves outcomes; don't build agents for everything | `simplest-thing-that-works:35` | PRIMARY | Erik Schluntz & Barry Zhang, Anthropic, "Building Effective Agents" — https://www.anthropic.com/research/building-effective-agents (reused) |
+| "Do the simplest thing that could possibly work" + YAGNI (burden of proof on complexity) | `simplest-thing-that-works:35` | PRIMARY (canonical maxim) | Ward Cunningham / Kent Beck, XP — https://wiki.c2.com/?DoTheSimplestThingThatCouldPossiblyWork ; YAGNI — https://martinfowler.com/bliki/Yagni.html |
+| Innovation tokens — spend the scarce novel-tech budget only on the genuinely new part | `simplest-thing-that-works:35` | PRIMARY | Dan McKinley, "Choose Boring Technology" — https://mcfunley.com/choose-boring-technology (reused) |
+| A complex system that works grew from a simple one → climb only because the goal forces it (anti-underkill) | `simplest-thing-that-works:36` | PRIMARY (canonical) | John Gall, *Systemantics* (Gall's Law) — https://en.wikipedia.org/wiki/Systemantics (shared) |
+| The mechanism ladder (zero-AI → … → multi-agent), default the lowest rung | `simplest-thing-that-works:21-31` | JUDGMENT-CALL | The kit's anti-overkill default; recipe knob, no citation. |
+
+## make-it-stable
+| Claim in skill | Line | Tier | Source |
+| --- | --- | --- | --- |
+| Nets/agents fail silently — without a check you can't even see the failure | `make-it-stable:25` | PRIMARY | Andrej Karpathy, "A Recipe for Training Neural Networks" — http://karpathy.github.io/2019/04/25/recipe/ (reused) |
+| Find the simplest thing that holds; add nondeterminism only where it earns its place | `make-it-stable:27` | PRIMARY | Anthropic, "Building Effective Agents" — https://www.anthropic.com/research/building-effective-agents (reused) |
+| Capped retry + backoff + jitter; classify transient (retry) vs permanent (fail fast) — retry only short-lived faults | `make-it-stable:30,31` | PRIMARY | Microsoft Azure Architecture Center, "Transient fault handling" (reused — also grounds `systematic-debugging:199`) |
+| Fail OVER to a different model/mechanism rather than re-rolling the same dice | `make-it-stable:32` | PRIMARY | OpenRouter, "Provider Routing" (heterogeneous failover) — https://openrouter.ai/docs/features/provider-routing ; corroborated by Warp cross-model retry (indexed above) |
+| External side effects are at-most-once via an idempotency key; only same-DB-transaction work is exactly-once | `make-it-stable:35,50` | PRIMARY | Stripe, "Idempotent requests / idempotency keys" — https://docs.stripe.com/api/idempotent_requests |
+| Reward hacking is a default failure mode of any proxy reward | `make-it-stable:66` | PRIMARY | Lilian Weng, "Reward Hacking in Reinforcement Learning" — https://lilianweng.github.io/posts/2024-11-28-reward-hacking/ (reused) |
+| The four stability moves (check / determinism / bound / idempotency), climbed to match stakes | `make-it-stable:21-37` | JUDGMENT-CALL | Standard production-reliability practice; recipe knob. |
+
+### Primary-source index — additions (v2 "solve any goal" pack)
+- **John Gall — *Systemantics* (Gall's Law: a complex system that works evolved from a simple system that worked):** https://en.wikipedia.org/wiki/Systemantics — grounds `frame-the-goal:38`, `simplest-thing-that-works:36`.
+- **George Pólya — *How to Solve It* (understand → plan → execute → check; split into verifiable sub-problems):** https://en.wikipedia.org/wiki/How_to_Solve_It — grounds `frame-the-goal:38`.
+- **Ward Cunningham / Kent Beck — "Do the simplest thing that could possibly work" (XP):** https://wiki.c2.com/?DoTheSimplestThingThatCouldPossiblyWork — grounds `simplest-thing-that-works:35`.
+- **Martin Fowler — YAGNI:** https://martinfowler.com/bliki/Yagni.html — grounds `simplest-thing-that-works:35`.
+- **OpenRouter — Provider Routing (heterogeneous model failover):** https://openrouter.ai/docs/features/provider-routing — grounds `make-it-stable:32`.
+- **Stripe — Idempotent requests / idempotency keys (at-most-once external effects):** https://docs.stripe.com/api/idempotent_requests — grounds `make-it-stable:35,50`.
