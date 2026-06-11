@@ -14,11 +14,11 @@ compound-v:designing-agents decides *whether* to fan out and into which shape (o
 Parallelize when **all** of these hold:
 
 - **Genuinely independent** — task B doesn't need task A's output. (If B consumes A, that's a pipeline, not a fan-out — see below.)
-- **File-disjoint** — agents write to non-overlapping files. Two agents editing the same file means last-write-wins, silently — one agent's work just vanishes. Partition by file or use separate worktrees.
+- **File-disjoint** — agents write to non-overlapping files. Two agents editing the same file means last-write-wins, silently — one agent's work just vanishes. Partition by file or use separate worktrees — and cut the seam at a *stable interface*, not an arbitrary file boundary, or "disjoint" files still couple through a shared, shifting API.
 - **No shared mutable state** — no shared in-memory structure, no contended resource they'd race on.
 - **Each piece is worth a fresh context** — it produces enough output (or noise) that isolating it in its own window is a real win.
 
-Good fits: editing N unrelated modules, researching N independent sub-questions, processing a batch of independent items, gathering context across disjoint areas of a repo. When unsure, stay single-threaded — the red-flags table below catches the coupled-work case.
+Good fits: editing N unrelated modules, researching N independent sub-questions, processing a batch of independent items, gathering context across disjoint areas of a repo. When unsure, stay single-threaded — the red-flags table below catches the coupled-work case. Note the asymmetry by domain: research fans out cleanly, but **coding has far fewer truly parallel seams** (LLM agents aren't yet great at coordinating in real time), so a multi-file edit is a *weaker* fan-out candidate than it looks — confirm the modules are genuinely decoupled (no shared interface they'd both reshape) before splitting.
 
 ### Parallelize intelligence; keep writes single-threaded
 The sharpest version of the independence rule isn't "file-disjoint" — it's *what kind* of work is being parallelized. Per Cognition, multi-agent pays when the extra agents **contribute intelligence (reads, research, critique), while writes stay single-threaded**. Parallel *reading* is safe — N agents can explore disjoint areas at once with no way to collide. Parallel *writing* is where divergence bites: two agents editing toward a shared design make incompatible choices, and the merge costs more than the fan-out saved. So the canonical safe worker is a **read-only retrieval worker** — it gathers and reports findings, mutates nothing; Cognition notes these "mostly resemble tool calls rather than true multi-agent collaboration," which is exactly why they're safe to run in parallel. If a step must *write*, route it through one agent.
@@ -34,7 +34,7 @@ A sub-agent starts with a **fresh, isolated context** — it does *not* see your
 1. **One clear objective** — one job per worker; don't bundle. Keep tasks distinct and non-overlapping so two workers never redo or collide on the same thing.
 2. **All the context it needs** — paths (absolute), the relevant facts, constraints, the spec. It can't ask you mid-run, and it can't see what you saw.
 3. **How to verify its own work** — the test command to run, the check to pass. A worker that can confirm its result returns something trustworthy.
-4. **The return contract** — ask for a tight summary (aim for ≤500 words / ~1–2K tokens): what it did, what it found, what's left, anything that surprised it. Findings cross the boundary; raw dumps do not.
+4. **The return contract** — ask for a tight summary (aim for ≤500 words / ~1–2K tokens): what it did, what it found, what's left, anything that surprised it. Findings cross the boundary; raw dumps do not. When a worker produces a *large* structured artifact (code, a report, a dataset), don't pipe it back through the summary — have it **write the artifact to the filesystem and return a lightweight reference (a path)**. Routing everything through the orchestrator is a game of telephone; the filesystem handoff avoids both the lossy re-summarization and the token cost of copying big outputs through the orchestrator's context.
 
 Two structural limits to design around: sub-agents **cannot spawn sub-agents** (one level of nesting — fan out from the orchestrator, not recursively), and many workers each returning verbose results will themselves flood the orchestrator's context, so enforce the condensed-summary contract.
 

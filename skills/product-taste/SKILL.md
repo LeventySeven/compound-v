@@ -5,9 +5,9 @@ description: Turns vague UI/UX verdicts into named, fixable properties and catch
 
 # Product Taste
 
-Taste is not a gift and it's not subjective — it's a perceptual apparatus you build, and good design has objective properties (designers measurably improve over time; an eight-year-old's output is not interchangeable with a master's). So when something is wrong, the job is to **name which property is violated**, not to say "it feels off." The interface IS the product for almost every user.
+Taste is not a gift and it's not subjective — it's a perceptual apparatus you build, and good design has objective properties (designers measurably improve over time; an eight-year-old's output is not interchangeable with a master's — no *total* order of works exists, but a *partial* one does, which is exactly why taste can be trained). So when something is wrong, the job is to **name which property is violated**, not to say "it feels off." The interface IS the product for almost every user.
 
-As AI makes code and features cheap, *how well it's made* becomes the moat — details, polish, performance, cohesion, opinion. That's the differentiator this skill defends.
+As AI makes code and features cheap, *how well it's made* becomes the moat — details, polish, performance, cohesion, opinion. That's the differentiator this skill defends. The mechanism: users **sense care** in a thing — and, even more reliably, they sense *carelessness* — without being able to name either. Slop is carelessness made visible: every untouched default is a place no one decided anything, and the user feels it as cheapness. So polish isn't decoration on top of working code — it's the felt evidence that someone cared, which a generated baseline can't fake.
 
 ## When to use
 - Any UI/UX/design/polish/animation/latency/copy decision.
@@ -43,6 +43,7 @@ Users can't articulate why one interaction feels alive and another dead, but the
 - Pause animations/loops when off-screen.
 - No dead zones between adjacent list items — full-row hit targets.
 - Open menus/dropdowns on `mousedown`, not `click` — firing on press-down instead of release shaves the perceptible delay and makes the menu feel instant (Web Interface Guidelines).
+- Match the trigger to the stakes: fire **lightweight** actions (a peek, an overlay) *during* a gesture once it passes a threshold; fire **destructive** ones (dismiss, delete) only when the gesture *ends* — so a change of mind mid-swipe can't destroy work.
 
 ## Animation gate — motion has a job or it's noise
 Decoration kills UX. Run every motion through six checks; any fail → cut or fix:

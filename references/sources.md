@@ -424,3 +424,87 @@ The recurring public primary URLs, for quick verification:
 - **Martin Fowler — YAGNI:** https://martinfowler.com/bliki/Yagni.html — grounds `simplest-thing-that-works:35`.
 - **OpenRouter — Provider Routing (heterogeneous model failover):** https://openrouter.ai/docs/features/provider-routing — grounds `make-it-stable:32`.
 - **Stripe — Idempotent requests / idempotency keys (at-most-once external effects):** https://docs.stripe.com/api/idempotent_requests — grounds `make-it-stable:35,50`.
+
+---
+
+## BAD_GUIDE harvest additions (2026-06-11)
+
+*Grounding for the source-verified enhancements from the BAD_GUIDE full-raw harvest (product / code / CTO / CPO / AI / dev domains). Per kit style, these claims live in the skill bodies WITHOUT inline citation; this is where they are grounded. Raw sources captured under `research/fullsources/{web,yt}/`.*
+
+### architecting-ai-systems
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Start from maximal capability and restrict; a too-thick harness fails because the action space is incomplete | `architecting-ai-systems` | PRIMARY | Gregor Zunic, browser-use, "The Bitter Lesson of Agent Frameworks" — https://browser-use.com/posts/bitter-lesson-agent-frameworks ("Agent frameworks fail not because models are weak, but because their action spaces are incomplete"; "Start with maximal capability, then restrict"). Same source as the ~99% row above. |
+| Shift from predefined scaffolds to reasoning-model-led workflows — "the harness becomes the box and the model chooses how to proceed" | `architecting-ai-systems` | PRIMARY | Ryan Lopopolo (OpenAI Frontier), "Extreme Harness Engineering" — https://www.latent.space/p/harness-eng |
+
+### ai-system-reliability
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Heterogeneous serving backends require strict implementation equivalence; degradation evaded evals because the model "recovers well from isolated mistakes"; fix = continuous evals on true production | `ai-system-reliability` | PRIMARY | Anthropic, "A Postmortem of Three Recent Issues" — https://www.anthropic.com/engineering/a-postmortem-of-three-recent-issues |
+| A workaround can mask, not fix, a deeper bug — removing it after a believed root-cause fix exposes a harder latent corruption (the December top-k workaround "inadvertently masking" a deeper miscompile) | `ai-system-reliability` | PRIMARY | Anthropic, "A Postmortem of Three Recent Issues" — https://www.anthropic.com/engineering/a-postmortem-of-three-recent-issues |
+| Long-horizon agent resume is a harness contract: each session starts memoryless → end clean/mergeable with handoff artifacts; silent failure is a later session "declares the job done" | `ai-system-reliability` | PRIMARY | Anthropic, "Effective harnesses for long-running agents" — https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents (also grounds `architecting-ai-systems`) |
+
+### context-engineering
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Programmatic tool-calling: a worked Drive→Salesforce example drops 150,000 → 2,000 tokens (98.7%) | `context-engineering` | PRIMARY | Anthropic, "Code execution with MCP" — https://www.anthropic.com/engineering/code-execution-with-mcp ("reduces the token usage from 150,000 tokens to 2,000 tokens—a … saving of 98.7%") |
+| The tool *set* is always-loaded context; "if a human engineer can't definitively say which tool to use … an AI agent can't" | `context-engineering` | PRIMARY | Anthropic, "Effective context engineering for AI agents" — https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents |
+| Keep failures, distrust successes: past failure cases improve agent performance; past successes often induce lazy pattern-matching into a local minimum | `context-engineering` | PRIMARY | Jeff Huber, Chroma, "Context Engineering for Engineers" (YC Root Access) — https://www.youtube.com/watch?v=3jN77Aw7Utk |
+
+### designing-agents
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Wrapping a sub-LLM inside a tool backfires — "increases latency and actually reduces the quality of the output" | `designing-agents` | PRIMARY | Armin Ronacher, "Agent Design Is Still Hard" — https://lucumr.pocoo.org/2025/11/21/agents-are-hard/ |
+| Sub-agent as failure firewall: run an iteration-prone subtask inside it until success, return only success + brief note of what didn't work | `designing-agents` | PRIMARY | Armin Ronacher, "Agent Design Is Still Hard" — https://lucumr.pocoo.org/2025/11/21/agents-are-hard/ |
+| Concurrent writers diverge because "actions carry implicit decisions, and conflicting decisions carry bad results" | `designing-agents` · `dispatching-parallel-agents` | PRIMARY | Walden Yan, Cognition, "Don't Build Multi-Agents" — https://cognition.ai/blog/dont-build-multi-agents (the canonical Flappy-Bird divergence; Principle 1: share full agent traces, not just messages) |
+
+### evals
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Over-optimizing a *legitimate* metric degrades the real thing (Goodhart) — NIAH recall / factual-consistency examples | `evals` | PRIMARY | Yan/Bischof/Frye/Husain/Liu/Shankar, "What We've Learned From a Year of Building with LLMs" — https://applied-llms.org/ |
+| Don't do eval-driven development — write evaluators for failures you discover, not imagine (infinite failure surface) | `evals` | PRIMARY | Hamel Husain & Shreya Shankar, "LLM Evals FAQ" — https://hamel.dev/blog/posts/evals-faq/ |
+| Baseline factual-inconsistency floor 5–10%, hard to push below ~2% even on simple tasks | `evals` | PRIMARY | applied-llms.org ("baseline rate of 5 - 10% … below 2%"); corroborated by Eugene Yan, "Task-Specific LLM Evals that Do & Don't Work" — https://eugeneyan.com/writing/evals/ |
+| Logging response + judge critique + verdict and reviewing with stakeholders lifted judge↔human agreement 68% → 94% over three iterations | `evals` | PRIMARY | applied-llms.org ("Over three iterations, agreement … improved from 68% to 94%!") |
+
+### agent-security
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| The model is not the security boundary — the authoritative control is system-level, not the model flagging an injection | `agent-security` | PRIMARY | Fouad Matin (OpenAI), "Securing Code-Executing AI Agents" — https://www.youtube.com/watch?v=w7IMuYsBNr8 ("your most … authoritative control is going to be a system level control") |
+| Prompt injection is an unsolved frontier problem; managed network policy blocks exfil destinations at the system layer | `agent-security` | PRIMARY | OpenAI, "Running Codex Safely" — https://openai.com/index/running-codex-safely/ ; Simon Willison, "2025: The Year in LLMs" — https://simonwillison.net/2025/Dec/31/the-year-in-llms/ |
+| Sandbox (technical boundary) vs approval policy (when to ask) are separate layers; graded approvals escape approval-fatigue; "hasn't burned me yet … and that's the problem" | `agent-security` | PRIMARY | OpenAI, "Running Codex Safely" (sandbox/approval split); Simon Willison (normalization-of-deviance) |
+
+### dispatching-parallel-agents
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Coding has far fewer truly parallelizable tasks than research; agents aren't yet great at real-time coordination | `dispatching-parallel-agents` | PRIMARY | Anthropic, "How we built our multi-agent research system" — https://www.anthropic.com/engineering/multi-agent-research-system |
+| Large artifacts: write to filesystem, return a lightweight reference; routing everything through the orchestrator is a "game of telephone" | `dispatching-parallel-agents` | PRIMARY | Anthropic, "How we built our multi-agent research system" — https://www.anthropic.com/engineering/multi-agent-research-system |
+| Partition on a stable interface, not an arbitrary file boundary (separate repos / stable APIs / clean interfaces) | `dispatching-parallel-agents` | PRIMARY | Adrian Cockcroft, "Directing a Swarm of Agents for Fun and Profit" (InfoQ) — https://www.infoq.com/presentations/coding-agents/ |
+
+### batched-implementation
+*(No body change — these ground claims the skill already states.)*
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Give the agent a check it can run — "the difference between a session you watch and one you walk away from" | `batched-implementation` | PRIMARY | Anthropic, "Best Practices for Claude Code (agentic coding)" — https://code.claude.com/docs/en/best-practices |
+| The most useful specs are self-contained — name files/interfaces, state what's out of scope, end with an end-to-end verification step | `batched-implementation` | PRIMARY | Anthropic, "Best Practices for Claude Code" — https://code.claude.com/docs/en/best-practices |
+| "If you could describe the diff in one sentence, skip the plan" (anti-overkill tier boundary) | `batched-implementation` | PRIMARY | Anthropic, "Best Practices for Claude Code" — https://code.claude.com/docs/en/best-practices |
+| Commit as a rollback point: snapshot mid-session, revert to the prior commit and retry with more guidance; keep the tree mergeable | `batched-implementation` | PRIMARY | Mitchell Hashimoto, "Agentic Engineering in Action" — https://www.youtube.com/watch?v=XyQ4ZTS5dGw ; "either mergeable or it is not," Lopopolo, "Extreme Harness Engineering" — https://www.latent.space/p/harness-eng |
+
+### product-taste
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Users sense care in a thing — and even more reliably sense carelessness — without being able to name it | `product-taste` | PRIMARY | Jony Ive & Patrick Collison, Stripe Sessions 2025 — https://www.youtube.com/watch?v=wLb9g_8r-mE |
+| Good taste is real: no total order of works, but a partial one — so taste can be trained | `product-taste:8` | PRIMARY | Paul Graham, "Is There Such a Thing as Good Taste?" — https://www.paulgraham.com/goodtaste.html (upgrades prior JUDGMENT-CALL/Olah-thematic grounding) |
+| Gesture trigger timing: lightweight actions fire during the gesture; destructive actions only on gesture end | `product-taste` | PRIMARY | Rauno Freiberg, "Invisible Details of Interaction Design" — https://rauno.me/craft/interaction-design |
+| The six-check animation gate (natural / fast / purpose / 60fps / interruptible / accessible) | `product-taste:48` | PRIMARY (source-of-record) | Emil Kowalski, "Great Animations" — https://emilkowal.ski/ui/great-animations (the prior "canonical" 200–300ms knob has its source-of-record here) |
+
+### startup-taste
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Best consumer apps run 60–85% DAU/MAU; median gen-AI app ~14% | `startup-taste:41` | PRIMARY | Sonya Huang & Pat Grady, Sequoia, "Generative AI's Act Two" — https://sequoiacap.com/article/generative-ai-act-two/ (pins the previously-uncited retention decimals) |
+| Raw data moats are shaky (the next foundation model can erase them); durable advantage is workflow + user network — "the moats are in the customers, not the data" | `startup-taste` | PRIMARY | Sequoia, "Generative AI's Act Two" — https://sequoiacap.com/article/generative-ai-act-two/ ; a16z, "Why AI Moats Still Matter" — https://www.youtube.com/watch?v=fgzr3PhzIMk (capability is differentiation, not defensibility) |
+| Be the last mover, not the first; overvalue durability, undervalue growth | `startup-taste` | PRIMARY | Peter Thiel, "Competition is for Losers" (Stanford/YC) — https://www.youtube.com/watch?v=3Fx5Q8xGU8k |
+
+### critical-thinking
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Be fastidious about *degree* of belief — unexamined, the probable hardens into the certain | `critical-thinking:20` | PRIMARY | Paul Graham, "How to Think for Yourself" — https://paulgraham.com/think.html (already cited in the same gate) |
