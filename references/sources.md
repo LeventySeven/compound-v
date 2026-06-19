@@ -204,6 +204,18 @@ sources.
 
 ---
 
+## extracting-specs
+
+| Claim (short) | skill:line | Category | Source / note |
+|---|---|---|---|
+| The real contract is the **observed behavior callers rely on, not the documented one** — when the docs and the callers disagree, the callers win | `extracting-specs:25` | PRIMARY (principle) | Hyrum's Law — https://www.hyrumslaw.com/ ("With a sufficient number of users of an API … all observable behaviors of your system will be depended on by somebody"). The contract is the observed behavior, not the stated one. |
+| Spec grammar = **Requirement** (triggered, WHEN→THEN scenario) + **Invariant** (always-true), kept flat rather than classified into type chapters; `entities` + `enforced` metadata make it machine-findable | `extracting-specs:18-26` | JUDGMENT-CALL / CANONICAL | WHEN→THEN scenario grammar = BDD/Gherkin's Given-When-Then — https://cucumber.io/docs/gherkin/reference; the always-true Invariant = Design by Contract (Bertrand Meyer, Eiffel). The flat, enforcement-anchored packaging is the `spec-miner` agent pattern from affaan-m/ECC (Everything-Claude-Code), generalized here language-agnostic. |
+| **Sample-and-expand** over reading the whole module (entry surfaces first, trace one level down, stop at boundaries / ~15-file budget) | `extracting-specs:30` | (see context-engineering) | The context-rot / attention-budget mechanics are owned and grounded by `context-engineering` (Chroma Context Rot; Anthropic attention-budget). This skill applies them to spec recovery; the ~15-file / 3-dry-files cutoffs are recipe knobs. No separate citation. |
+| **Never invent behavior** — record an explicit `uncertainty` note rather than guessing a Requirement | `extracting-specs:29` | (see systematic-debugging) | Same honesty bar as `systematic-debugging`'s "say I don't know and gather evidence" + Karpathy, "never trust a result you can't explain." No separate citation. |
+| **Flag-don't-fix** while mining; **mine what you touch, not the whole repo** (a spec that outpaces usage rots) | `extracting-specs:33-34` | JUDGMENT-CALL | Maintenance discipline; single-source / prune-on-a-cadence rules are owned by `writing-prd` (cross-ref). No citation needed. |
+
+---
+
 ## systematic-debugging
 
 | Claim (short) | skill:line | Category | Source / note |
