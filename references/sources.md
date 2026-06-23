@@ -39,6 +39,21 @@ as skills are edited.
 
 ---
 
+## code-review
+
+| Claim (short) | skill:line | Category | Source / note |
+|---|---|---|---|
+| **Confidence-scored, multi-agent** review — fan parallel review lenses across a PR/diff, then score each candidate finding and filter the low-confidence ones to keep false positives off the PR | `code-review` (Steps 3-4) | PRIMARY | Anthropic Claude Code — official `code-review` plugin (`claude-plugins-official` marketplace): "Automated code review for pull requests using multiple specialized agents with confidence-based scoring to filter false positives." https://github.com/anthropics/claude-plugins-public/tree/main/plugins/code-review |
+| Confidence filter at **~80 / 100** | `code-review` (Step 4) | JUDGMENT-CALL (recipe-knob) | The threshold is a tunable knob (the official plugin filters below 80); the *mechanism* (confidence-gate to drop false positives) is the grounded part above. No separate citation needed. |
+| Effort scale **low / medium / high / max / ultra** maps review depth to diff size; route *down* when unsure | `code-review` (Step 2) | JUDGMENT-CALL (recipe-knob) | The kit's tier law applied to a review — owning skill is `using-compound-v` (anti-overkill, `references/sources.md` → using-compound-v). Mirrors the depth tiers surfaced by Claude Code's own `/code-review` effort levels. |
+| Clean-context reviewer catches **~2 bugs/PR, most severe** | `code-review` (Step 3) | PRIMARY | Cognition, "Multi-Agents: What's Actually Working" — https://cognition.ai/blog/multi-agents-working. Same source as the recheck table; reused here for the on-demand reviewer. |
+| Parallelize the read/analysis lenses; keep any **write single-threaded** | `code-review` (Step 3) | PRIMARY | Walden Yan, Cognition, "Don't Build Multi-Agents" — https://cognition.ai/blog/dont-build-multi-agents. Same as `ai-system-reliability:30`. |
+| Reviewer stays **read-only**; `--fix` is a separate, re-verified apply phase | `code-review` (Output) | PRIMARY | Same read-only-reviewer grounding as `recheck:19` (production reviewers mutate nothing); the bug a reviewer introduces is the one nobody reviews. |
+| Don't flag **intentional changes** / no **extra rigor** beyond the surrounding code | `code-review` (Step 4) | PRIMARY | OpenAI Codex CLI review prompt (`codex-rs/core/review_prompt.md`), same rows as `recheck:68`. |
+| GitHub comments: brief, no emojis, cite file+line with a permalink | `code-review` (Output) | JUDGMENT-CALL | Output-format recipe; matches the official `code-review` plugin's comment conventions (cited above). No separate citation needed. |
+
+---
+
 ## evals
 
 | Claim (short) | skill:line | Category | Source / note |
