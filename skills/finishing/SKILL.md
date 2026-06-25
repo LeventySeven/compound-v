@@ -19,6 +19,8 @@ Run the full suite this turn and read the exit code yourself — the **compound-
 
 The finishing-specific rule: a red suite is **not** a finishing situation. **Stop**, surface the failure, and route back to **compound-v:systematic-debugging** — never present the finish menu on red, because every option below assumes a green branch.
 
+**Green ≠ "the change worked" when the change targets a metric.** If the work was meant to move cost, latency, quality, or some observable behavior, a passing suite only proves it didn't break — it does *not* prove the intended effect landed. Finish that work by **measuring the effect with a real post-ship run**, not by asserting it ("should be ~30% cheaper now" is a prediction, not a result). If the measurement is genuinely blocked (needs prod traffic, a scheduled batch, real users), say so and **track/schedule it** — a deferred measurement is an open item, never silently "done." And **sanity-check any auto-generated metric before you relay it**: a number off by a timezone, a confound, or a selection bias is worse than no number, because it reads as evidence.
+
 ## Step 2 — Present the options, let the user pick
 
 Offer a small structured menu, not an open-ended "what now?":
