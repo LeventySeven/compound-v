@@ -37,7 +37,7 @@ The kit's bet is that adaptive effort is something the model is increasingly goo
 
 - **Solve any goal (opt-in — invoke when the user asks for it or names a skill):** `frame-the-goal` (turn the goal into a testable success check) → `simplest-thing-that-works` (the simplest mechanism that passes it — below "use a model," climb only when forced, as high as a hard goal needs) → `make-it-stable` (make the chosen mechanism hold every time). Caps the machinery, never the goal.
 - **Judgment:** `startup-taste` · `product-taste`
-- **Plan:** `brainstorming` · `writing-plans` (per-build plan) · `writing-prd` (the product's stable source-of-truth doc)
+- **Plan:** `brainstorming` · `writing-plans` (per-build plan) · `writing-prd` (the product's stable source-of-truth doc) · `extracting-specs` (recover the real contract of *existing* code — the backward complement of writing-prd)
 - **Thinking:** `critical-thinking` (red-team your own reasoning before you commit — steelman + disconfirm)
 - **Build:** `batched-implementation` · `recheck` · `finishing`
 - **Correctness:** `test-driven-development` · `systematic-debugging` · `verification-before-completion`
