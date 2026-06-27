@@ -9,13 +9,15 @@ Confirm the work is actually green, then let the user choose how to land it — 
 
 ## When to use
 
-- All tasks are built and compound-v:recheck returned APPROVED.
+- All tasks are built and the branch is **reviewed** — compound-v:recheck returned APPROVED in-session, or compound-v:code-review cleared it (a PR or branch you're landing).
 - The user signals the work is done and asks how to integrate or close it out.
-- Skip it when the work isn't finished or recheck hasn't returned APPROVED — finishing assumes a green, reviewed branch; route incomplete work back to compound-v:batched-implementation or compound-v:systematic-debugging instead.
+- Skip it when the work isn't finished or it hasn't passed review — finishing assumes a green, reviewed branch; route incomplete work back to compound-v:batched-implementation or compound-v:systematic-debugging instead.
 
 ## Step 1 — Verify green, fresh, yourself
 
 Run the full suite this turn and read the exit code yourself — the **compound-v:verification-before-completion** gate, applied to integration: no merge/PR decision rides on "they passed earlier" or the implementer's word.
+
+**Green is necessary, not sufficient — the change must be reviewed before it lands.** If compound-v:recheck didn't gate this work in-session (you're landing a PR, or a branch built elsewhere), run **compound-v:code-review** *before* you merge and resolve every Critical/Important finding first. An unreviewed change does not get merged, however green it is.
 
 The finishing-specific rule: a red suite is **not** a finishing situation. **Stop**, surface the failure, and route back to **compound-v:systematic-debugging** — never present the finish menu on red, because every option below assumes a green branch.
 

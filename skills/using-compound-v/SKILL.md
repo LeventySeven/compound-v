@@ -39,7 +39,7 @@ The kit's bet is that adaptive effort is something the model is increasingly goo
 - **Judgment:** `startup-taste` · `product-taste`
 - **Plan:** `brainstorming` · `writing-plans` (per-build plan) · `writing-prd` (the product's stable source-of-truth doc) · `extracting-specs` (recover the real contract of *existing* code — the backward complement of writing-prd)
 - **Thinking:** `critical-thinking` (red-team your own reasoning before you commit — steelman + disconfirm)
-- **Build:** `batched-implementation` · `recheck` (in-pipeline review gate) · `code-review` (on-demand: review a PR/branch/diff, post to GitHub, or apply fixes) · `finishing`
+- **Build:** `batched-implementation` · `recheck` (in-pipeline review gate) · `code-review` (on-demand **and the automatic pre-merge gate**: review a PR/branch/diff, post to GitHub, or apply fixes — runs before any merge) · `finishing`
 - **Correctness:** `test-driven-development` · `systematic-debugging` · `verification-before-completion`
 - **AI design (one feature):** `designing-agents` · `evals` · `context-engineering`
 - **AI systems (architecture — opt-in, invoke on explicit request or by name):** `architecting-ai-systems` (the shape around the model — harness-as-moat, primitive-not-wrapper, build for the model ~18 months out) · `ai-system-reliability` (keep a built system from corrupting its own state; chain a constellation past one model's ceiling)

@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: On-demand reviewer for a specific change — point it at a pull request, a branch, or your uncommitted diff and it returns confidence-gated, severity-tagged findings at a depth that matches the change, and can post them to GitHub or apply the fixes. Use when someone hands you a change to review — "review this PR", "review my diff", "look over this branch", "is this change ok", "code review #123" — or whenever you want a diff reviewed outside the build pipeline, where compound-v:recheck owns the gate.
+description: On-demand and pre-merge reviewer for a specific change — point it at a pull request, a branch, or your uncommitted diff, or let it run automatically as the gate before anything is merged; it returns confidence-gated, severity-tagged findings at a depth that matches the change, and can post them to GitHub or apply the fixes. Use when someone hands you a change to review — "review this PR", "review my diff", "look over this branch", "is this change ok", "code review #123" — AND automatically before merging or landing a PR/branch ("merge this PR", "is this ready to merge", "land #123", "merge these PRs"): anything about to hit the base branch gets reviewed first, even when no one names a review. Outside the build pipeline, where compound-v:recheck owns the in-loop gate.
 ---
 
 # Code Review
@@ -13,6 +13,7 @@ This is the **on-demand** reviewer: a user points you at a PR, a branch, or the 
 
 - A user points you at a change: "review this PR", "review my diff", "look over branch X", "is #123 ready".
 - You want a diff reviewed *outside* the batched-implementation→recheck loop — a colleague's PR, a long-lived branch, your own working set before you open the PR.
+- **Before a PR or branch is merged — automatically.** Anything about to land in the base branch gets reviewed first, even when no one explicitly asks ("merge this PR", "land #123", "merge these PRs"). compound-v:finishing runs this as its pre-merge gate and won't merge over an unresolved Critical/Important finding.
 - Skip it for a typo, rename, or config flip → compound-v:verification-before-completion. And inside the build pipeline, recheck owns the review — don't run both on the same batch.
 
 ## Step 1 — scope the target, then decide if it's even worth reviewing
