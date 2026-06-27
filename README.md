@@ -52,7 +52,7 @@ Three rules sit above the skills:
 /plugin install compound-v@compound-v-dev
 ```
 
-For local work, symlink the skill directories into `~/.claude/skills/`. A SessionStart hook injects the small router each session and everything else loads on demand, so the always-on cost is the router alone.
+For local work, symlink the skill directories into `~/.claude/skills/`. A SessionStart hook injects the small router each session, a UserPromptSubmit hook re-asserts the routing directive each turn (one self-gating line, so skills keep firing as context grows instead of decaying after the opening turn), and everything else loads on demand — so the always-on cost is the router plus a one-line nudge.
 
 ## Checking the kit
 

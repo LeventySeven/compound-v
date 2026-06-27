@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# UserPromptSubmit hook for the Compound V plugin.
+# The SessionStart router is injected once and its salience decays as the
+# context grows, so applicable skills quietly stop firing mid-session. This
+# re-asserts the routing directive every turn — a terse, self-gating one-liner,
+# NOT the whole router (progressive disclosure; we dogfood context-engineering).
+
+set -euo pipefail
+
+reminder="Compound V is active. Before acting on a non-trivial request, check whether a Compound V skill applies and invoke it with the Skill tool FIRST — don't silently skip an applicable skill (proactive routing is the discipline this kit exists to enforce). When unsure how to route, consult compound-v:using-compound-v. Trivial one-liners need no skill."
+
+# Emit only the field the current platform consumes (printf, not heredoc — bash 5.3+ heredoc hang).
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "UserPromptSubmit",\n    "additionalContext": "%s"\n  }\n}\n' "$reminder"
+else
+  printf '{\n  "additionalContext": "%s"\n}\n' "$reminder"
+fi
+
+exit 0
