@@ -21,6 +21,8 @@ Skipping any step is asserting something you haven't checked.
 
 **No command proves it yet? Build the observation channel before you claim — don't skip the gate.** The reason agents confidently ship broken work is an *observation* gap, not an action gap: the files were written, the tool returned no error, but the result was never sensed. When step 1 has no answer, add the missing sense — a screenshot, an assertion, a structured-output check — then run *that*. A claim with no way to observe the outcome is a guess wearing a checkmark. [Anthropic "Claude Agent SDK Deep Dive", DeepLearning.AI: closing the feedback loop — e.g. a browser-screenshot channel for a UI the agent can't otherwise see — is one of the biggest unlocks for autonomous task length.]
 
+**For user-visible or hard-to-unsend output, the observation channel is a preview into a safe sink — render it before the prod-facing send.** A UI surface, a bot message, a channel post, a generated artifact: a typecheck and a green unit suite prove the code runs, *not* that the thing looks right or reads right to a human, and once it's sent you can't take it back. So route it to a dry-run / staging / test sink first (a test channel, a preview screenshot, a `--dry-run` render, a draft) and *look at it* — or have a human look — before the real send. The cost of the preview is seconds; the cost of the un-sendable mistake is a user seeing it.
+
 ## What each claim actually requires
 
 | Claim | Requires (evidence) | Not sufficient |

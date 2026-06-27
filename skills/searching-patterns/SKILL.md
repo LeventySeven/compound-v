@@ -12,6 +12,7 @@ Before writing something you're not sure about, find how it's *actually* done no
 Search when getting it wrong is likely or expensive:
 
 - **Unfamiliar API or library** — you haven't used this exact version, or you're choosing between libraries and need to see the real API shape.
+- **Any third-party SaaS/API client** — for pricing, endpoints, response shape, or auth headers, fetch the *current official* docs at implementation time. A prior spec/PRD/design-doc or an earlier memory is an **input, never the authoritative reference** — a stale internal spec is a trap masquerading as a source, and it'll send you to confidently code last quarter's endpoint.
 - **Non-obvious pattern** — concurrency, caching, auth flows, retries, framework lifecycle hooks: areas where the wrong-but-plausible version compiles and then misbehaves.
 - **Security-sensitive surface** — anything touching authn/authz, secrets, deserialization, SSRF, path handling, SQL. The cost of the wrong pattern here is a vulnerability, not a nit.
 - **Confirming a best practice** during review — when you flag "this isn't how X is done," verify it instead of asserting it.
@@ -23,6 +24,7 @@ Don't search for trivial, well-trodden code you'd write correctly from memory (a
 The default tools need zero setup. Reach for the heaviest one that fits, lightest first:
 
 - **Check the local convention first.** If the repo already has an established shape for this — a house wrapper, an AGENTS.md/CLAUDE.md rule, a pattern in neighboring files — that overrides the external canonical one. Match the local shape; don't import a clashing "correct" pattern. Only reach outward when the repo has no precedent. (AGENTS.md spec; Codex/Cursor system prompts: preserve an existing design system's established patterns.)
+- **A docs-MCP server** (context7-style `resolve-library-id` + `query-docs`), *when one is available* — the lightest step for library/framework docs: it returns the current, version-pinned API surface without you hunting a URL. Prefer it ahead of `WebSearch`/`WebFetch`; fall through to those when no such server is wired up.
 - **`WebSearch`** — find the current canonical page when you don't have the URL ("`<lib> <version>` retry middleware docs").
 - **`WebFetch`** — read one known page (a docs section, a guide). The common case.
 - **`gh`** — read the upstream repo directly: `gh api` for file contents, releases, or the `CHANGELOG`; `gh search code` to see how the library itself uses a thing. This is how you reach the *real* source and private/authed pages.

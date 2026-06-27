@@ -13,14 +13,17 @@ A PRD is the product's **stable source of truth** — the durable record of what
 - You're onboarding a human or an agent to an existing product.
 - **Skip it** for one feature's design (that's **compound-v:brainstorming**), for per-build / how-to-build-it work (that's **compound-v:writing-plans**), and for a one-off script. Unsure of the effort? Route via **compound-v:using-compound-v**.
 
+This skill owns the *boundary* — the stable source of truth. The per-build **workflow** that consumes it (tier routing, adversarial grill, plan-gate, parallel build) belongs to a build pipeline that *composes* this skill — see **compound-v:writing-plans** / **compound-v:brainstorming** for that per-build layer; don't re-implement that workflow here.
+
 ## The durable sections
 Keep the whole thing to roughly two pages — if it doesn't fit, the scope is too broad, not the doc too short.
 
 - **Problem & primitive** — the friction the product removes, anchored in something real, plus the one-sentence primitive the product is a consequence of ("the search result, from links to a cited answer"; "speculative editing"; "the sync engine"). Finding the primitive is **compound-v:startup-taste**'s job — record it here, don't re-derive it.
-- **Goal** — what the product is, who it's for, and the one outcome it exists to deliver. Plain language, not a mission statement.
+- **Goal** — what the product is, who it's for, and the one outcome it exists to deliver. Work **backwards from the customer**: write the outcome in *their* words, as one paragraph (the thing they can now do, the friction gone) — not a feature list and not a mission statement. If you can't state it from the customer's side, you don't yet have the goal.
 - **Core functions** — the handful of capabilities that define the product (the feature *spine*, not a backlog), one line each.
 - **Non-goals** — what the product explicitly is *not* and won't do. Bounds scope, pre-empts the most common pushback, and survives a model upgrade because it encodes a human judgment a fresh model can't reconstruct. Include the **support boundary**: for inputs past the edge of scope, say what the product does — reject or escalate, not silently guess — because an unsure agent won't ask, it'll assume and proceed (a16z / Steinhardt).
-- **Tech stack & architecture** — the languages, frameworks, and services it runs on, a one-sentence shape of the system, and the load-bearing design decisions. The slow-changing *what* and *why* — never the per-build *how*.
+- **Tech stack & architecture** — the languages, frameworks, and services it runs on, a one-sentence shape of the system, and the load-bearing design decisions — *each with the alternative it beat and why* (a design with no rejected alternative wasn't designed; it was defaulted into). Capture too the **cross-cutting constraints that shape everything**: the security/privacy boundary, the cost envelope, the observability story, the data-retention policy. The slow-changing *what* and *why* — never the per-build *how*.
+- **Key bets & invalidators** — the load-bearing assumptions the whole product rides on, each written as a triple: the **observable condition** that must hold, **how you'd measure** it, and **what a break means** (pivot, re-scope, kill). A "revisit later" must carry a *concrete* trigger — N users or runs, a named event, a data threshold — **never calendar time** ("in Q3" is not a trigger; "once 1k users have run it" is). An unstated assumption is the one that sinks you silently.
 
 ## What does NOT go here
 Per-build content rots the stable doc on every feature — it stays in the **plan** (**compound-v:writing-plans**): the scope-cut for this build, the risks, the one verifiable ship signal, the approach, the task breakdown. Also keep out the **model name, exact prompts, and model-specific scaffolding** — those are the swappable execution layer the next model washes away (prompt sets are not PRDs). The test for any line: *would it still be true and useful against a clearly smarter model next year?* If an upgrade would force a rewrite, it doesn't belong here.
@@ -33,3 +36,5 @@ Per-build content rots the stable doc on every feature — it stays in the **pla
 
 ## Writing discipline
 Prose where precision matters — writing the sentence forces the thinking a bullet lets you skip. Cite or tag every load-bearing claim (`[ASSUMPTION]` when you're guessing); an unsourced magic number is a defect. Encode only what transfers across model generations. Keep it lean: if `CLAUDE.md` links it, you pay for it at every session start.
+
+Before you call it done, run the self-check: **every durable section above is present and non-empty.** A missing or stubbed section isn't a shorter PRD — it's a silent gap the next reader will fill with a guess. If a section genuinely doesn't apply, say so explicitly ("no external services") rather than omitting it.
