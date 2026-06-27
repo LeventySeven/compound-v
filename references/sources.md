@@ -454,9 +454,9 @@ The recurring public primary URLs, for quick verification:
 
 ---
 
-## BAD_GUIDE harvest additions (2026-06-11)
+## Cross-domain source-verified additions (2026-06-11)
 
-*Grounding for the source-verified enhancements from the BAD_GUIDE full-raw harvest (product / code / CTO / CPO / AI / dev domains). Per kit style, these claims live in the skill bodies WITHOUT inline citation; this is where they are grounded. Raw sources captured under `research/fullsources/{web,yt}/`.*
+*Grounding for a batch of source-verified enhancements across the product / code / CTO / CPO / AI / dev domains. Per kit style, these claims live in the skill bodies WITHOUT inline citation; this is where they are grounded. Every row below cites its public source directly.*
 
 ### architecting-ai-systems
 | Claim (short) | skill | Category | Source / note |
