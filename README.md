@@ -31,7 +31,7 @@ Two pieces carry most of the weight:
 | Taste | `startup-taste` (whether and what to build) and `product-taste` (how it feels) |
 | Plan | `brainstorming` (design before code), `writing-plans` (a per-build plan with real code, no placeholders), `writing-prd` (the product's stable source-of-truth doc, read first for context), and `extracting-specs` (recover the real contract of *existing* code — the backward complement of `writing-prd`) |
 | Thinking | `critical-thinking` (red-team your own reasoning before you commit — steelman it, hunt disconfirming evidence) |
-| Build | `batched-implementation`, `recheck`, `finishing` |
+| Build | `batched-implementation`, `recheck` (the in-pipeline review gate), `code-review` (the on-demand reviewer — point it at a PR/branch/diff, scale the depth, gate findings by confidence, post to GitHub or apply the fixes), `finishing` |
 | Correctness and security | `test-driven-development`, `systematic-debugging`, `verification-before-completion`, and `agent-security` (build-time defense: the lethal trifecta, source-trust, sandboxing model-written code) |
 | AI design (one feature) | `designing-agents` (a call, a workflow, or an agent?), `evals` (does the AI actually work?), `context-engineering` |
 | AI systems (architecture, opt-in) | `architecting-ai-systems` (the compound system around the model — harness-as-moat, primitive-not-wrapper, build for the model ~18 months out) and `ai-system-reliability` (keep a built system from corrupting its own state; chain a constellation past one model's ceiling) |
