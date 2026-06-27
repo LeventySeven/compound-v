@@ -53,7 +53,7 @@ Security is a lens too, but its catalog lives in compound-v:agent-security (buil
 
 ## Step 4 — gate false positives by confidence
 
-This is the step that makes an on-demand reviewer trustworthy instead of noisy. Score every candidate finding 0–100 for how sure you are it's a *real, diff-introduced* issue, and **drop anything below ~80** — the confidence-scored filter the official Claude Code reviewer uses to keep false positives off the PR. For a CLAUDE.md-derived finding, re-verify the rule actually says what you claim before it counts.
+This is the step that makes an on-demand reviewer trustworthy instead of noisy. Gate cheapest-first: before scoring anything, **drop any finding whose cited line doesn't map to a real changed line in the diff** — a hallucinated location is a common false positive and catching it is free and deterministic. Then score every surviving candidate finding 0–100 for how sure you are it's a *real, diff-introduced* issue, and **drop anything below ~80** — the confidence-scored filter the official Claude Code reviewer uses to keep false positives off the PR. For a CLAUDE.md-derived finding, re-verify the rule actually says what you claim before it counts.
 
 Default to *not* a finding. These are not findings:
 

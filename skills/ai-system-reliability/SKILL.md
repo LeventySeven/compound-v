@@ -50,7 +50,7 @@ At scale the durable edge is the serving stack itself, not the weights: native l
 
 ## Correctness invariants that prevent silent drift
 
-These are the default contracts a reliable AI system holds at its seams. They aren't all-caps rules; each one closes a specific silent-failure path (verified in the Verso agent framework, LeventySeven):
+These are the default contracts a reliable AI system holds at its seams. They aren't all-caps rules; each one closes a specific silent-failure path:
 
 - **Errors are data, not exceptions.** A tool may `raise` freely; the framework catches it and feeds back a typed `{ok, data, error}` envelope as a model-legible observation. An exception that reaches the loop crashes a run the model could have self-corrected from.
 - **Terminate on a named `StopReason`, never by sniffing text.** "Done" is a structured tool call (`done(result)`) and an enum (`END_TURN / DONE / MAX_STEPS / ERROR`), so why-a-run-ended is programmatic. Matching the string "done" in prose is a whole class of false stops.
@@ -60,7 +60,7 @@ These are the default contracts a reliable AI system holds at its seams. They ar
 
 ## The seam landmines: where durable AI state actually corrupts
 
-These recurred across subsystems in an adversarial pass that verified each against a freshly-cloned upstream system (DBOS, Google AX, Instructor, Tower, Helicone, Verso failures corpus, LeventySeven). They are the concrete teeth of the failure reflex — the seam between two correct-in-isolation subsystems is where the bug lives.
+These recurred across subsystems in an adversarial pass that verified each against a freshly-cloned upstream system (DBOS, Google AX, Instructor, Tower, Helicone). They are the concrete teeth of the failure reflex — the seam between two correct-in-isolation subsystems is where the bug lives.
 
 - **Async-default re-fires a non-idempotent step on crash** *(the worked example below — the default everyone copies and the one that corrupts state silently)*.
 - **Two co-authoritative logs disagree on resume.** Using *both* an event log (replay-to-messages) and a step-memo journal as jointly authoritative means a crash between the synchronous append and the async memo-write leaves them disagreeing; resume double-writes a `tool_result`. Pick *one* source of truth — replay the event log alone (AX-style) or resume from the memo map alone (DBOS-style); don't stitch two correct models without a reconciliation step.
@@ -84,7 +84,7 @@ On resume, the engine re-fires the step — and here is the corruption, not a cl
 - **The LLM call is not idempotent.** A non-deterministic model returns a *different* result the second time, so the event log now holds **two divergent records for one logical step**. The state isn't retried, it's forked.
 - **A non-idempotent tool fires twice.** If that step sent an email or charged a card, the user gets two. No error is thrown; the system looks healthy.
 
-The fix is the failure reflex, made enforceable in the harness: **flip the default to sync — write-before-advance.** Async becomes an explicit per-step opt-in, and `@tool(destructive=True)` auto-forces sync regardless. The reason it's safe to make sync the default is economic: the latency win is invisible at agent timescales (a ~1ms checkpoint write against a >100ms LLM call), while the corruption cost is real and silent. Three independent critics found this same default unsafe (verified against DBOS, LangGraph's `Durability` literal, and AX's two-log model; Verso failures corpus, LeventySeven).
+The fix is the failure reflex, made enforceable in the harness: **flip the default to sync — write-before-advance.** Async becomes an explicit per-step opt-in, and `@tool(destructive=True)` auto-forces sync regardless. The reason it's safe to make sync the default is economic: the latency win is invisible at agent timescales (a ~1ms checkpoint write against a >100ms LLM call), while the corruption cost is real and silent. Three independent critics found this same default unsafe (verified against DBOS, LangGraph's `Durability` literal, and AX's two-log model).
 
 The general lesson the example teaches: at every seam where a side effect and a checkpoint aren't in one transaction, the *safe default* is the slow-but-correct one, and "fast" is an opt-in a destructive tool can override. Most state corruption in durable AI systems is one of these unsafe defaults copied from a system with a different concurrency model.
 
