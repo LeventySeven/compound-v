@@ -44,5 +44,6 @@ For anything a user touches, "it runs" means **end-to-end as a real user** — b
 - You're reaching for "should," "probably," "seems to," "I believe it." Those words mean you're guessing; go run the command.
 - You're trusting a test run, build, or agent report from *before* your most recent change. Stale evidence is not evidence — the change may have broken it.
 - "It's a tiny change, no need to verify." Tiny changes break builds too. The check is cheap; run it.
+- You piped the verifier to `tail`, `tee`, or `grep` and read "exit 0" off the *pipeline* — that's the last stage's exit code, not the tool's (`cargo clippy | tail` reports green while hiding clippy's errors). Use `set -o pipefail`, or read `${PIPESTATUS[0]}` — the command's own status, not the pipe's.
 
 When the gate passes, state the evidence: "Ran `pytest`: 142 passed, 0 failed (exit 0)." That sentence is worth more than any amount of "looks good." If a verification reveals a failure you don't understand, that's a debugging task — use **compound-v:systematic-debugging**.

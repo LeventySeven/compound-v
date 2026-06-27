@@ -68,6 +68,9 @@ Hold the perceptual cliffs:
 
 The levers are perceived-speed work — optimistic updates, skeleton states, streaming — applied *before* you reach for backend speed. "We'll optimize latency later, it's infra" is the wrong call; bake the masks in now. When the felt surface sits on an AI system, the latency budget is an architecture constraint, not just a polish layer — it can force a simpler, faster rung (fewer agent hops, a smaller model, no extra round-trip); see **compound-v:designing-agents**.
 
+## Agentic surfaces — the transcript is the product
+For a chat-style AI product the transcript *is* the interface, and rendering it is its own discipline. Discriminate the block types — reasoning, tool call, diff/patch, approval each read differently and deserve a distinct shape, not one undifferentiated bubble. Render an approval request **inline, adjacent to the reasoning that prompted it**, never a modal that rips the user out of context. Collapse tool calls to **expandable rows with capped-height output**, so a long log can't bury the thread. Reserve color for **semantic meaning** (green add / red remove) so the diff and the reasoning stay the signal.
+
 ## Reduce cognitive load, not clicks
 The thing to minimize is *thinking*, not taps. Software that stops the user with a decision they don't understand makes them feel stupid — that's the real cost, not one more click. A flow of many trivially-obvious taps can feel effortless (Snapchat runs at several deliberate taps a second), while a single screen demanding an unfamiliar judgment feels heavy. Cut decisions and unfamiliar choices first; only collapse clicks that each carry real cognitive weight.
 

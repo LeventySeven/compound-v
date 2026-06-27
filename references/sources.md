@@ -535,3 +535,59 @@ The recurring public primary URLs, for quick verification:
 | Claim (short) | skill | Category | Source / note |
 |---|---|---|---|
 | Be fastidious about *degree* of belief — unexamined, the probable hardens into the certain | `critical-thinking:20` | PRIMARY | Paul Graham, "How to Think for Yourself" — https://paulgraham.com/think.html (already cited in the same gate) |
+
+---
+
+## Recheck pass additions (2026-06-27)
+
+*Grounding for a recheck-and-improve pass across the kit. Each claim was checked against a public source and adversarially verified before shipping; per kit style the claims live in the skill bodies and are grounded here.*
+
+### code-review
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Widen the bug lens from changed lines to the **contract** — trace callers/callees of every modified symbol and pull just the directly-connected files; a change often breaks a dependency it never touches | `code-review` | PRIMARY | CodeRabbit, "How CodeRabbit delivers accurate AI code reviews on massive codebases" — https://www.coderabbit.ai/blog/how-coderabbit-delivers-accurate-ai-code-reviews-on-massive-codebases ("Codegraph" builds a map of definitions/references, traverses related files, and surfaces "bugs outside the diff range" / broken dependencies). The "load the contract, not the repo" framing is owned by context-engineering. |
+| At high/ultra or when no CI is wired up, run the static-analysis tools yourself and have the model **triage** each finding for real-in-this-diff relevance — model as a filter on top of the tools, not a re-derivation of CI | `code-review` | PRIMARY | CodeRabbit, "How CodeRabbit's agentic code validation helps with code reviews" — https://www.coderabbit.ai/blog/how-coderabbits-agentic-code-validation-helps-with-code-reviews (integrates static tools into the pipeline; a "verification agent checks each one for accuracy, relevance, and usefulness — filtering out noise"). |
+
+### context-engineering
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Circuit breaker on the compaction loop — abort after N consecutive failures (3 is a reasonable default) rather than retrying forever; runaway compaction burns API calls indefinitely | `context-engineering` | PRIMARY | Anthropic — Claude Code context-management (auto-compaction halts after consecutive compaction failures to stop runaway API spend). Bounded-retry framing reused from compound-v:make-it-stable. |
+| On truncation (head-and-tail slicing), leave an explicit gap placeholder ("skipped N messages") at the seam — silent truncation makes the model reconstruct the missing span and hallucinate | `context-engineering` | PRIMARY | Microsoft AutoGen — `HeadAndTailChatCompletionContext` inserts a `UserMessage("Skipped N messages.")` between head and tail — https://github.com/microsoft/autogen |
+
+### ai-system-reliability
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Rainbow deployments for long-running agents — context window + checkpoint format are pinned to the start version, so a mid-run version cutover corrupts in-flight state; keep running agents on their start-version until they finish | `ai-system-reliability` | PRIMARY | Anthropic, "How we built our multi-agent research system" — https://www.anthropic.com/engineering/multi-agent-research-system (rainbow deployments gradually shift traffic old→new while keeping both running, to avoid disrupting running agents). Same source already cited at `ai-system-reliability:30`. |
+| Name the failure mode before targeting it — agents break in distinct, separately-fixable ways (agentic laziness, self-preferential bias, goal drift); generic "reliability work" targets none | `ai-system-reliability` | PRIMARY | Anthropic — "A harness for every task: dynamic workflows in Claude Code" (claude.com/blog) names agentic laziness, self-preferential bias, and goal drift as distinct harness-addressable failure modes. |
+| Every reliability constraint has a shelf life — tag each workaround with its model version and review it for deletion on each model release; scaffolds become capability overhang and a reliability fix can curdle into a reliability bug | `ai-system-reliability` | PRIMARY | Thibault Sottiaux (OpenAI Codex), "Scaffolding is coping not scaling" (Dev Interrupted) — https://devinterrupted.substack.com/p/scaffolding-is-coping-not-scaling (harness is temporary infra to remove over time; over-built scaffolding creates capability overhang). General delete-on-release thesis is owned by compound-v:architecting-ai-systems. |
+
+### designing-agents
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Fix the tool, not the prompt — treat a misused tool as an eval target: run it many times, watch the model trip, rewrite the interface/description in the agent's own voice; a dedicated tool-testing pass cut task-completion time ~40% | `designing-agents` | PRIMARY | Anthropic, "Writing effective tools for AI agents" — https://www.anthropic.com/engineering/writing-tools-for-agents (rewrite descriptions in the model's voice; model-vs-human ergonomics) and "How we built our multi-agent research system" — https://www.anthropic.com/engineering/multi-agent-research-system (tool-testing agent → "40% decrease in task completion time for future agents"). |
+
+### dispatching-parallel-agents
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Cheapest rung of parallelism is below sub-agents: within one turn, issue independent reads/searches as parallel tool calls (sequential only when one's output feeds the next) | `dispatching-parallel-agents` | PRIMARY | Frontier coding-agent system prompts (Cursor Agent; Claude Code) mandate parallel tool calls for independent reads, citing multi-fold latency cuts — public system-prompt corpus, github.com/x1xhlol/system-prompts-and-models-of-ai-tools. |
+| Asymmetric model tier — frontier model at the orchestration/synthesis layer, a cheaper/faster model at the parallel worker layer — beat a single frontier agent by ~90% | `dispatching-parallel-agents` | PRIMARY | Anthropic, "How we built our multi-agent research system" — https://www.anthropic.com/engineering/multi-agent-research-system ("Claude Opus 4 lead + Claude Sonnet 4 subagents outperformed single-agent Claude Opus 4 by 90.2%"). Tier names kept out of the skill body (model-agnostic). |
+
+### verification-before-completion
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| A piped verifier (`clippy \| tail`, `pytest \| tee`) reports the pipeline's last-stage exit code, not the tool's — it can read green while hiding failures; use `set -o pipefail` or read `${PIPESTATUS[0]}` | `verification-before-completion` | PRIMARY | Standard POSIX/bash shell semantics — pipeline `$?` is the last command's status; `pipefail` / `PIPESTATUS` recover the real status (GNU Bash manual; POSIX shell). |
+
+### agent-security
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Structural absence beats a call-time gate — omit the privileged tool / agent-to-agent edge from the registry at construction; an injection can't reach a decision point that doesn't exist, whereas a runtime check is still reachable | `agent-security` | PRIMARY | Attack-surface-reduction / minimal-tooling is established agent-security canon (Anthropic engineering); construction-time declaration of allowed agent-to-agent edges is the Agency Swarm `communication_flows` model — github.com/vrsen/agency-swarm. |
+
+### product-taste
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Agentic transcript is its own design surface — discriminate block types (reasoning/tool-call/diff/approval), render approvals inline (not modal) adjacent to the prompting reasoning, collapse tool calls to expandable capped-height rows, reserve color for semantic meaning | `product-taste` | PRIMARY | OpenAI Codex app — typed conversation/thread items (message, tool execution, approval request, diff) with approvals rendered inline with the active turn; developers.openai.com/codex. |
+
+### systematic-debugging
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| For a wrong AI answer, debug from the raw context the model received (not the rendered output); if you can't derive the answer from that context, the bug is retrieval not the prompt — force answer-only-from-provided-context to localize | `systematic-debugging` | PRIMARY | Jake Heller (Casetext/CoCounsel), "Context Engineering: Lessons from Scaling CoCounsel" (YC AI Startup School); "answer only from provided context" is a standard RAG grounding/diagnosis technique. |

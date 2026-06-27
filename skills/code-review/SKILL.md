@@ -44,7 +44,7 @@ A bigger pass is not a better pass — `low` on a one-file fix is the right call
 At `high` and above, read the diff through several independent lenses **in parallel** and merge their findings. Reading and analysis parallelize cleanly; keep any *write* single-threaded — multi-agent earns its keep as added review intelligence, never as parallel editors (compound-v:ai-system-reliability). A clean-context reviewer that reasons backward from the diff catches what the author's own context rationalizes away — about 2 bugs/PR, most of them severe, in Cognition's measured data.
 
 1. **Conventions** — does the diff obey the relevant `CLAUDE.md` / `AGENTS.md` and the codebase's existing shape? (House rules are guidance for *writing* code, so not every line applies on review — judge intent.)
-2. **Bugs in the diff itself** — a shallow scan of just the changed lines: logic errors, unhandled edge cases, off-by-one, null/undefined, error paths that swallow, races, resource leaks. Only what's **introduced here** — pre-existing bugs are out of scope.
+2. **Bugs in and around the diff** — first a shallow scan of the changed lines: logic errors, unhandled edge cases, off-by-one, null/undefined, error paths that swallow, races, resource leaks. Then widen to the **contract**: trace the callers and callees of every modified symbol and pull just those directly-connected files into context, since a change often breaks a dependency it never touches and that cross-file break is invisible if you read only the diff. Load the contract, not the whole repo (compound-v:context-engineering). Only what's **introduced here** — pre-existing bugs are out of scope.
 3. **Historical context** — `git blame` / log on the touched code: does the change reintroduce a reverted fix or miss why the old code was the way it was?
 4. **Prior art** — earlier PRs on these files and the review comments they drew; the same note may apply again.
 5. **Inline guidance** — code comments in the modified files that the change now violates.
@@ -58,7 +58,7 @@ This is the step that makes an on-demand reviewer trustworthy instead of noisy. 
 Default to *not* a finding. These are not findings:
 
 - Pre-existing issues, and real issues on lines the diff didn't touch.
-- Anything a linter / type-checker / compiler / CI would catch — imports, types, formatting, broken tests. Assume those run separately; don't review them.
+- Anything a linter / type-checker / compiler / CI would catch — imports, types, formatting, broken tests. Assume those run separately; don't review them. (Exception, at high/ultra or when no CI is wired up: run the static-analysis tools yourself and have the model triage each finding for whether it's real in *this* diff — the model as a filter on top of the tools, not a re-derivation of what CI already reports.)
 - Nitpicks a senior engineer wouldn't raise; general "more tests / more docs" wishes not required by CLAUDE.md.
 - A change the author clearly made on purpose, or one held to a rigor bar the surrounding code doesn't meet — a deliberate design choice is not a bug, and a clean-context reviewer is the one most likely to misread intent it can't see (OpenAI Codex review prompt).
 

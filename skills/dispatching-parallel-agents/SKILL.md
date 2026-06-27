@@ -7,7 +7,7 @@ description: Fan work out to multiple sub-agents only when the pieces are genuin
 
 Parallel sub-agents multiply throughput *and* isolate context — but only when the work is actually independent. The default failure isn't too little parallelism, it's splitting coupled work: isolated agents make divergent assumptions and return pieces that don't fit together. Fan out when the seams are clean; otherwise keep it single-threaded.
 
-compound-v:designing-agents decides *whether* to fan out and into which shape (orchestrator-workers, evaluator-optimizer, …); this skill is the *how* once that choice is made. Each sub-agent is a context firewall (compound-v:context-engineering owns that mechanism) — that's why fan-out also buys context isolation, not just throughput.
+compound-v:designing-agents decides *whether* to fan out and into which shape (orchestrator-workers, evaluator-optimizer, …); this skill is the *how* once that choice is made. Each sub-agent is a context firewall (compound-v:context-engineering owns that mechanism) — that's why fan-out also buys context isolation, not just throughput. Parallelism has a cheaper rung *below* sub-agents, too: within a single turn, issue every independent read/search as parallel tool calls in one message — frontier coding agents mandate this because it cuts wall-clock latency several-fold — and go sequential only when one call's output feeds the next. Reach for a sub-agent only when a piece needs its *own context window*, not merely to run things at once.
 
 ## When to fan out
 
@@ -40,7 +40,7 @@ Two structural limits to design around: sub-agents **cannot spawn sub-agents** (
 
 ## Don't over-spawn
 
-More workers means more overhead and more reconciliation, not linearly more value. Prefer **fewer, more capable workers** over many narrow ones; add a worker only when it does something genuinely distinct. A 50-CEO lookup splits cleanly into a handful of workers handling batches — not fifty one-each. Match the count to the real independent seams in the work, and route down to a single agent (or no sub-agent at all) when the task doesn't actually have them.
+More workers means more overhead and more reconciliation, not linearly more value. Prefer **fewer, more capable workers** over many narrow ones; add a worker only when it does something genuinely distinct. A 50-CEO lookup splits cleanly into a handful of workers handling batches — not fifty one-each. Match the count to the real independent seams in the work, and route down to a single agent (or no sub-agent at all) when the task doesn't actually have them. Split the model *tier* across layers, too: a frontier model at the orchestration/synthesis layer (decomposition, coordination) and a cheaper, faster model at the embarrassingly-parallel worker layer — Anthropic's multi-agent research found this split beat a single frontier agent by ~90%.
 
 **~4 is the practical optimal for a typical task** (e.g. a frontend / backend / tests / infra split). Beyond a handful you hit the named failure mode YC's Light Cone calls "Claude Code cyber psychosis" — workers stepping on each other's edits and generating incompatible implementations of the same interface, faster than you can reconcile them (the coinage is YC's Light Cone; the ~4 figure is directional, not a measured optimum). The fix is the file-ownership discipline above, but the cheaper fix is *not spawning the extra workers in the first place*.
 
