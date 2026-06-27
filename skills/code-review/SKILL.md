@@ -83,7 +83,7 @@ Then one verdict: **APPROVED** (no Critical/Important — a clean diff gets a on
 The review **finds**; it does not edit. A reviewer that can edit ships its own unreviewed bug (compound-v:recheck). The two outbound actions are explicit, separate phases that run *after* the findings exist — triggered by intent ("post these to the PR", "apply the fixes") or by the familiar `--comment` / `--fix` flags from Claude Code's own reviewer:
 
 - **Post to GitHub (`--comment`)** — write the findings as inline PR comments via `gh`. Re-run the eligibility check first (state can change while you review). Keep each comment brief, no emojis, and cite the file + line with a permalink. If there are no surviving findings, say so and skip — don't post an empty review.
-- **Apply the fixes (`--fix`)** — apply the surfaced findings to the working tree as a deliberate follow-on, skipping any that are wrong or not worth it, then **re-run the relevant tests/linter/build and read the output** before claiming done (compound-v:verification-before-completion). This is a distinct apply phase, not the reviewer silently mutating code mid-review.
+- **Apply the fixes (`--fix`)** — apply the surfaced findings to the working tree as a deliberate follow-on, **verifying each against the code before implementing it** and pushing back on a wrong one rather than typing it out (the receiving-findings discipline in compound-v:batched-implementation) — skipping any that are wrong or not worth it, then **re-run the relevant tests/linter/build and read the output** before claiming done (compound-v:verification-before-completion). This is a distinct apply phase, not the reviewer silently mutating code mid-review.
 
 ## Red flags
 

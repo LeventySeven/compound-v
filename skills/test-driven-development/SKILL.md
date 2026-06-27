@@ -73,6 +73,7 @@ The point of a test is to exercise the actual behavior. Mocks that assert on the
 - **Don't test the mock.** `mock.assert_called_with(...)` checks that you called your own stub — it tells you nothing about whether the code works. Test the real output, the real state change, the real return value.
 - **Don't mock what you don't understand.** If you mock a dependency without knowing its real contract, the mock encodes your *assumption*, and the test passes against a fiction.
 - **No test-only methods in production classes.** If a class needs a `reset_for_test()` hatch to be testable, the design is wrong — fix the seam, don't add the hatch.
+- **Hard to test is a design signal.** When a test needs heavy mocking, sprawling setup, or a convoluted assertion just to write at all, that's the design telling you the code is too coupled or the seam is wrong — change the design (inject the dependency, split the unit, simplify the interface), don't contort the test to fit it.
 - **Prefer real collaborators** (a real in-memory DB, a real temp file, a real local server) over mocks wherever it's cheap. It's cheaper than ever to spin one up — ask the model to seed realistic fixtures ("create 100 users with made-up names").
 
 A passing test suite still doesn't prove the system *runs* — tests miss "the web server won't even start." After green, exercise it for real: **compound-v:verification-before-completion**.

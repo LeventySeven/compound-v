@@ -592,3 +592,16 @@ The recurring public primary URLs, for quick verification:
 | Claim (short) | skill | Category | Source / note |
 |---|---|---|---|
 | For a wrong AI answer, debug from the raw context the model received (not the rendered output); if you can't derive the answer from that context, the bug is retrieval not the prompt — force answer-only-from-provided-context to localize | `systematic-debugging` | PRIMARY | Jake Heller (Casetext/CoCounsel), "Context Engineering: Lessons from Scaling CoCounsel" (YC AI Startup School); "answer only from provided context" is a standard RAG grounding/diagnosis technique. |
+
+---
+
+## Adapted from superpowers v6.0.3 (2026-06-27)
+
+*Content-gap pass against superpowers v6.0.3 (github.com/obra/superpowers). Most shared skills were at parity or ahead; these four techniques were genuinely missing and adapted into the kit's own voice. (Their "receiving code review" discipline was found already covered by `batched-implementation`'s "Responding to findings"; their "praise the author first" reviewer directive was rejected as conflicting with the kit's anti-sycophancy stance.)*
+
+| Claim (short) | skill | Category | Source / note |
+|---|---|---|---|
+| Capture a **green baseline** — run the suite before editing; if already red, stop and surface it — so a later failure is attributable to your change, not a pre-existing one | `batched-implementation` | JUDGMENT-CALL | Standard engineering practice; spelled out as a pre-implementation step in superpowers `using-git-worktrees` (github.com/obra/superpowers). |
+| **Compaction-resume protocol** — after a compaction/restart, reconcile against `git log` before dispatching; a committed batch is done, resume at the first uncommitted task, never re-dispatch completed work | `batched-implementation` | PRIMARY | superpowers `subagent-driven-development` names controller re-dispatch of completed task sequences after compaction as its most expensive observed failure and defends with a durable ledger + "trust git log over recollection" (github.com/obra/superpowers). Durable-state-survives-the-window framing owned by `compound-v:context-engineering`. |
+| Plan preamble carries the **global constraints every task must honor** (version floors, dependency limits, naming/security/perf rules, platform requirements), one line each — a fresh batch implementer sees only its own tasks and regresses unstated constraints to defaults | `writing-plans` | PRIMARY | superpowers `writing-plans` "## Global Constraints" header block (github.com/obra/superpowers). |
+| **Hard to test is a design signal** — heavy mocking / sprawling setup / convoluted assertions mean the code is too coupled or the seam is wrong; fix the design, not the test | `test-driven-development` | PRIMARY | Test-driven-design feedback loop (Kent Beck, *Test-Driven Development: By Example*; Michael Feathers on testability as a design smell); surfaced in superpowers `test-driven-development` "When Stuck" (github.com/obra/superpowers). |
