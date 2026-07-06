@@ -51,6 +51,15 @@ One-sentence core principle.
 - **Match specificity to fragility.** Rigid step-by-step gates only for documented failure modes
   (verification, design-before-code, root-cause-before-fix); everywhere else give the reasoning and
   trust judgment (Ruling C). Over-specifying a robust step is the same defect as overkill.
+- **Match the *form* to the failure, not just the rigidity.** Specificity is one axis; the *shape* of
+  the guidance is another, and it's failure-type-specific. A **discipline** failure (the model knows
+  the rule but skips it under pressure) wants a prohibition / red-flag row; a **wrong-output-shape**
+  failure wants a positive recipe or example; an **omitted-element** failure wants a structural
+  `REQUIRED:` slot. Crucially, a prohibition list *backfires* on a shaping problem — in head-to-head
+  wording tests the "don't X" arm produced *more* of the unwanted output than a positive-recipe arm,
+  and trended worse than no guidance at all; and "don't X unless it matters" only reopens the
+  negotiation (superpowers, "writing-skills"). So reach for a table when the model knows-but-skips,
+  never to shape an output.
 - **Mind validation.** `name`/`description` are the only required keys; any other top-level key fails
   validation. `name` must match `^[a-z0-9-]+$`, ≤64 chars, and equal the directory name.
 
@@ -79,7 +88,11 @@ links — they force-load the file and burn context before it's needed.
   ones. No Iron-Law liturgy, no rationalization tables, no all-caps reinforcement walls. And no
   mandatory pressure-test-before-every-edit gate: that ceremony would turn a one-line deepen into a
   multi-day exercise and break the kit's ship-in-hours discipline. Test a *new* skill or a risky
-  change; don't gate every word.
+  change; don't gate every word. When you do test a load-bearing wording, do it cheaply: always
+  include a **no-guidance control** (if the control doesn't exhibit the failure, there's nothing to
+  fix — don't author the guidance), run **5+ reps** per variant (single samples lie), and treat
+  **variance as the signal** — five different readings across five reps means the wording isn't
+  binding yet.
 - Every section answers: would a senior engineer be *worse off* without it? If not, cut it.
 - No ceremony, no triple-reinforced rationalization walls, no dated "in session X we…" narratives,
   no motivational filler, no model cost-tiering (we run Opus 4.8).

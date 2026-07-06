@@ -7,12 +7,12 @@ description: Write a failing test before the implementation, watch it fail, then
 
 Write the test first. The failing test is the spec; the implementation exists only to turn it green.
 
-For an agent, TDD is no longer the slow tax it was for humans. The test is "five tokens" of instruction and the model spins on it without complaining (Willison, "Engineering practices that make coding agents work"). Its real payoff is two things you can't get from tests-after:
+For an agent, TDD is no longer the slow tax it was for humans. The instruction is nearly free — "use red-green TDD" is about five tokens, and every good coding agent already knows what that means and runs with it (Willison, "Engineering practices that make coding agents work"). Its real payoff is two things you can't get from tests-after:
 
 - **It bounds the work.** A failing test defines *exactly* what "done" means, so the model writes the minimum to pass and stops — instead of gold-plating or drifting. ("TDD stops the agent writing more than it needs.")
 - **It is the verifiable signal.** A green suite you watched go red-then-green is the evidence that lets you trust code without reading every line. This is the leash that makes an autonomous agent safe to run.
 
-The cost of tests used to be the writing and the maintenance. For an agent that's near zero now, so tests are no longer optional — skipping them is leaving the one cheap proof of correctness on the table.
+The cost of tests used to be the writing and the maintenance. For an agent that's near zero now, so tests are no longer optional — skipping them is leaving the one cheap proof of correctness on the table. Open the session by running the existing suite *first*, before any task: it confirms tests exist, forces the agent to learn how to invoke them, and sets the testing frame for everything that follows (Willison).
 
 ## When to use
 
@@ -62,7 +62,7 @@ def total(items, currency="USD", rounding="bankers", discount=None):
     ...  # YAGNI — delete it until a test needs it
 ```
 
-**Verify GREEN.** Start with the narrowest test for the code you changed (fastest signal), then widen to the whole suite — confirm you didn't break something else (OpenAI Codex CLI, "Testing Philosophy").
+**Verify GREEN.** Start with the narrowest test for the code you changed (fastest signal), then widen to the whole suite — confirm you didn't break something else (OpenAI Codex CLI, "Testing Philosophy"). Read the output, not just the exit code: a suite can report 0 failures while emitting stderr noise, a deprecation warning, or an `act()`-style warning that flags a real problem. The bar is green *and* clean, not just green.
 
 **REFACTOR.** Now clean up (extract, rename, dedupe) with the green suite as your safety net. Behavior unchanged, tests stay green.
 
@@ -93,8 +93,5 @@ Writing the reproduction first is also how you *understand* the bug. If you can'
 | Thought | Why it's wrong |
 | --- | --- |
 | "I'll add tests after it works." | Tests-after pass on the first run and prove nothing — they ratify whatever you wrote, bugs included. You also lose the scope-bounding that writing the test first gives you. |
-| "The test passed immediately, good." | A test that never failed is unverified — it might assert nothing, or the behavior already existed. Make it go red first. |
-| "I'll mock the database to keep it fast." | A mock encodes your assumption of the dependency; use a real (in-memory/temp) collaborator so the test exercises the real contract. |
-| "Tests are green, so I'm done." | Green is necessary, not sufficient — the suite can pass while the app won't boot. Verify for real before claiming done: **compound-v:verification-before-completion**. |
 | "I wrote the code first, I'll just keep it." | Then you can't know the test actually tests it. Delete or set it aside, write the test, watch it fail, restore. |
 | Waiting for async work with a fixed delay (`setTimeout`, `sleep(500)`) | Flaky by construction — too short is a false red, too long crawls the suite. Wait on the *condition* (poll until the state holds, with a timeout cap), never a bare clock delay. |

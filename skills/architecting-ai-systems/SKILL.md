@@ -72,10 +72,10 @@ Hold the counterweight, because the same thesis that says "build the harness" sa
 | Symptom | The actual problem |
 | --- | --- |
 | Swap the model in your head and the product is basically the same | You built a wrapper. A base-model upgrade deletes you, not helps you. Find the primitive. (You skipped the go/no-go gate: **REQUIRED:** use compound-v:startup-taste.) |
-| Can't state the core primitive in one sentence | You don't have a primitive yet — you have a feature on top of someone's API. (You skipped the go/no-go gate: **REQUIRED:** use compound-v:startup-taste.) |
+| Can't state the core primitive in one sentence | You don't have a primitive yet — you have a feature on top of someone's API. |
 | "We'll fine-tune / train our own model" before the harness exists | Burns iteration speed; the next frontier release laps you. Build the composite around a frontier model. |
 | Reflexively reaching for vector RAG | Conflates filtering with relevance, flattens multi-hop. Pick the retrieval shape from the task. |
-| Building an RL loop before the verifier exists | The verifier sets the ceiling and catches reward-hacking. Build it first. (You skipped the go/no-go gate: **REQUIRED:** use compound-v:startup-taste.) |
+| Building an RL loop before the verifier exists | The verifier sets the ceiling and catches reward-hacking. Build it first. |
 | Architecting only for what the model can do *today* | You'll have rebuilt it before launch. Size the harness to ~18 months out (METR doubling ~7mo). |
 | A thick hand-built scaffold the next model will absorb | That layer is now your ceiling. Keep the harness thin and model-forward; delete it each release. |
-| Core primitive runs on a third-party service | That service caps your quality. Own the layer that sets your ceiling, or you don't control your destiny. (You skipped the go/no-go gate: **REQUIRED:** use compound-v:startup-taste.) |
+| Core primitive runs on a third-party service | That service caps your quality. Own the layer that sets your ceiling, or you don't control your destiny. |

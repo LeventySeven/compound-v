@@ -42,7 +42,7 @@ A bigger pass is not a better pass — `low` on a one-file fix is the right call
 
 ## Step 3 — the lenses (parallel fan-out at `high`+)
 
-At `high` and above, read the diff through several independent lenses **in parallel** and merge their findings. Reading and analysis parallelize cleanly; keep any *write* single-threaded — multi-agent earns its keep as added review intelligence, never as parallel editors (compound-v:ai-system-reliability). A clean-context reviewer that reasons backward from the diff catches what the author's own context rationalizes away — about 2 bugs/PR, most of them severe, in Cognition's measured data.
+At `high` and above, read the diff through several independent lenses **in parallel** and merge their findings. Reading and analysis parallelize cleanly; keep any *write* single-threaded — multi-agent earns its keep as added review intelligence, never as parallel editors (compound-v:ai-system-reliability). A clean-context reviewer that reasons backward from the diff catches what the author's own context rationalizes away — the same clean-context review mechanism (and its measured bugs-per-PR) that **compound-v:recheck** documents.
 
 1. **Conventions** — does the diff obey the relevant `CLAUDE.md` / `AGENTS.md` and the codebase's existing shape? (House rules are guidance for *writing* code, so not every line applies on review — judge intent.)
 2. **Bugs in and around the diff** — first a shallow scan of the changed lines: logic errors, unhandled edge cases, off-by-one, null/undefined, error paths that swallow, races, resource leaks. Then widen to the **contract**: trace the callers and callees of every modified symbol and pull just those directly-connected files into context, since a change often breaks a dependency it never touches and that cross-file break is invisible if you read only the diff. Load the contract, not the whole repo (compound-v:context-engineering). Only what's **introduced here** — pre-existing bugs are out of scope.
@@ -55,6 +55,8 @@ Security is a lens too, but its catalog lives in compound-v:agent-security (buil
 ## Step 4 — gate false positives by confidence
 
 This is the step that makes an on-demand reviewer trustworthy instead of noisy. Gate cheapest-first: before scoring anything, **drop any finding whose cited line doesn't map to a real changed line in the diff** — a hallucinated location is a common false positive and catching it is free and deterministic. Then score every surviving candidate finding 0–100 for how sure you are it's a *real, diff-introduced* issue, and **drop anything below ~80** — the confidence-scored filter the official Claude Code reviewer uses to keep false positives off the PR. For a CLAUDE.md-derived finding, re-verify the rule actually says what you claim before it counts.
+
+The confidence gate filters hallucinated findings *after* they're generated; the sharper fix is upstream. A free-text "review this diff" prompt defaults to *manufacturing* nits, because silence reads as failure — so make "nothing to report" an explicit, equally-valid outcome (a `finish_review(comments: 0)` action), not an absence of output. One production reviewer's switch from free text to a forced per-finding action with an explicit no-finding branch cut its hallucination ratio from ~9:1 to ~1:1 (Graphite/Diamond).
 
 Default to *not* a finding. These are not findings:
 

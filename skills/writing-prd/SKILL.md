@@ -1,11 +1,11 @@
 ---
 name: writing-prd
-description: Write or maintain a PRD — the product's stable, model-agnostic source of truth that a person or a fresh AI session reads first to get ~80% of the context in one pass: what the product is, what it does, and what it runs on. Use when asked for a PRD, a product doc, or a product spec, when bootstrapping `docs/` for a new product, when a fresh session keeps re-deriving the same product context, or when onboarding a human or agent to an existing product. Not for per-build decisions (that's writing-plans) or designing one feature (that's brainstorming).
+description: Write or maintain a PRD — the product's stable, model-agnostic source of truth that a person or a fresh AI session reads first to get most of the context in one pass: what the product is, what it does, and what it runs on. Use when asked for a PRD, a product doc, or a product spec, when bootstrapping `docs/` for a new product, when a fresh session keeps re-deriving the same product context, or when onboarding a human or agent to an existing product. Not for per-build decisions (that's writing-plans) or designing one feature (that's brainstorming).
 ---
 
 # Writing a PRD
 
-A PRD is the product's **stable source of truth** — the durable record of what the product *is* and why it's shaped that way, captured once so neither a person nor a fresh AI session has to re-derive it. Its whole job is to be read *first* and hand over ~80% of the context in one pass. It is **not** a record of what you're building right now — that's the plan. If reading the PRD doesn't replace re-discovery, it isn't doing its job.
+A PRD is the product's **stable source of truth** — the durable record of what the product *is* and why it's shaped that way, captured once so neither a person nor a fresh AI session has to re-derive it. Its whole job is to be read *first* and hand over most of the context in one pass. It is **not** a record of what you're building right now — that's the plan. If reading the PRD doesn't replace re-discovery, it isn't doing its job.
 
 ## When to use
 - You're asked for a PRD, a product doc, a product spec, or "the doc that explains this product."

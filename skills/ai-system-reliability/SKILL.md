@@ -10,7 +10,7 @@ In a built AI system, reliability is the product and the seams between subsystem
 ## When to use
 
 - The system is shipped and now **drifts, double-fires, races, or plateaus** at one model's per-step ceiling — capability is fine, but it isn't dependable enough to keep users.
-- You need **95%-reliable beating 70%-capable**: users leave after two failures, so you'd trade raw capability for dependability (Amjad Masad, Replit, "The Future of Software Creation").
+- You'd trade raw **capability for dependability** — a reliable-but-narrower system beats a more-capable-but-flaky one once users get burned and stop trusting it (the reliability bar **compound-v:startup-taste** owns and grounds).
 - You're chaining a **supervisor/specialist constellation** to compound past what one model does in a single pass, or wiring **durable execution, failover, budgets, or fan-out** at scale.
 - A **weird failure** just happened and you want it to become a permanent regression case, not a one-off patch.
 - You're reviewing a durable/concurrent AI system for the **state-corruption landmines at the seams** (async re-fires a non-idempotent call, two logs disagree on resume, `MAX(seq)+1` races, TOCTOU on the budget, a reask rewrites a destructive call).
@@ -24,10 +24,10 @@ This skill is **system-level**. For PER-STEP reliability inside one loop (the 0.
 A single frontier model has a fixed per-step ceiling; you raise the *system's* ceiling by chaining roles, not by waiting for a better model. The default architecture, from teams running customer-facing agents in production:
 
 1. **Self-error-detection.** Models catch their own mistakes more reliably than they avoid making them — so add a check after the act, not just a better prompt before it.
-2. **Supervisor / specialist constellation.** A primary model is supervised by specialist models, with human escalation as the last rung. Sierra runs self-error-detection → supervisor chain; Hippocratic AI runs a "constellation" — a primary model watched by specialist models plus human escalation — precisely because one model can't be trusted alone in a high-stakes domain (Clay Bavor, Sierra, "Making Customer-Facing AI Agents Delightful"; Munjal Shah, Hippocratic AI, "Building the First Safety-First LLM for Healthcare").
+2. **A second, generic reviewer first — not a trained constellation.** Default to *one* generic model reviewing the primary's output post-hoc against a rubric; add specialist watchers, and human escalation as the last rung, only when a *named* gap forces it (a high-stakes medical or financial domain is exactly such a gap — Clay Bavor, Sierra, "Making Customer-Facing AI Agents Delightful"; Munjal Shah, Hippocratic AI, "Building the First Safety-First LLM for Healthcare"). The burden of proof is on the extra watcher — the same escalation discipline as **compound-v:designing-agents** — so resist reaching for an N-model constellation by default.
 3. **Simulator-as-regression.** Every fix becomes a permanent regression case via a conversation simulator — the failure you just fixed can never silently return. This *feeds* your eval suite: **REQUIRED:** use `compound-v:evals` to turn the captured failure into a judge/eval case — that skill owns judge construction and align-to-human; here you only generate the case.
 
-Constellation topology has a default too: **parallelize the reading/searching/analysis, keep every write single-threaded.** Two agents writing the same state concurrently is a merge conflict you chose to create; multi-agent should *add intelligence* (a review or supervisor loop), not add parallel writers (Walden Yan, Cognition, "Don't Build Multi-Agents"; Anthropic, "How We Built Our Multi-Agent Research System"). **REQUIRED:** for the fan-out mechanics use `compound-v:dispatching-parallel-agents`.
+The topology default — **parallelize reading/analysis, keep every write single-threaded** (multi-agent adds review intelligence, not parallel writers) — is owned by **compound-v:designing-agents**; for the fan-out mechanics use **compound-v:dispatching-parallel-agents**.
 
 For a **long-horizon agent spanning many context windows**, durable resume is also a harness contract, not just an engine checkpoint: each session begins with no memory, so end every session in a clean, mergeable state with structured handoff artifacts (a progress log, descriptive commits, a spec checklist), and start the next by reading them and running a basic end-to-end check *before* building more. Skip this and a later session looks around, sees that progress was made, and declares the job done — the silent failure. Deploys are part of that contract: a long-running agent's context window and checkpoint format are pinned to the version it started on, so flipping everyone to a new version mid-run corrupts in-flight state — keep running agents on their start-version until they finish (a *rainbow deployment*) instead of a blue-green cutover.
 
@@ -44,10 +44,6 @@ And treat every weird failure as a **research lead, not a bug ticket** — nets 
 
 And every constraint the reflex adds has a shelf life: tag each workaround you added *because a model kept getting it wrong* with the model version, and review it for deletion on each model release — accumulated scaffolds become capability overhang, and a reliability fix can curdle into a reliability bug (a constraint that rescued a weaker model can make a stronger one worse). The general delete-on-release thesis is `compound-v:architecting-ai-systems`; this is its reliability-specific edge.
 
-## The serving/inference system is a reliability moat
-
-At scale the durable edge is the serving stack itself, not the weights: native low-precision training to kill train/serve mismatch, attention/KV-cache engineering for order-of-magnitude memory cuts, and stateful prefix caching. Character.AI's stack (int8-native training, multi-query/hybrid attention, cross-layer KV-sharing for 20x+ KV-cache reduction, a 95%-hit prefix cache cutting serving cost ~33x) is the proof that correctness-and-cost of serving is where the moat lives (Character.AI engineering, "Optimizing AI Inference at Character.AI"). Its correctness half is unforgiving: serving one model across heterogeneous backends demands strict implementation equivalence, and a violation degrades output almost invisibly — a real run of inference bugs evaded standard evals precisely because the model recovers well from isolated mistakes, so the fix is to run quality evals *continuously on true production traffic*, not just pre-deploy. Note this is the *reliability/durability* angle on serving; the **KV-cache mechanics** themselves belong to `compound-v:context-engineering`.
-
 ## Correctness invariants that prevent silent drift
 
 These are the default contracts a reliable AI system holds at its seams. They aren't all-caps rules; each one closes a specific silent-failure path:
@@ -57,6 +53,7 @@ These are the default contracts a reliable AI system holds at its seams. They ar
 - **Compaction masks, never silently truncates.** Overflow replaces *old tool outputs* with a placeholder while keeping all reasoning/user/assistant turns and the message structure — lossy truncation hands the next window a hole it hallucinates over. This is the correctness invariant only; the **compaction ladder mechanics** are `compound-v:context-engineering`.
 - **Classify failures, then retry-same vs failover-to-different on the right axis.** Map each provider exception to a `FailureKind`: transient/rate-limit → retry the *same* candidate with capped backoff + jitter; context-window error → fail *over* to a different model; auth/content-policy → raise immediately (blind retry is harmful). Same-model retry just repeats a deterministic failure — a different model is a new experiment.
 - **A fallback that silently drops `tools` is a correctness bug.** The dangerous failover is a provider that *accepts* the request but ignores the `tools` field, returns prose instead of a tool call, and breaks the loop with no error. Guard it at construction (`require_parameters` rejecting any candidate that can't use tools), not at runtime.
+- **Run quality evals continuously on real production traffic, not just pre-deploy.** A model that recovers gracefully from isolated errors *hides* serving/inference bugs from a pre-deploy eval — the drift only surfaces on live traffic (Character.AI, "Optimizing AI Inference at Character.AI"). The serving-stack mechanics themselves (KV/prefix cache) belong to **compound-v:context-engineering**.
 
 ## The seam landmines: where durable AI state actually corrupts
 
@@ -92,7 +89,7 @@ The general lesson the example teaches: at every seam where a side effect and a 
 
 | Symptom | The actual problem |
 | --- | --- |
-| "We'll fix reliability when the model gets better" | You raise the *system's* ceiling by chaining a constellation, not by waiting — 95%-reliable beats 70%-capable. |
+| "We'll fix reliability when the model gets better" | You raise the *system's* ceiling by chaining roles, not by waiting — a reliable-but-narrower system beats a flaky-but-capable one once users get burned. |
 | Response to a failure is "make the prompt try harder" | Skipping the failure reflex. Ask which capability was missing and make the fix enforceable in the harness. |
 | Fast/async durability is the default | A crash re-fires a non-idempotent LLM call or tool — divergent log, double side effect. Sync by default; async opt-in; destructive forces sync. |
 | Both an event log and a memo journal are authoritative on resume | Two correct models stitched without reconciliation disagree on crash. Pick one source of truth. |

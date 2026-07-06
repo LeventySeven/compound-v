@@ -29,7 +29,7 @@ Skipping any step is asserting something you haven't checked.
 | --- | --- | --- |
 | "Tests pass" | Ran the suite this turn; output shows **0 failures** + exit 0 | "Should pass" · the tests passed before your last edit · only one test ran |
 | "Build / typecheck is clean" | Ran the build/typecheck; **exit 0** | The linter passed · it compiled an hour ago · no red in the editor |
-| "The bug is fixed" | A test that reproduces the **original symptom** now passes | The code looks right · it no longer crashes on *your* one input |
+| "The bug is fixed" | A test reproducing the **original symptom** now passes — and *would fail without the fix* (revert the fix, watch the test go red, restore it) | The code looks right · a green test you never saw fail — running it once green doesn't prove it would have caught the bug |
 | "Feature is complete" | Each requirement checked off against the spec, line by line | "I implemented the main part" · it handles the happy path |
 | "It runs" | Actually started it (booted the server, ran the CLI, hit the endpoint) | The unit tests are green — passing tests don't prove the app boots |
 | "The subagent finished it" | **You read the VCS diff yourself** and ran the suite | The agent reported success · its summary says DONE |

@@ -47,11 +47,11 @@ Rungs 3–7 are AI features, and their internal shape is already owned. Once the
 
 The reflex answer is "fine-tune a classifier" or "build an agent." Walk the ladder against the framed check (correct category on a held-out set of real emails):
 
-- **Rung 1 — rules.** A keyword/sender table ("refund/charge → Billing", "reset/login → Account") is tried first. Measured on real traffic it lands ~90% of the volume correctly. That tier ships today: zero model cost, fully deterministic, instantly debuggable. Climbing higher for this 90% would be pure overkill — the cheaper rung did **not** provably fail it.
-- **Rung 3 — one model call, for the tail only.** The ~10% the rules can't place (ambiguous, multi-topic) is the case that *proves* rung 1 fails. So only that slice escalates to a single classification call, with a check on its output. You did not replace the rules; you added one rung exactly where the lower one broke.
+- **Rung 1 — rules.** A keyword/sender table ("refund/charge → Billing", "reset/login → Account") is tried first. In this scenario, assume it covers the large majority of routine traffic correctly (measure it on a held-out set to know). That tier ships today: zero model cost, fully deterministic, instantly debuggable. Climbing higher for that majority would be pure overkill — the cheaper rung did **not** provably fail it.
+- **Rung 3 — one model call, for the tail only.** The minority the rules can't place (ambiguous, multi-topic) is the case that *proves* rung 1 fails. So only that slice escalates to a single classification call, with a check on its output. You did not replace the rules; you added one rung exactly where the lower one broke.
 - **Rung 6 — agent, only if the goal grows.** If the goal were "categorize *and* draft a resolution that may need a refund lookup, a policy check, and a reply," that's a multi-step path you can't pre-script — now an agent legitimately earns its place, and you climb because *the goal forced it*, not for fun. At that point its loop/tool shape is compound-v:designing-agents and its reliability is compound-v:make-it-stable.
 
-The whole skill in one line: the simplest thing that works for the 90% was *no AI*, for the tail was *one call*, and for the hard version was *an agent* — each rung chosen because the one below it provably couldn't carry that part of the goal, and not one rung higher.
+The whole skill in one line: the simplest thing that works for the bulk of traffic was *no AI*, for the tail was *one call*, and for the hard version was *an agent* — each rung chosen because the one below it provably couldn't carry that part of the goal, and not one rung higher.
 
 ## Red flags
 

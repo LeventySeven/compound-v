@@ -84,6 +84,4 @@ A signal you've already crossed this line: you're adding defensive checks, retri
 | --- | --- |
 | "Let me just try changing this and see." | You're guessing. Reproduce and trace to the cause first (Phase 1). |
 | "I'll reinstall deps / bump the version and hope." | Diagnose before mutating the environment — read the error and the lockfile first (Phase 2). |
-| "It might be one of these few things, I'll fix all of them." | One hypothesis, one variable. Fixing several at once hides which was real and may add bugs. |
 | Wrapping the symptom in a try/except or a retry to make it pass | That's concealment, not a fix. Find why it throws. |
-| "The error message is long, I'll skim it." | Read it fully — the exact cause is often in the part you'd skip. |

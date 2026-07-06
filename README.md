@@ -60,7 +60,7 @@ The kit checks itself. `bash scripts/check.sh` reads every skill and fails if on
 
 ## How it was built
 
-Compound V was built with its own loop: batched Opus implementers and a read-only `recheck` on every batch. The source material was an audit of how today's production coding and research agents behave, the canonical engineering and skill-authoring writing, practitioner talks, and a founder-judgment canon. The build's own recheck caught real defects, including a router over its line budget, a verdict-handling gap, and two descriptions that broke the kit's own rules, and they were fixed before commit. Each release re-checks discoverability and the review pass with a small eval suite.
+Compound V was built with its own loop: batched Opus implementers and a read-only `recheck` on every batch. The source material was an audit of how today's production coding and research agents behave, the canonical engineering and skill-authoring writing, practitioner talks, and a founder-judgment canon. The build's own recheck caught real defects, including a router over its line budget, a verdict-handling gap, and two descriptions that broke the kit's own rules, and they were fixed before commit. `scripts/check.sh` re-runs the structural checks (above) on every change.
 
 ## License
 
