@@ -52,7 +52,9 @@ Three rules sit above the skills:
 /plugin install compound-v@compound-v-dev
 ```
 
-For local work, symlink the skill directories into `~/.claude/skills/`. A SessionStart hook injects the small router each session, a UserPromptSubmit hook re-asserts the routing directive each turn (one self-gating line, so skills keep firing as context grows instead of decaying after the opening turn), and everything else loads on demand — so the always-on cost is the router plus a one-line nudge.
+For local development, point a directory marketplace at your clone and enable the plugin — **don't also copy or symlink the skills into `~/.claude/skills/`.** A personal-level copy takes precedence over the plugin, so you end up running a snapshot while editing the repo, and every skill appears twice in the listing: two entries competing for one shared, truncated description budget. The failure is silent in both directions — your edits don't take effect, and the extra entries shorten everyone else's triggers.
+
+A SessionStart hook injects the small router each session, a UserPromptSubmit hook re-asserts the routing directive each turn (one self-gating line, so skills keep firing as context grows instead of decaying after the opening turn), and everything else loads on demand — so the always-on cost is the router plus a one-line nudge.
 
 ## Checking the kit
 
