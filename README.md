@@ -8,7 +8,7 @@ The bet is that code got cheap and judgment didn't. So most of these skills are 
 
 Every session starts at the router. `using-compound-v` loads up front and sizes the task first, so a typo just gets fixed and a real feature earns the full pipeline. A one-line change never spawns four agents.
 
-For a real feature the path is short: pin the design with `brainstorming`, turn it into a plan an implementer with no prior context can follow with `writing-plans`, build it with `batched-implementation` (one fresh subagent per two or three related tasks, all on your strongest model), and review each batch with `recheck` before the next one starts. A five-task plan lands in about four dispatches.
+For a real feature the path is short: pin the design with `brainstorming`, turn it into a plan an implementer with no prior context can follow with `writing-plans`, build it with `batched-implementation` (one fresh subagent per two or three related tasks), and review each batch with `recheck` before the next one starts. A five-task plan lands in about four dispatches.
 
 ## The workflow
 
@@ -19,7 +19,7 @@ using-compound-v → brainstorming → writing-plans → batched-implementation 
 
 Two pieces carry most of the weight:
 
-- `batched-implementation` runs one implementer per two or three related tasks, all on your strongest model. It keeps going instead of stopping to ask permission, and reports each batch with a four-status contract.
+- `batched-implementation` runs one implementer per two or three related tasks — sized by what one review pass can hold in judgment, not by what fits in a context window. It passes no model parameter, so each worker inherits the session model rather than being silently downgraded. It keeps going instead of stopping to ask permission, and reports each batch with a four-status contract.
 - `recheck` is a single read-only pass, ordered cheapest-disqualifying-first: goals, plan, bugs, vulnerabilities, re-test, over-engineering. It returns severity-tagged findings and one verdict, and caps the fix loop at three rounds. It stays read-only because a reviewer that can edit ships its own unreviewed bug.
 
 ## The skills
@@ -43,7 +43,7 @@ Three rules sit above the skills:
 
 - Honest. Evidence over claims, no praise-padding, no false "done." When something doesn't work, it says so.
 - Safe. Security is a review axis that blocks a merge. It's never traded away to ship, and the kit won't write harmful code.
-- Grounded. The skills come from how production coding agents actually behave and from primary engineering sources, not invented best practice. Every load-bearing number maps to a public source in `references/sources.md`. A claim that can't be grounded is marked as a judgment call.
+- Grounded. The skills come from how production coding agents actually behave and from primary engineering sources, not invented best practice. Load-bearing numbers map to a public source in `references/sources.md`, and a claim that can't be grounded is marked as a judgment call. That file also carries an open list of claims still missing a source — an accurate ledger with known gaps beats one that quietly implies everything is covered.
 
 ## Install
 
@@ -60,15 +60,17 @@ A SessionStart hook injects the small router each session, a UserPromptSubmit ho
 
 The kit checks itself, structurally and behaviourally.
 
-`bash scripts/check.sh` reads every skill and fails if one breaks a rule: a body over its line budget, a frontmatter name that doesn't match its directory, an unknown frontmatter key, a description over the 1024-char cap the harness truncates at, a cross-reference to a skill that doesn't exist, an `@path` link, or any mention of the private research notes that must never ship. It also prints the kit's always-on cost — the descriptions are loaded in every session whether or not a skill fires, so that number is the real price of admission. No dependencies; it drops straight into CI or a pre-commit hook.
+`bash scripts/check.sh` reads every skill and fails if one breaks a rule: a body over its budget, a frontmatter name that doesn't match its directory, an unknown frontmatter key, a description over the 1024-char cap the harness truncates at, a cross-reference to a skill that doesn't exist, an `@path` link, or any mention of the private research notes that must never ship. The size budget counts **words, not lines** — a body can double while the line count stays flat just by merging paragraphs, and the warning fires past ~3,750 words, the point where compaction stops re-attaching the rest of the file. It also prints the kit's always-on cost, since descriptions load in every session whether or not a skill fires. No dependencies; it drops straight into CI or a pre-commit hook.
 
-`bash scripts/trigger-eval.sh` answers the harder question: **do these skills actually fire?** A skill that never gets invoked changes nothing, and it fails silently — a description the harness truncated looks exactly like one that simply didn't match. The script drives the real CLI on your existing session auth, feeds it realistic user phrasings from `scripts/trigger-fixtures.tsv` with `Skill` as the only permitted tool, and reports which skill each prompt actually invoked. Negative fixtures are included: over-triggering on "fix the typo in the readme" is exactly as wrong as under-triggering on a real one.
+`bash scripts/trigger-eval.sh` answers the harder question: **do these skills actually fire?** A skill that never gets invoked changes nothing, and it fails silently — a description the harness truncated looks exactly like one that simply didn't match. The script drives the real CLI on your existing session auth, feeds it realistic user phrasings from `scripts/trigger-fixtures.tsv`, and reports which skill each prompt actually invoked. Everything that could write, spend or spawn is denied by settings, and each case is bounded by a timeout. Negative fixtures are included: over-triggering on "fix the typo in the readme" is exactly as wrong as under-triggering on a real one, and a run that fails outright is reported as an error rather than scored as a pass.
 
-It measures routing, not output quality, and each case is one cold turn — so it can't see a skill decaying over a long session. Both are real limits, and it's still the difference between "every line changes what the agent does" as a claim and as a number.
+It measures routing, not output quality, and each case is one cold turn — so it can't see a skill decaying over a long session. A miss is also not automatically a skill defect: the fixture can be wrong about what should happen, and bending a skill to satisfy a bad fixture is how a suite starts lying to you. Both are real limits, and it's still the difference between "every line changes what the agent does" as a claim and as a number.
 
 ## How it was built
 
-Compound V was built with its own loop: batched Opus implementers and a read-only `recheck` on every batch. The source material was an audit of how today's production coding and research agents behave, the canonical engineering and skill-authoring writing, practitioner talks, and a founder-judgment canon. The build's own recheck caught real defects, including a router over its line budget, a verdict-handling gap, and two descriptions that broke the kit's own rules, and they were fixed before commit. `scripts/check.sh` re-runs the structural checks (above) on every change.
+Compound V is built with its own loop: batched implementers and a read-only `recheck` on every batch. The source material is an audit of how today's production coding and research agents actually behave, the canonical engineering and skill-authoring writing, practitioner talks, and a founder-judgment canon.
+
+The loop keeps earning its place. The most recent pass re-grounded every skill against the harness's own documented behaviour and found real defects: `code-review` carried the lethal trifecta it warns others about, several skills told you to pin a worker's model in a way that can silently downgrade it, and one taxonomy had three incompatible definitions across three files. The recheck on that pass returned FIX_REQUIRED and blocked the commit until they were fixed. Measurement caught the rest — a routing defect no amount of reading would have surfaced, and two of my own test fixtures that were wrong rather than the skills.
 
 ## License
 
