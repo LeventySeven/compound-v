@@ -15,6 +15,13 @@
 # either the description is missing a trigger phrase, or the fixture is wrong about
 # what should happen. Changing the skill to satisfy a bad fixture is how a suite starts
 # lying to you.
+#
+# Two rows below list several skills because the prompt is genuinely ambiguous and more
+# than one answer is right: "how would i even know if this worked" is both a success-check
+# question and a measurement question; "it works but only about half the time" is both a
+# flakiness problem and a debugging problem. Those rows record a real boundary between
+# skills rather than pretending one answer is correct — an eval that forces a single
+# answer onto an ambiguous prompt measures the fixture author, not the kit.
 
 should we build a dashboard for this or is it a waste of time	startup-taste
 i want to add team invites to the app	brainstorming
@@ -36,8 +43,8 @@ turn this design into steps an agent can follow	writing-plans
 i'm pretty sure this is the right approach, let's go	critical-thinking
 tests pass, we're done	verification-before-completion
 what's the least complicated way to do this	simplest-thing-that-works
-how would i even know if this worked	frame-the-goal,NONE
-it works but only about half the time	make-it-stable
+how would i even know if this worked	frame-the-goal,evals,NONE
+it works but only about half the time	make-it-stable,systematic-debugging
 what's the idiomatic way to write this in a framework i don't know	searching-patterns
 our multi-agent system double-fires on retries	ai-system-reliability
 help me design the architecture around the model	architecting-ai-systems
