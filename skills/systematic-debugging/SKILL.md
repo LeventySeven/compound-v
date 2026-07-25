@@ -22,9 +22,10 @@ For a one-line obvious typo (wrong variable name the compiler points at), just f
 You don't always need all four, but you may not skip *ahead* of a phase you haven't satisfied. You cannot hypothesize a cause (Phase 3) before you've reproduced and traced (Phase 1).
 
 ### Phase 1 — Find the root cause
+- **Read the code before you hypothesize — and expect that to feel expensive.** Models are trained with token-use penalties, so the pull is always toward firing off one cheap hypothesis immediately instead of spending tokens reading; the felt experience is urgency, as if the budget will run out mid-task. It won't. Reading the relevant code first can legitimately consume a large fraction of a session's tokens and still be the fastest path to the fix — five guesses cost more, in tokens and in damage. Naming the bias is what lets you override it.
 - **Read the actual error.** The full message, the full stack trace, the exit code. Not the gist — the literal text. The answer is often in a line people skip.
-- **A green you can't explain is a defect, not a pass.** AI/agent code fails silently — the loop exits 0 with a confidently-wrong answer and no error ever fires, so a passing-looking result you cannot account for is a bug *lead*, not a finish. Go simple-to-complex and never trust an output you can't explain; distrust the passing signal, don't just chase visible crashes. (Karpathy, *A Recipe for Training Neural Networks*: "neural nets fail silently… never trust a result you can't explain.")
-- **Reproduce it consistently.** A bug you can't trigger on demand, you can't verify you fixed. Find the exact inputs/steps. If it's flaky, make it deterministic before going further (e.g. control the timing/seed/ordering that makes it intermittent). For a nondeterministic agent/LLM there is no single reproducible stack trace — a bug that fires 1-in-5 runs defeats both "reproduce on demand" and "write one failing test." Build a small graded example set (**compound-v:evals**) and treat *where it fails across runs* as your repro and your regression guard — the same role a failing test plays for deterministic code. (Hamel Husain, *Your AI Product Needs Evals* — "no eval system" is the #1 reason AI products fail.)
+- **A green you can't explain is a defect, not a pass.** AI/agent code fails silently — the loop exits 0 with a confidently-wrong answer and no error ever fires, so a passing-looking result you cannot account for is a bug *lead*, not a finish. Go simple-to-complex and never trust an output you can't explain; distrust the passing signal, don't just chase visible crashes.
+- **Reproduce it consistently.** A bug you can't trigger on demand, you can't verify you fixed. Find the exact inputs/steps. If it's flaky, make it deterministic before going further (e.g. control the timing/seed/ordering that makes it intermittent). For a nondeterministic agent/LLM there is no single reproducible stack trace — a bug that fires 1-in-5 runs defeats both "reproduce on demand" and "write one failing test." Build a small graded example set (**compound-v:evals**) and treat *where it fails across runs* as your repro and your regression guard — the same role a failing test plays for deterministic code. (No eval system is the #1 reason AI products fail.)
 - **Shrink to the simplest failing case.** Strip the input down to the smallest instance that still fails — and check the system passes the *single simplest* instance (one item, empty list, one request) before you debug the broad case. If the simplest case already fails, the bug is upstream of everything you were looking at; debug *that* first.
 - **Check what recently changed.** `git diff`, `git log` on the touched files. Most new bugs entered with recent edits. If the regression's onset is unclear, `git bisect` (ideally `git bisect run <failing-test>`) pins the exact commit that introduced it.
 - **Trace backward from the symptom to its source.** Don't fix where the error *surfaces*; follow the data back to where it first goes wrong. In a multi-component flow, log (or inspect) the value at each boundary between components — the boundary where good input becomes bad output is your suspect. The error message location is a clue, not usually the cause.
@@ -39,12 +40,12 @@ You don't always need all four, but you may not skip *ahead* of a phase you have
 - State it explicitly: **"X is the root cause, because Y."** Writing it forces the causal claim into the open where you can check it.
 - **One hypothesis, one variable at a time.** Changing three things at once and seeing it pass tells you nothing about which mattered — and one of the other two may now be a latent bug.
 - If you genuinely don't know, say "I don't know" and go gather more evidence. A confident wrong hypothesis is worse than an admitted gap.
-- **If you can't state what "correct" would even look like, the bug is underspecification, not a code defect.** Pin the expected behavior down first — otherwise you chase a symptom that keeps shifting as your notion of "right" drifts (Hamel Husain on *criteria drift*).
+- **If you can't state what "correct" would even look like, the bug is underspecification, not a code defect.** Pin the expected behavior down first — otherwise you chase a symptom that keeps shifting as your notion of "right" drifts (*criteria drift*).
 
 ### Phase 4 — Fix and verify
 - **Write a failing test that reproduces the bug first**, then fix until it passes (this is the bug-fix loop in **compound-v:test-driven-development**). The test is your proof the fix landed and your guard against regression.
 - Make the **single** change your hypothesis predicts. Verify the symptom is gone and the suite stays green.
-- If the fix doesn't work, that hypothesis was wrong. Revert it (don't leave failed attempts stacked in the code), return to Phase 1 with what you just learned, and count the attempt.
+- If the fix doesn't work, that hypothesis was wrong. Revert it (don't leave failed attempts stacked in the code), return to Phase 1 with what you just learned, and count the attempt. Revert the *code*, but keep the failure in *context* — the failed action and its literal error text are what move you off that entire class of attempt, so don't tidy them out of the working notes or summarize them away. The instinct to clean up is exactly what makes a model re-issue the call that just failed.
 
 ## The 3-attempt rule — stop digging, question the design
 
@@ -67,16 +68,15 @@ digraph debug {
 }
 ```
 
-Classify the failure before you spend a retry. A **deterministic** red — validation error, missing/typed arg, auth revoked, type error — is guaranteed to fail again on the same inputs: **zero retries**, go straight to root cause or ask. Reserve the retry budget for genuinely **transient** faults (network blip, 503, rate limit). The retry-cap is for non-determinism, not for hoping a deterministic bug disappears — and a try/except-retry around a deterministic red is just that anti-pattern wearing a loop. (Standard transient-fault practice, e.g. Azure Architecture Center: retry only faults expected to be short-lived; never retry one guaranteed to recur.)
+Classify the failure before you spend a retry. A **deterministic** red — validation error, missing/typed arg, auth revoked, type error — is guaranteed to fail again on the same inputs: **zero retries**, go straight to root cause or ask. Reserve the retry budget for genuinely **transient** faults (network blip, 503, rate limit). The retry-cap is for non-determinism, not for hoping a deterministic bug disappears — and a try/except-retry around a deterministic red is just that anti-pattern wearing a loop. (Standard transient-fault practice: retry only faults expected to be short-lived; never retry one guaranteed to recur.)
+
+Name which degradation state you're actually in before you spend another attempt — **frozen / stuck / blocked / misdirected**, defined in **compound-v:designing-agents**; one word for all four gets you the wrong response. One rider is debugging-specific: **blocked** is not declarable on the first obstacle (a credential you don't hold, a service that's down). Require the **same** blocking condition across at least three consecutive attempts — one failure is noise, three is a signal — then escalate with the exact condition named.
 
 After three failed fixes, the problem is almost never the next tweak — your model of the system is wrong. **Do not attempt fix #4.** Stop and challenge a level-up assumption:
 
 - Is my understanding of how this system works actually correct? (Re-read, re-trace — maybe the data doesn't flow the way I assumed.)
-- Is the *design* the bug? A fix that keeps slipping away often means the abstraction is wrong, not the line.
-- Am I fixing the right layer? The symptom may be downstream of a cause in a component I haven't looked at.
+- Is the *design* the bug, or am I fixing the wrong layer? A fix that keeps slipping away usually means the abstraction is wrong rather than the line — and the symptom may be downstream of a cause in a component I never opened.
 - Should I ask the user / surface the blocker? "I've tried A, B, C, each failed because Z — I think the issue is the design of W" is far more useful than a fourth guess.
-
-A signal you've already crossed this line: you're adding defensive checks, retries, or `try/except` around a symptom you can't explain. That's not a fix — it's hiding the bug. Go back to root cause.
 
 ## Red flags
 
@@ -84,4 +84,4 @@ A signal you've already crossed this line: you're adding defensive checks, retri
 | --- | --- |
 | "Let me just try changing this and see." | You're guessing. Reproduce and trace to the cause first (Phase 1). |
 | "I'll reinstall deps / bump the version and hope." | Diagnose before mutating the environment — read the error and the lockfile first (Phase 2). |
-| Wrapping the symptom in a try/except or a retry to make it pass | That's concealment, not a fix. Find why it throws. |
+| Wrapping the symptom in a try/except, a defensive check, or a retry to make it pass | Concealment, not a fix — and a signal you crossed the 3-attempt line a while ago. Find why it throws. |

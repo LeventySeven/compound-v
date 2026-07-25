@@ -30,10 +30,10 @@ Climb only when the rung below **provably** fails the check. Most goals stop far
 6. **Agent** — a model in a loop with tools when the path can't be predicted in advance.
 7. **Multi-agent / full AI system** — a constellation or compound system when one agent provably can't carry the goal.
 
-Two rules make this honest, both from primary practice:
+Two rules make this honest:
 
-- **The burden of proof is on the higher rung.** "Find the simplest solution; add complexity only when it demonstrably improves outcomes — don't build agents for everything" (Erik Schluntz & Barry Zhang, Anthropic, "Building Effective Agents"). This is the AI restatement of the XP rule: "do the simplest thing that could possibly work," plus YAGNI (Ward Cunningham / Kent Beck). The matching restraint: spend your scarce novel-tech budget only on the part that's genuinely new and pick boring, proven tech for everything around it (Dan McKinley, "Choose Boring Technology" — innovation tokens).
-- **Never cap the goal — only the machinery.** A complex system that works grew from a simple system that worked (John Gall, *Systemantics* — Gall's Law), so for a hard goal you climb *because the goal forces it*, then keep every rung you don't need off the build. Anti-underkill matters as much as anti-overkill: when the goal genuinely demands rungs 6–7, build them — and stability scales up with them (**REQUIRED:** use compound-v:make-it-stable, and at full-system scale **REQUIRED:** use compound-v:ai-system-reliability).
+- **The burden of proof is on the higher rung.** Find the simplest solution; add complexity only when it demonstrably improves outcomes — don't build agents for everything. This is the AI restatement of the XP rule: "do the simplest thing that could possibly work," plus YAGNI.
+- **Never cap the goal — only the machinery.** A complex system that works grew from a simple system that worked (Gall's Law), so for a hard goal you climb *because the goal forces it*, then keep every rung you don't need off the build. Anti-underkill matters as much as anti-overkill: when the goal genuinely demands rungs 6–7, build them — and stability scales up with them (**REQUIRED:** use compound-v:make-it-stable, and at full-system scale **REQUIRED:** use compound-v:ai-system-reliability).
 
 The single biggest cost lever is *which rung*, not micro-optimizing an expensive one — a goal solved by a SQL query costs nothing a tuned agent can match. Cost is a mechanism choice; once a rung is chosen, its token mechanics are **REQUIRED:** use compound-v:context-engineering.
 

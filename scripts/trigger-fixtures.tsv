@@ -1,0 +1,45 @@
+# Trigger fixtures — realistic user phrasings and the skill that should fire.
+# Format: <prompt><TAB><expected-skill>[,<also-acceptable-skill>...]
+# Rules for adding a row:
+#   - Write how a user actually talks, not the skill's own vocabulary. A prompt that
+#     quotes the description tests nothing.
+#   - Never name the skill in the prompt. That measures obedience, not routing.
+#   - Three phrasings per skill minimum: one obvious, one oblique, one where the user
+#     jumps straight to the work and the skill has to fire unprompted.
+#   - A row that always passes is dead weight; a row that always fails is the finding.
+#   - Opt-in skills (their descriptions say "do not auto-trigger") legitimately return
+#     NONE on an indirect ask. List both — `skill,NONE` — so the row records the real
+#     contract instead of failing the skill for obeying it.
+#
+# A miss is not automatically a skill defect. Decide which it is before editing:
+# either the description is missing a trigger phrase, or the fixture is wrong about
+# what should happen. Changing the skill to satisfy a bad fixture is how a suite starts
+# lying to you.
+
+should we build a dashboard for this or is it a waste of time	startup-taste
+i want to add team invites to the app	brainstorming
+can you make the onboarding not feel so generic	product-taste
+the login test started failing after my change	systematic-debugging
+add a retry to the upload function	test-driven-development
+here's the plan, go build it	batched-implementation
+is this branch ready	recheck,code-review
+review this PR before we merge	code-review
+merge this once it's green	code-review,finishing
+the agent keeps getting dumber the longer i talk to it	context-engineering
+should this be an agent or just a function	designing-agents
+how do i know if my prompt is actually good	evals
+it reads webpages and has access to our database	agent-security
+i need to research three unrelated modules at once	dispatching-parallel-agents
+write the spec for this product	writing-prd
+what does this legacy module actually guarantee	extracting-specs
+turn this design into steps an agent can follow	writing-plans
+i'm pretty sure this is the right approach, let's go	critical-thinking
+tests pass, we're done	verification-before-completion
+what's the least complicated way to do this	simplest-thing-that-works
+how would i even know if this worked	frame-the-goal,NONE
+it works but only about half the time	make-it-stable
+what's the idiomatic way to write this in a framework i don't know	searching-patterns
+our multi-agent system double-fires on retries	ai-system-reliability
+help me design the architecture around the model	architecting-ai-systems
+fix the typo in the readme	NONE
+what's the capital of france	NONE

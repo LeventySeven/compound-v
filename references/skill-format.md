@@ -12,8 +12,33 @@ description: <Imperative WHAT it does, one clause>. Use when <concrete triggers 
 ---
 ```
 
-- `name` and `description` are the only required keys. Optional, rarely needed: `license`,
-  `allowed-tools`, `metadata`. Any other key fails validation.
+- `name` and `description` are the only required keys. Optional and occasionally worth it:
+  `disable-model-invocation` (see below), `license`, `metadata`.
+- **`disable-model-invocation: true` — right for a dead end, wrong for a link in a chain.** The flag
+  enforces what a prose plea ("opt-in, do not auto-trigger") only asks for, so prefer it *when no
+  other skill hands off to this one*. If a skill sits mid-workflow, the flag silently breaks every
+  upstream handoff — the model can no longer reach it at all — and the failure is invisible until a
+  pipeline stops halfway. For those, keep the prose and put the real protection where it belongs: an
+  explicit confirmation gate on each irreversible action inside the skill. Consequence-gating and
+  invocation-gating are different jobs; don't substitute one for the other.
+
+### The economics that govern every authoring choice
+**The body is pay-per-use; the description is always loaded.** Every description in the session is
+resident before any task starts, so that is where the always-on cost lives — and it is a *shared*
+budget: the skill listing is capped near 1% of the context window, and when the listing overflows,
+**descriptions get shortened**. Three consequences, in order of importance:
+
+1. **Front-load the trigger.** Truncation eats the tail, so the discriminating "use when…" clause goes
+   in the first sentence, never after a paragraph of what-it-does. A trigger that gets truncated is a
+   skill that stops firing — and it fails silently, indistinguishably from a skill that was never a
+   good match.
+2. **Cut bodies ruthlessly; spend on descriptions deliberately.** These pull in opposite directions and
+   the correct policy is asymmetric. Reliable triggering can genuinely take a paragraph, and cutting a
+   description below that threshold is how a skill quietly stops being invoked. So don't shorten a
+   description to save space — *re-spend* it: drop any clause describing the workflow (Ruling A) and
+   buy more trigger situations with the words you free.
+3. **Fewer skills is also a description-budget decision.** Every skill you add shortens every other
+   skill's description. A skill that fires rarely is not free.
 - **Ruling A — description = WHAT + WHEN, never the workflow.** State what the skill does + when to
   reach for it + searchable keywords. Be slightly *pushy* ("…even if not asked") to fight
   under-triggering. **Never** summarize the steps/flow — a description that encodes the workflow makes

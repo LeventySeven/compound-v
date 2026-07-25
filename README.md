@@ -56,7 +56,13 @@ For local work, symlink the skill directories into `~/.claude/skills/`. A Sessio
 
 ## Checking the kit
 
-The kit checks itself. `bash scripts/check.sh` reads every skill and fails if one breaks a rule: a body over its line budget, a frontmatter name that doesn't match its directory, a cross-reference to a skill that doesn't exist, an `@path` link, or any mention of the private research notes that must never ship. It has no dependencies, so it drops straight into CI or a pre-commit hook.
+The kit checks itself, structurally and behaviourally.
+
+`bash scripts/check.sh` reads every skill and fails if one breaks a rule: a body over its line budget, a frontmatter name that doesn't match its directory, an unknown frontmatter key, a description over the 1024-char cap the harness truncates at, a cross-reference to a skill that doesn't exist, an `@path` link, or any mention of the private research notes that must never ship. It also prints the kit's always-on cost — the descriptions are loaded in every session whether or not a skill fires, so that number is the real price of admission. No dependencies; it drops straight into CI or a pre-commit hook.
+
+`bash scripts/trigger-eval.sh` answers the harder question: **do these skills actually fire?** A skill that never gets invoked changes nothing, and it fails silently — a description the harness truncated looks exactly like one that simply didn't match. The script drives the real CLI on your existing session auth, feeds it realistic user phrasings from `scripts/trigger-fixtures.tsv` with `Skill` as the only permitted tool, and reports which skill each prompt actually invoked. Negative fixtures are included: over-triggering on "fix the typo in the readme" is exactly as wrong as under-triggering on a real one.
+
+It measures routing, not output quality, and each case is one cold turn — so it can't see a skill decaying over a long session. Both are real limits, and it's still the difference between "every line changes what the agent does" as a claim and as a number.
 
 ## How it was built
 

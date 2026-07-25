@@ -7,12 +7,12 @@ description: Write a failing test before the implementation, watch it fail, then
 
 Write the test first. The failing test is the spec; the implementation exists only to turn it green.
 
-For an agent, TDD is no longer the slow tax it was for humans. The instruction is nearly free — "use red-green TDD" is about five tokens, and every good coding agent already knows what that means and runs with it (Willison, "Engineering practices that make coding agents work"). Its real payoff is two things you can't get from tests-after:
+For an agent, TDD is no longer the slow tax it was for humans. The instruction is nearly free — "use red-green TDD" is about five tokens, and every good coding agent already knows what that means and runs with it. Its real payoff is two things you can't get from tests-after:
 
 - **It bounds the work.** A failing test defines *exactly* what "done" means, so the model writes the minimum to pass and stops — instead of gold-plating or drifting. ("TDD stops the agent writing more than it needs.")
 - **It is the verifiable signal.** A green suite you watched go red-then-green is the evidence that lets you trust code without reading every line. This is the leash that makes an autonomous agent safe to run.
 
-The cost of tests used to be the writing and the maintenance. For an agent that's near zero now, so tests are no longer optional — skipping them is leaving the one cheap proof of correctness on the table. Open the session by running the existing suite *first*, before any task: it confirms tests exist, forces the agent to learn how to invoke them, and sets the testing frame for everything that follows (Willison).
+The cost of tests used to be the writing and the maintenance. For an agent that's near zero now, so tests are no longer optional — skipping them is leaving the one cheap proof of correctness on the table. Open the session by running the existing suite *first*, before any task: it confirms tests exist, forces the agent to learn how to invoke them, and sets the testing frame for everything that follows.
 
 ## When to use
 
@@ -22,7 +22,9 @@ The cost of tests used to be the writing and the maintenance. For an agent that'
 
 Skip it for genuinely throwaway code (a one-off script, a scratch HTML page) where "it either works or it doesn't" and nobody maintains it. Quality is a choice you make per context, not a ritual.
 
-Tune testing intensity to how hard bugs are to spot: test database and business-logic layers rigorously (corruption hides for weeks), test the visible frontend lightly (bugs show up in the browser) — intensity scales inversely with how easily a bug is observed (Andrew Ng, DeepLearning.AI).
+**Don't impose a test suite on a codebase that has none.** Write the test where tests already live — same framework, same directory, same naming convention. If the project has no tests at all, adding the first one is not a free side effect of an unrelated change: introducing a testing framework is its own decision with its own review. Say plainly that the code is untested, propose the setup as separate work, and let the user take that call. TDD is the default here; it is not a license to restructure someone else's project mid-task.
+
+Tune testing intensity to how hard bugs are to spot: test database and business-logic layers rigorously (corruption hides for weeks), test the visible frontend lightly (bugs show up in the browser) — intensity scales inversely with how easily a bug is observed.
 
 ## The loop: red → green → refactor
 
@@ -45,24 +47,22 @@ digraph tdd {
 }
 ```
 
-**RED — one minimal test.** Name it for the behavior (`rejects_expired_token`, not `test1`). Test against **real code, not mocks** — see the anti-patterns below. The model writes the assertion for free; choosing *what* it should assert is the judgment that's now yours — a flawlessly-written test against the wrong spec is a worthless suite (Andrew Ng, DeepLearning.AI).
+**RED — one minimal test.** Name it for the behavior (`rejects_expired_token`, not `test1`). Test against **real code, not mocks** — see the anti-patterns below. The model writes the assertion for free; choosing *what* it should assert is the judgment that's now yours — a flawlessly-written test against the wrong spec is a worthless suite.
 
 **Verify RED — and read *why* it failed.** A test that fails because of an import error or a typo proved nothing. It must fail because the behavior is genuinely missing. If it passes immediately, the test is wrong (or the behavior already exists) — fix that before writing any implementation.
 
-**GREEN — the simplest thing that passes.** Resist building for requirements no test demands yet. Each later test pulls the design forward.
+**GREEN — the simplest thing that passes.** Resist building for requirements no test demands yet. Each later test pulls the design forward. Resist the opposite move harder: a green bought by deleting or loosening the assertion is a reward hack, not a pass — the test now proves nothing and the defect is still shipping, which is the same shape as a quietly-introduced vulnerability. Never swap in a narrower or easier-to-test version of the goal because it's likelier to pass, either. If the test itself is genuinely wrong, change it deliberately, say so out loud, and re-verify RED.
 
 ```python
 # Good — simplest code that turns the test green:
 def total(items):
     return sum(i.price for i in items)
-
-# Bad — over-built for a test that only checks a sum;
-# no test asked for currencies, rounding, or discounts:
+# Bad — the test only checks a sum; no test asked for currency, rounding, or discounts:
 def total(items, currency="USD", rounding="bankers", discount=None):
     ...  # YAGNI — delete it until a test needs it
 ```
 
-**Verify GREEN.** Start with the narrowest test for the code you changed (fastest signal), then widen to the whole suite — confirm you didn't break something else (OpenAI Codex CLI, "Testing Philosophy"). Read the output, not just the exit code: a suite can report 0 failures while emitting stderr noise, a deprecation warning, or an `act()`-style warning that flags a real problem. The bar is green *and* clean, not just green.
+**Verify GREEN.** Start with the narrowest test for the code you changed (fastest signal), then widen to the whole suite — confirm you didn't break something else. Read the output, not just the exit code: a suite can report 0 failures while emitting stderr noise, a deprecation warning, or an `act()`-style warning that flags a real problem. The bar is green *and* clean, not just green. *When* to widen depends on who's watching: with a user present and iterating, holding the full suite until they're ready is legitimate — a long run mid-conversation spends their turn. Running unattended, always run it; the alternative is reporting a green nobody ever saw.
 
 **REFACTOR.** Now clean up (extract, rename, dedupe) with the green suite as your safety net. Behavior unchanged, tests stay green.
 
@@ -72,8 +72,7 @@ The point of a test is to exercise the actual behavior. Mocks that assert on the
 
 - **Don't test the mock.** `mock.assert_called_with(...)` checks that you called your own stub — it tells you nothing about whether the code works. Test the real output, the real state change, the real return value.
 - **Don't mock what you don't understand.** If you mock a dependency without knowing its real contract, the mock encodes your *assumption*, and the test passes against a fiction.
-- **No test-only methods in production classes.** If a class needs a `reset_for_test()` hatch to be testable, the design is wrong — fix the seam, don't add the hatch.
-- **Hard to test is a design signal.** When a test needs heavy mocking, sprawling setup, or a convoluted assertion just to write at all, that's the design telling you the code is too coupled or the seam is wrong — change the design (inject the dependency, split the unit, simplify the interface), don't contort the test to fit it.
+- **Hard to test is a design signal.** Heavy mocking, sprawling setup, a convoluted assertion, or a `reset_for_test()` hatch bolted onto a production class all say the same thing: the code is too coupled or the seam is wrong. Change the design — inject the dependency, split the unit, simplify the interface — don't contort the test to fit it and don't add the hatch.
 - **Prefer real collaborators** (a real in-memory DB, a real temp file, a real local server) over mocks wherever it's cheap. It's cheaper than ever to spin one up — ask the model to seed realistic fixtures ("create 100 users with made-up names").
 
 A passing test suite still doesn't prove the system *runs* — tests miss "the web server won't even start." After green, exercise it for real: **compound-v:verification-before-completion**.
@@ -95,3 +94,4 @@ Writing the reproduction first is also how you *understand* the bug. If you can'
 | "I'll add tests after it works." | Tests-after pass on the first run and prove nothing — they ratify whatever you wrote, bugs included. You also lose the scope-bounding that writing the test first gives you. |
 | "I wrote the code first, I'll just keep it." | Then you can't know the test actually tests it. Delete or set it aside, write the test, watch it fail, restore. |
 | Waiting for async work with a fixed delay (`setTimeout`, `sleep(500)`) | Flaky by construction — too short is a false red, too long crawls the suite. Wait on the *condition* (poll until the state holds, with a timeout cap), never a bare clock delay. |
+| "It still fails — I'll relax the assertion / narrow the goal." | A green you bought by weakening the test proves nothing and leaves the bug in place. Change the code, or change the test deliberately and say that's what you did. |
