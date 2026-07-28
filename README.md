@@ -39,9 +39,9 @@ Two pieces carry most of the weight:
 
 It also ships one agent: `code-reviewer`, the spawnable read-only form of `recheck` — it reads the actual diff, re-runs the tests itself, and returns severity-tagged findings plus one verdict. It never edits; the implementer applies the fixes.
 
-## What's deliberately not here
+## Documents earn their place
 
-The tier-adaptive **build pipeline** — routing a change against the docs that already exist, the adversarial grill, the plan-gate, the parallel git-worktree build — lives in the separate [`prd-pipeline`](https://github.com/Timmy-Lane/prd-pipeline) plugin. That's per-build *process*, not skill content; keeping a second copy here would give two that drift apart. Compound V supplies the skills it composes, `prd-pipeline` supplies the sequencing, and neither requires the other. Install both from the same marketplace if you want the whole stack.
+The router carries one rule the tier table can't express on its own: writing the spec is the expensive default, not the safe one. Before a document gets written, route the change against the docs the repo already has — amend the one that owns this surface, supersede the decision it reverses, create one, or none — and cap the output at **one new document per change**, with findings and the plan as sections of it rather than siblings. Below Standard that count is zero: the plan is confirmed in the conversation and the commit message is the record. Then name every doc the change makes wrong, make each a task, and treat the change as unshipped until they're updated.
 
 ## What the kit holds itself to
 

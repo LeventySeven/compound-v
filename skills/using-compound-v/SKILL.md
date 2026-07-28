@@ -36,7 +36,7 @@ The kit's bet is that adaptive effort is something the model is increasingly goo
 | **Trivial** | typo, rename, one-liner, config flip | Just do it → `verification-before-completion`. No plan, no agents, no skill. |
 | **Small** | one function/file, clear spec | plan mode for explore-and-plan, then inline `test-driven-development` → verify. Skip the plan doc. |
 | **Standard** | a feature, ~2–8 tasks | (open "should we?" → `startup-taste` first) → `brainstorming` → `writing-plans` → `batched-implementation` → `recheck`. |
-| **Large** | multiple subsystems · a one-way door · schema or public API | split into sub-projects; each runs its own Standard cycle. If `prd-pipeline` is in the session's listing, hand the whole change to it instead — it owns the tier routing, the plan-gate and the parallel-worktree build end to end, and this kit supplies the skills it composes. |
+| **Large** | multiple subsystems · a one-way door · schema or public API | split into sub-projects, each running its own Standard cycle, under one confirmed plan. Nothing touches disk before a human approves it; fan out only across disjoint files, in worktrees. |
 
 If you could describe the whole diff in one sentence, skip the plan. The harness's own explore → plan → code → commit, run through plan mode, is the right default below Standard — reaching past it is the overkill this table exists to prevent.
 
@@ -57,5 +57,12 @@ Two failure modes to route around. **Process is what you reach for when you can'
 - **Security:** `agent-security` (lethal trifecta, untrusted input, model-written code)
 - **Power:** `searching-patterns` (pull the canonical pattern + its anti-pattern) · `dispatching-parallel-agents` (default is one agent; fan out only for disjoint writes or isolated reads) · `handoff` (one `.claude/STATE.md` for work that outlives the session)
 
-## Not in this kit
-The tier-adaptive **build pipeline** — spec routing against existing docs, the adversarial grill, the plan-gate, the parallel git-worktree build — lives in the separate `prd-pipeline` plugin, deliberately: that is per-build *process*, not skill content, and duplicating it here would give two copies that drift. This kit supplies the skills it composes; it supplies the sequencing. Neither requires the other.
+## Documents earn their place
+Writing the spec is the expensive default, not the safe one. A repo full of specs nobody reads is the same defect as no spec at all, and it is the one the tier table alone won't catch — so before writing a document, run these four, in order:
+
+1. **Route against what exists first.** Read the docs the repo already has — product intent, decisions/ADRs, prior change records, runbooks, API/CLI/config reference — then pick exactly one: **amend** the doc that already owns this surface (the default), **supersede** the decision this reverses with a new ADR linked back, **create** one document, or **none**. A new document for a surface something already owns is how nine overlapping specs and a contradicting README happen.
+2. **At most one new document per change.** Review findings and the plan are *sections of it*, never siblings. Below Standard the count is zero — the spec and plan get confirmed in the conversation, and the commit message is the durable record.
+3. **Name what the change makes wrong.** Every doc this invalidates — a README claim, a runbook command, a config table, a CLI help string — becomes a task in the plan, not a follow-up.
+4. **Then check it shipped.** A change that invalidates documentation isn't done until that documentation is updated. Reference and how-to docs rot first, because neither is where the thinking happened.
+
+Fold the durable part — the decision and what was rejected — into the living doc or an ADR when the work lands, and let the per-change scaffolding go. `writing-prd` owns the stable product doc; `writing-plans` owns the per-build plan.
