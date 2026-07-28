@@ -26,53 +26,70 @@ The variable that predicts first-cohort velocity is not push-vs-pull, paid-vs-or
 
 Win the first 100 on a surface that delivers real value in a **single zero-configuration interaction** — open a page, paste a public identifier, run one query. Anything that requires an account, a connection, a credential, or a configured preference is a **second-stage** surface, for people who already have a reason to trust you.
 
-This is the observed sequencing across the analytics tools that got big: a free, no-signup, browse-or-paste-an-address surface first; alerts, personalization, and push layered on **after** a base existed. Several scaled to millions with no push feature at all. The reflex to lead with the personalized surface is strong — it's the most impressive thing you built — and it is backwards.
+This is the observed sequencing across the reference-data tools that got big: a free, no-signup, browse-or-paste-an-address surface first; alerts, personalization, and push layered on **years after** a base existed, as a retention layer rather than an acquisition one. CoinMarketCap was a top-200 global site before it shipped its first watchlist, five years in. Etherscan's own product timeline reaches the top 1,000 sites with no accounts milestone on it at all. The reflex to lead with the personalized surface is strong — it's the most impressive thing you built — and it is backwards.
+
+**The condition, because this is not universal.** Every case above is a product whose first-use value is a *public fact a stranger can verify instantly*. Where the value is user-*contributed* or the inventory is scarce, a gate at the door can be accretive: Glassdoor required contribution from day one and exited at $1.2B. And the friction is not free in either direction — one published A/B test found a registration wall lifting signups over tenfold while costing 18% of engagement, which is why the team refused to ship it. So: when first-use value is a public, instantly-legible fact, put it behind zero friction. When it is contributed or scarce, decide deliberately and measure both sides.
 
 Ask: *what is the least a stranger can do and still get something real?* Put that first. If the answer is "nothing, everything needs setup," you have a distribution problem disguised as a product.
 
-### One channel, not five
-Almost every company that got its first thousand users did it through **one** channel, not a portfolio. Five channels at 20% effort is how you get zero on all five. Pick one, go deep enough to actually learn it, and give it a deadline and a falsifier.
+### Concentrate effort on one channel — after testing three
+Five channels at 20% effort is how you get zero on all five. But the concentration is the *endpoint* of a deliberate test, not the starting posture, and the framework everyone cites for it says so: focus on one **"only after you've identified a channel that seems like it could actually work"**, having run about three cheap tests in parallel first. Skipping the parallel test is skipping the only operationally load-bearing step.
 
-Prefer the channel where your buyers **already are** over one you must build. If your users congregate somewhere public, that is a gift — instrument it before you invent an audience from scratch.
+Be honest about the stage, too. That framework aims at the channel that unlocks your *next* growth stage; its own authors describe getting the first customers as an explicitly plural scramble — talks, guest posts, warm email, conferences, at once. Expect the first hundred to arrive that way. Expect concentration to start mattering somewhere in the first few thousand. Expect the winning channel to change at every stage, because channels decay.
 
-### The gate decision rule
-An entry gate (invite, waitlist, approval) is **accretive only when all four hold**:
-1. **No network effects on the gated side.** Single-player value → slow admission costs nothing. If the product needs density to work, gating starves the thing that makes it work while an open competitor closes the gap.
-2. **It screens on fit with the product**, not on who the person already knows or can pay.
-3. **The cost of admission is a product interaction, not a transferable token.** A conversation cannot be resold; a code can — and once a resale market exists, the gate selects for hustle, not fit.
-4. **It is a capacity constraint actively being worked against**, not a permanent identity that outlived its reason.
+There is no counted evidence that most companies' first thousand came through a single door — the widely-repeated "70% from one channel" traces to a vendor page with no study behind it. Concentration of *effort* is the defensible claim. Prefer the channel where your buyers **already are** over one you must build.
 
-The famous gate that worked was a *capacity constraint around manual onboarding coupled to a real measurement program* — an expensive standing apparatus. Note what that implies at small n: the mechanism that is prohibitive at scale is nearly free at 20 users. **A gate with no mechanism behind it is friction wearing a strategy's clothes** — it screens nothing, protects no capacity, and just makes the door heavier.
+### A gate is scaffolding with a demolition date
+That is the part the case studies actually share, and it is stronger than any rule about gate shape. Gmail's invite era ran three years and ended the moment the hardware allowed. Superhuman carved out self-serve per segment at PMF, then spent three more years engineering the gate away. Both were dismantled on purpose. If you cannot say what would let you take the gate down, you do not have a gate, you have a permanent identity — and that is the failure mode, not the gate itself.
 
-Failing the rule rarely means "remove all friction." It usually means **the gate is on the wrong surface**: open the browse surface, gate the thing that actually costs you something.
+Treat these as pressure, not as a rule with four boxes to tick:
 
-### Threshold at entry, not curation at exit
-When a feed, digest, or alert stream is too loud, the reflex is "curate" — assign a human, cut the volume. That is high-lift and rarely happens.
+1. **Network effects on the gated side.** Single-player value → slow admission costs little. If the product needs density, gating defers reach and you collect the deferred demand in a burst when you open — Bluesky went 3.1M to 5.1M in the month after dropping invites. Deferral is a real cost, not a fatal one: Gmail, Clubhouse and Facebook all gated network-effects products and grew. What gates on the network side reliably produce is a user base, not retention.
+2. **What it screens for.** Fit with the product beats who the person already knows or can pay. Note honestly that nobody publishes the comparison — no case measures fit or retention differences between gated and ungated cohorts. This is the condition you should *want* to be true; it is not one you can cite.
+3. **Whether the token is transferable.** A conversation cannot be resold; a code can. Do not treat this as necessary, though — the three largest gated user bases in software all violate it. Gmail invites were bearer tokens with a liquid market: over 63,000 traded for roughly $393,000 in a single quarter, and Google's own engineers call the resulting exclusivity unintentional. What transferability actually costs you is *screening*: you inherit a resale market and none of the fit signal. That is the warning, not a veto.
+4. **Duration.** The condition the folklore omits and the only one with a sharp measurement behind it. Superhuman's own waitlist operator reports it converting roughly three times worse than the concurrent live funnel, with conversion halving for each additional year someone sat in the queue. **Open within a window measured in months.** A year-long list is not caution, it is decay.
 
-The lever that works is a **threshold on what is allowed to enter the stream**: a size cutoff, a significance floor, a relevance bar. It is a config change, not a hiring decision, and it closes most of the volume gap as a side effect.
+Two gates are cited as the canonical success and they did not do the same thing. Superhuman's was a mandatory human onboarding whose purpose was *instrumentation* — a controlled cohort a survey could run on — and which paid for itself as a sales motion. Gmail's was three hundred second-hand Pentium IIIs. Neither gated for exclusivity. **A gate with no mechanism behind it is friction wearing a strategy's clothes.**
 
-Apply it to **every** stream you own, not just the loudest one. Products that flood one surface usually flood all of them, and the worst-hit users are the ones who took the highest-friction action to get there — your most valuable cohort, drowning first.
+Failing here rarely means "remove all friction." It usually means **the gate is on the wrong surface**: open the browse surface, gate the thing that actually costs you something.
 
-### Retention sets the ceiling; acquisition cannot outrun churn
-A product with modest virality and long retention beats one with high virality and 30-day churn. Every new cohort has to stick or the loop decays to nothing. **Fix retention before optimizing acquisition** — and note that "retention" here means people coming back, not messages delivered.
+### Fix the entry bar before you staff the exit
+When a feed, digest, or alert stream is too loud, the reflex is "curate" — assign a human, cut the volume. That is high-lift and rarely happens. The cheaper lever is a **threshold on what is allowed to enter the stream**: a size cutoff, a significance floor, a relevance bar. A stream that admits non-actionable items degrades the recipient's response to *everything* in it, and exit-side triage does not recover that. Google's SRE rule is the clean form: every page should be actionable.
+
+Do not claim more than that. There is no study comparing filter-at-ingestion against curate-at-exit and naming a winner, and the evidence cuts both ways — an audit of Apple News found human curation beating the algorithm on source diversity, while a newsroom field study found the algorithm beating editors on clicks. The winner depends on how much personalization data you have and which metric you chose.
+
+**Every threshold buys quiet by spending sensitivity.** The one discipline worth copying comes from the clinical alarm literature, which is the only place this is genuinely measured: before you raise a bar, name in advance the measure that must *not* degrade, and check it afterwards. Product teams almost never do this. Raising the bar and never looking at what stopped arriving is how you hide the item that mattered.
+
+### Retention sets the ceiling — but the ordering is not settled
+A product with modest virality and long retention beats one with high virality and 30-day churn. That much is arithmetic rather than observation: growth runs as `K^(t/ct)`, a loop below K=1 converges to a finite multiple of what you seed, and K is itself gated by retention because invites accrue over repeat sessions. Say "arithmetic under stated assumptions" and you are on solid ground. Note also that most products never reach K>1 at all — real viral factors cluster around 0.2–0.3 — so a sub-1 loop is an amplifier that *requires* a paid or content source underneath it, not a substitute for one.
+
+**Do not say "fix retention before optimizing acquisition."** It is contested, and the Ehrenberg-Bass Institute contradicts it directly: the belief that retention is cheaper than acquisition, they argue, was sold to marketers without evidence. For anything with network effects the ordering is incoherent anyway — retention is not stably measurable until acquisition supplies liquidity.
+
+What survives is a claim about *interpretation*, not work order: **acquisition performance carries no information about retention**, so acquisition wins are not evidence of fit, and a flattening retention curve is what makes acquisition spend recoverable rather than merely spent. The two are a joint constraint. A curve that flattens at 10% is fine or fatal depending entirely on whether your acquisition motion can reach the volume that implies.
 
 ### Distinguish reach from conversion — and don't assume the bridge
 A large audience on a free surface is a **reach asset**. Reach is not conversion, and the step between them is a separate mechanism you must actually build: a filtered tier, a product layer, a reason to move.
 
 Be suspicious here: this is a place where public numbers are systematically unavailable. Impressive follower counts are published constantly; the conversion rate from those followers to product users is published almost never. **If you cannot find the number, say so** rather than borrowing a plausible-looking benchmark from a vendor's content-marketing post.
 
-### A number that only goes up is not a metric
-Waitlist size, registered users, subscribers, total messages sent — cumulative counts that **by construction almost never decrease** and have no intrinsic link to whether anyone got value. They feel like progress and measure nothing.
+### A metric earns its place by naming an action
+Waitlist size, registered users, subscribers, total messages sent — these are the original worked examples of a vanity metric, and they are still the right ones. But the test that condemns them is not that they cannot go down. It is Ries's question: *you have 10,000 of them. Now what?* A number earns its place when a movement in it names an action you could take and you can attribute the movement to something you did. A weekly-active count can fall and still fail that test.
 
-Before celebrating: name the **user outcome** the number is a proxy for, and check that the outcome moved too. Prefer counts that can go **down**: weekly actives, paid power-user retention, the share of a user's relevant work happening in your product.
+So: name the **user outcome** the number is a proxy for, and check the outcome moved too. Prefer rates and ratios over totals, and cohorts over aggregates. **The exception worth keeping:** pre-PMF, a cumulative count is admissible as a rough leading indicator — it tells you something is happening. It stops being admissible the moment it appears in a goal, a board deck, or a fundraise, because that is when someone starts optimizing it.
 
-### PMF is a number, not a vibe
-Survey users with *"how would you feel if you could no longer use this?"* and build for the segment that answers **very disappointed**. Track paid power-user retention, not signups. No segment clears the bar → you have interest, not fit; keep finding the people who'd be gutted to lose it rather than widening to please everyone.
+### PMF is a number — but not the number you think
+Survey existing users with *"how would you feel if you could no longer use this?"* and build for the segment that answers **very disappointed**. The instrument is good and cheap. The famous 40% bar is not: Sean Ellis introduced it in 2009 and called it "a bit arbitrary" in the same sentence, derived from roughly a hundred startups he advised, with no published dataset and no peer-reviewed validation since. Superhuman — the case everyone cites — scored 22% and went on to $100M+ ARR.
+
+Use it as a **trend line, not a gate**: same wording, same segment, quarter over quarter, and report the delta. Never quote a score without its n, its segment definition, its activity filter, and whether churned users were excluded — because the standard method surveys only recent active users, which excludes by construction the people whose churn defines fit, and because *narrowing the segment raises the score without changing the product*. That is not a hypothetical: it is how the canonical success case got its first ten points. Below about fifty responses do not quote a percentage at all; read the open-ended answers instead, which is where the signal actually is. Where you have cohort retention data, it outranks the survey. Treat a high score as necessary, not sufficient — Ellis conceded that himself.
 
 ### Hand-recruit the first hundred — it is research that happens to collect users
-The first cohort comes through you, one at a time. The unscalable work is where the signal is: the exact words people use for the problem, the trigger that made them look, the objection you didn't anticipate. Every awkward conversation is data you cannot get from analytics.
+The first cohort comes through you, one at a time. Graham's point is not that manual recruiting grows you; it is that over-engaging with early users is *"a necessary part of the feedback loop that makes the product good."* The unscalable work is where the signal is: the exact words people use for the problem, the trigger that made them look, the objection you didn't anticipate. Success here is not "100 users" — it is "the product changed as a result."
 
-Interview by asking about their **past behavior**, never about your idea. "What did you do the last time this happened?" beats "would you use this?" — the second question has no wrong answer and therefore no information. At n=20, this is a week of calendar, not a program.
+Two things the popular version drops. It **presumes the market exists**: you can always sign up a hundred people by hand, so this tests execution, not demand. And it needs an **exit trigger** you have to set yourself, because the essay gives none — the documented failure is a team that committed to a call with every user and kept it past the point where quality survived. Write down the number of users at which the manual motion has to be replaced, before you start it.
+
+Interview by asking about their **past behavior**, never about your idea. "What did you do the last time this happened?" beats "would you use this?" — the second question has no wrong answer and therefore no information. The warrant is better than the handbook everyone cites: the intention–behaviour literature finds a medium-to-large change in intention yields only a small-to-medium change in behaviour, and it names your problem exactly — the *inclined abstainer*, who sincerely means yes and never buys. Do **not** repeat the folk claim that people overstate willingness to pay by 2–3x; the meta-analysis puts the median at 1.35 and says "only 1.35" to correct that belief. The real hazard is the shape, not the size: the distribution is severely right-skewed, so most answers are mildly inflated, a minority wildly so, and nothing tells you which one you are holding. At n=20, this is a week of calendar, not a program.
+
+**These two rules do not conflict, and the distinction matters.** The past-behaviour rule governs *discovery*, with people who are not yet users, where you are asking them to forecast adoption. The PMF survey governs *retention diagnostics*, with people already using the thing, who are reporting on an existing behaviour by imagining its removal. Applying the hypothetical-bias literature to the second is a category error. Its real weakness is elsewhere: nobody has validated the leap from stated affect to observed retention.
 
 ### Check where the value actually accrues
 A growing market does not mean a growing market **for your category**. Ask who captures the money in this ecosystem today — and whether that is the category you're in. If the volume accrues to a neighboring category, that is a positioning problem sitting upstream of every channel decision, and no amount of channel work fixes it.
@@ -99,9 +116,20 @@ Named cases are all survivors; the matched losers who made the same choice and d
 - **No distribution in the plan:** "Every item here makes the product better for people who already use it. Which one puts it in front of someone who doesn't know us?"
 - **Personalized surface first:** "This needs an account and a connected source before it does anything. What's the version a stranger gets value from in one interaction — and can that go first?"
 - **Gate with no mechanism:** "This gate screens nothing and protects no capacity — it's friction, not strategy. Either give it a real admission interaction or open the door and gate the expensive surface instead."
-- **Vanity number:** "That count can't go down. What user outcome is it a proxy for, and did that move?"
-- **Channel portfolio:** "Five channels at 20% each gets zero on all five. Which one, how deep, by when, and what result makes us abandon it?"
+- **Gate with no end date:** "What has to become true for us to take this down, and when do we check? A gate without a demolition date is a permanent identity."
+- **Vanity number:** "Say the number moved. What would we do differently? If nothing, it isn't a metric."
+- **Channel portfolio:** "Five channels at 20% each gets zero on all five. But have we actually tested three cheaply yet, or are we concentrating on a guess? Which one, how deep, by when, and what result makes us abandon it?"
 - **Borrowed benchmark:** "That figure traces to a vendor blog with no method. Either we measure our own or we state that no reliable number exists — we don't launder theirs."
+
+## What this skill does not cover — say so rather than implying it doesn't exist
+The gates above are about judgment, not tactics, so plenty of real distribution sits outside them. Four worth naming, because silence reads as disapproval:
+
+- **Paid acquisition.** Excluded as a tactic, but its *gate* is a judgment tool and belongs here: paid is fine when CAC is recovered inside roughly twelve months, against an LTV:CAC floor around 3. Below that the cohort P&L goes anemic. Nothing above says paid is disreputable, and a reader should not infer it.
+- **Programmatic SEO.** Not a tactic at all — a decision about your data model made before the first user, which is squarely the first-surface question. If the product generates many unique pages, the product's structure *is* the channel.
+- **Pricing and packaging.** The first-surface gate stops at the paywall, and the paywall decides whether anyone converts. Free-trial and freemium shapes differ by several multiples on free-to-paid conversion and pull self-serve share the opposite way. That is a distribution decision, not a finance one.
+- **Bottom-up B2B and its ceiling.** Everything above takes the individual user as the unit. In B2B the individual is not the buyer; the individual→team→company motion stalls as a sole motion somewhere around $20M ARR. Advice tuned to the first hundred goes quietly wrong at a thousand.
 
 ## What this skill is NOT
 It is not a growth-hacking tactics list, and it is not optimism. It assumes an operator who can already build and whose scarce resource is honest signal about whether anyone wants it. Name the violated property, offer the cheapest test that would settle it, and cut the hand-holding — not the rigor.
+
+Every empirical claim above is graded, sourced, and where necessary contradicted in `references/sources.md` → `founder-distribution`. If you are about to quote a number from this file, read its row first.

@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: Open, continue, or close the state file for work that will outlive one session. Use when starting multi-session or unattended work, before ending a session with work unfinished, or when the user says continue / resume and a run may already be in progress.
+description: Open, continue, or close the state file for work that will outlive one session. Use when starting multi-session or unattended work, before ending a session with work unfinished, or when the user says continue or resume (in any language) and a run may already be in progress.
 ---
 
 # Handoff
