@@ -36,7 +36,7 @@ The kit's bet is that adaptive effort is something the model is increasingly goo
 | **Trivial** | typo, rename, one-liner, config flip | Just do it → `verification-before-completion`. No plan, no agents, no skill. |
 | **Small** | one function/file, clear spec | plan mode for explore-and-plan, then inline `test-driven-development` → verify. Skip the plan doc. |
 | **Standard** | a feature, ~2–8 tasks | (open "should we?" → `startup-taste` first) → `brainstorming` → `writing-plans` → `batched-implementation` → `recheck`. |
-| **Large** | multiple subsystems | split into sub-projects; each runs its own Standard cycle. |
+| **Large** | multiple subsystems · a one-way door · schema or public API | split into sub-projects; each runs its own Standard cycle. If `prd-pipeline` is in the session's listing, hand the whole change to it instead — it owns the tier routing, the plan-gate and the parallel-worktree build end to end, and this kit supplies the skills it composes. |
 
 If you could describe the whole diff in one sentence, skip the plan. The harness's own explore → plan → code → commit, run through plan mode, is the right default below Standard — reaching past it is the overkill this table exists to prevent.
 
@@ -47,7 +47,7 @@ Two failure modes to route around. **Process is what you reach for when you can'
 *The two design-heavy groups marked **opt-in** below are invoked only when the user explicitly asks for that help or names a skill — the auto-invoke rule above does not apply to them. Every other skill auto-invokes on intent as usual.*
 
 - **Solve any goal (opt-in — invoke when the user asks for it or names a skill):** `frame-the-goal` (turn the goal into a testable success check) → `simplest-thing-that-works` (the simplest mechanism that passes it — below "use a model," climb only when forced, as high as a hard goal needs) → `make-it-stable` (make the chosen mechanism hold every time). Caps the machinery, never the goal.
-- **Judgment:** `startup-taste` · `product-taste`
+- **Judgment:** `startup-taste` (should we build it) · `product-taste` (is it well made) · `founder-distribution` (will it reach anyone — the third leg of the master gate)
 - **Plan:** `brainstorming` · `writing-plans` (per-build plan) · `writing-prd` (the product's stable source-of-truth doc) · `extracting-specs` (recover the real contract of *existing* code — the backward complement of writing-prd)
 - **Thinking:** `critical-thinking` (red-team your own reasoning before you commit — steelman + disconfirm)
 - **Build:** `batched-implementation` · `recheck` (in-pipeline review gate) · `code-review` (on-demand **and the automatic pre-merge gate**: review a PR/branch/diff, post to GitHub, or apply fixes — runs before any merge) · `finishing` (it merges, pushes and deletes — the irreversible paths need explicit confirmation)
@@ -55,4 +55,7 @@ Two failure modes to route around. **Process is what you reach for when you can'
 - **AI design (one feature):** `designing-agents` · `evals` · `context-engineering`
 - **AI systems (architecture — opt-in, invoke on explicit request or by name):** `architecting-ai-systems` (the shape around the model — harness-as-moat, primitive-not-wrapper, build for the model ~18 months out) · `ai-system-reliability` (keep a built system from corrupting its own state; chain a constellation past one model's ceiling)
 - **Security:** `agent-security` (lethal trifecta, untrusted input, model-written code)
-- **Power:** `searching-patterns` (pull the canonical pattern + its anti-pattern) · `dispatching-parallel-agents` (default is one agent; fan out only for disjoint writes or isolated reads)
+- **Power:** `searching-patterns` (pull the canonical pattern + its anti-pattern) · `dispatching-parallel-agents` (default is one agent; fan out only for disjoint writes or isolated reads) · `handoff` (one `.claude/STATE.md` for work that outlives the session)
+
+## Not in this kit
+The tier-adaptive **build pipeline** — spec routing against existing docs, the adversarial grill, the plan-gate, the parallel git-worktree build — lives in the separate `prd-pipeline` plugin, deliberately: that is per-build *process*, not skill content, and duplicating it here would give two copies that drift. This kit supplies the skills it composes; it supplies the sequencing. Neither requires the other.
