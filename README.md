@@ -28,14 +28,20 @@ Two pieces carry most of the weight:
 |---|---|
 | Foundation | `using-compound-v`: the router. Tiering, the taste/distribution/primitive gate, the non-negotiables. |
 | Solve any goal (opt-in) | `frame-the-goal` (turn any goal into a testable success check) → `simplest-thing-that-works` (the simplest mechanism that provably passes it — zero-AI first, climb only when forced, as high as a hard goal needs) → `make-it-stable` (make it hold every time). The general front-door; caps the machinery, never the goal, and routes into the AI skills. |
-| Taste | `startup-taste` (whether and what to build) and `product-taste` (how it feels) |
+| Taste | `startup-taste` (whether and what to build), `product-taste` (how it feels) and `founder-distribution` (whether it will reach anyone — the leg that gets skipped, because it's the only one you can't make progress on by building) |
 | Plan | `brainstorming` (design before code), `writing-plans` (a per-build plan with real code, no placeholders), `writing-prd` (the product's stable source-of-truth doc, read first for context), and `extracting-specs` (recover the real contract of *existing* code — the backward complement of `writing-prd`) |
 | Thinking | `critical-thinking` (red-team your own reasoning before you commit — steelman it, hunt disconfirming evidence) |
 | Build | `batched-implementation`, `recheck` (the in-pipeline review gate), `code-review` (the on-demand reviewer **and automatic pre-merge gate** — point it at a PR/branch/diff or let it run before any merge; scale the depth, gate findings by confidence, post to GitHub or apply the fixes), `finishing` |
 | Correctness and security | `test-driven-development`, `systematic-debugging`, `verification-before-completion`, and `agent-security` (build-time defense: the lethal trifecta, source-trust, sandboxing model-written code) |
 | AI design (one feature) | `designing-agents` (a call, a workflow, or an agent?), `evals` (does the AI actually work?), `context-engineering` |
 | AI systems (architecture, opt-in) | `architecting-ai-systems` (the compound system around the model — harness-as-moat, primitive-not-wrapper, build for the model ~18 months out) and `ai-system-reliability` (keep a built system from corrupting its own state; chain a constellation past one model's ceiling) |
-| Power | `searching-patterns` (the canonical pattern and the anti-pattern it replaces, from primary sources) and `dispatching-parallel-agents` |
+| Power | `searching-patterns` (the canonical pattern and the anti-pattern it replaces, from primary sources), `dispatching-parallel-agents`, and `handoff` (one `.claude/STATE.md` for work that outlives a session) |
+
+It also ships one agent: `code-reviewer`, the spawnable read-only form of `recheck` — it reads the actual diff, re-runs the tests itself, and returns severity-tagged findings plus one verdict. It never edits; the implementer applies the fixes.
+
+## Documents earn their place
+
+The router carries one rule the tier table can't express on its own: writing the spec is the expensive default, not the safe one. Before a document gets written, route the change against the docs the repo already has — amend the one that owns this surface, supersede the decision it reverses, create one, or none — and cap the output at **one new document per change**, with findings and the plan as sections of it rather than siblings. Below Standard that count is zero: the plan is confirmed in the conversation and the commit message is the record. Then name every doc the change makes wrong, make each a task, and treat the change as unshipped until they're updated.
 
 ## What the kit holds itself to
 
