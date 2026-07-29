@@ -14,15 +14,16 @@ handoff split across two documents is a handoff that will go stale in one of the
 2. Read the file.
 3. Continue from **Next**. Do not re-plan what it already settled. Do not re-verify what **Done**
    already proves. Do not retry anything under **Do not**.
-4. If the goal is still open and the work is unattended, print the exact line for the user to
-   paste: `/goal <the Goal text>`. A skill cannot arm a goal on their behalf.
+4. If the goal is still open and the work is unattended, quote the **Goal** line back to the user.
+   If their harness has a goal or watchdog mechanism, that text is what arms it — a skill cannot
+   arm one on their behalf.
 
 ## If it does not exist
 
 1. Copy this skill's `STATE.md` template into `<repo>/.claude/STATE.md` and fill it in.
 2. If the work is risky or spans days, branch first: `git switch -c run/<slug>`.
 3. Commit it alone: `chore: open run state`.
-4. Say in one line: the branch, and the `/goal` line to paste.
+4. Say in one line: the branch, and the **Goal** text the run is aimed at.
 
 ## While working
 
@@ -44,5 +45,10 @@ Delete `.claude/STATE.md` in the final commit. Git history is the record.
 
 ## Budget
 
-Keep it under 30 lines. A `SessionStart` hook that re-injects it truncates at a few KB, so a state
-file that does not fit is one that silently loses its tail.
+Keep it under 30 lines — the same argument `writing-plans` makes at its 200-line cap. A state file
+longer than that stops being re-read in full, and a handoff nobody reads to the end is one whose
+tail silently stops existing. If your harness re-injects it at session start, that injection
+truncates too, which only sharpens the limit.
+
+This file is **run scaffolding, not a document**: it does not count against the one-new-document-per-change
+cap in `using-compound-v`, and it is deleted when the run ends.

@@ -38,14 +38,14 @@ done
 # 2. Publish boundary: shipped files must never name the internal research corpus.
 #    (scripts/ is excluded on purpose — this file holds the pattern itself.)
 leak="$(grep -rnoE 'BAD_GUIDE|researchfms|teardowns|skills_research|research/(findings|SYNTH|sources)|/Users/[a-z]' \
-  skills/ references/ README.md .claude-plugin/ 2>/dev/null || true)"
+  skills/ agents/ references/ README.md .claude-plugin/ 2>/dev/null || true)"
 if [ -n "$leak" ]; then
   err "internal-corpus references in shipped files (these must never publish):"
   printf '%s\n' "$leak" | sed 's/^/        /'
 fi
 
 # 3. Cross-reference integrity: every compound-v:<name> resolves to a real skill.
-for r in $(grep -rhoE 'compound-v:[a-z][a-z-]+' skills/ README.md 2>/dev/null | sed 's/compound-v://' | sort -u); do
+for r in $(grep -rhoE 'compound-v:[a-z][a-z-]+' skills/ agents/ README.md 2>/dev/null | sed 's/compound-v://' | sort -u); do
   [ -d "skills/$r" ] || err "dangling cross-reference: compound-v:$r (no skills/$r)"
 done
 
@@ -83,6 +83,49 @@ done
 printf 'always-on description cost: %s chars (~%s tokens) across all skills\n' \
   "$desc_total" "$((desc_total / 4))"
 [ "$desc_total" -gt 14000 ] && note "description budget $desc_total chars — trim or merge skills; the listing is shortened when it overflows"
+
+# 7. Agents must not pin a worker's model. `recheck` states the rule: "do not set a `model`
+#    parameter when you dispatch it; a pin can silently downgrade the worker, and the clean
+#    context is what buys the catch, not a model tier." An agent file is a dispatch spec, so
+#    a `model:` key there is that same pin, written down.
+for f in agents/*.md; do
+  [ -e "$f" ] || continue
+  if awk 'NR==1&&/^---/{p=1;next} p&&/^---/{exit} p&&/^model:/{found=1} END{exit !found}' "$f"; then
+    err "$f: pins a model in frontmatter — workers inherit the session model (see skills/recheck/SKILL.md)"
+  fi
+done
+
+# 8. Ledger anchors must still be greppable in the skill they point at.
+#    references/sources.md states the contract itself: the Anchor phrase is "text that appears
+#    verbatim in the current skill body and can be grepped for". Anchors rot silently whenever a
+#    skill is reworded, and a rotted anchor breaks the "read its row first" lookup several skills
+#    promise their reader. Case- and emphasis-insensitive so markdown edits don't cause noise.
+#    WARNING, not failure: anchors in the older ledger sections have already drifted; hardening
+#    this to err() is a follow-up that has to re-sync those rows first.
+#    A markdown table cell cannot contain a literal '|', so '|' is a safe field separator here.
+norm_md() { tr -d '*_`' | tr '[:upper:]' '[:lower:]' | tr '\n' ' ' | tr -s ' '; }
+anchor_pairs="$(mktemp)"; anchor_rot="$(mktemp)"
+trap 'rm -f "$anchor_pairs" "$anchor_rot"' EXIT
+grep -ohE '`[a-z][a-z0-9-]+` *(→|->) *"[^"]+"' references/sources.md 2>/dev/null \
+  | sed -E 's/^`([a-z0-9-]+)` *(→|->) *"(.*)"$/\1|\3/' | sort -u > "$anchor_pairs"
+anchor_last=''
+anchor_body=''
+while IFS='|' read -r sk phrase; do
+  [ -n "${sk:-}" ] && [ -f "skills/$sk/SKILL.md" ] || continue
+  if [ "$sk" != "$anchor_last" ]; then
+    anchor_body="$(norm_md < "skills/$sk/SKILL.md")"
+    anchor_last="$sk"
+  fi
+  needle="$(printf '%s' "$phrase" | norm_md)"
+  case "$anchor_body" in
+    *"$needle"*) ;;
+    *) printf '%s → "%s"\n' "$sk" "$phrase" >> "$anchor_rot" ;;
+  esac
+done < "$anchor_pairs"
+if [ -s "$anchor_rot" ]; then
+  note "$(wc -l < "$anchor_rot" | tr -d ' ') ledger anchor(s) no longer appear in the skill they point at:"
+  sed 's/^/        /' "$anchor_rot"
+fi
 
 skills_n="$(find skills -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')"
 printf '\n%s skills checked — %s failure(s), %s warning(s)\n' "$skills_n" "$fail" "$warn"

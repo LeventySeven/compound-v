@@ -1,7 +1,7 @@
 # STATE — <repo> — rewritten <YYYY-MM-DD HH:MM>
 
 ## Goal
-<one sentence: what "done" looks like, as observable behavior. This is also the /goal condition.>
+<one sentence: what "done" looks like, as observable behavior. This is the stop condition for the whole run.>
 
 ## Done
 - <thing that works> — evidence: `<command>` exit 0, "<the proving output line>"

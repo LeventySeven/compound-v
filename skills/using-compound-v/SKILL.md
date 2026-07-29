@@ -65,4 +65,4 @@ Writing the spec is the expensive default, not the safe one. A repo full of spec
 3. **Name what the change makes wrong.** Every doc this invalidates — a README claim, a runbook command, a config table, a CLI help string — becomes a task in the plan, not a follow-up.
 4. **Then check it shipped.** A change that invalidates documentation isn't done until that documentation is updated. Reference and how-to docs rot first, because neither is where the thinking happened.
 
-Fold the durable part — the decision and what was rejected — into the living doc or an ADR when the work lands, and let the per-change scaffolding go. `writing-prd` owns the stable product doc; `writing-plans` owns the per-build plan.
+Fold the durable part — the decision and what was rejected — into the living doc or an ADR when the work lands, and let the per-change scaffolding go. `writing-prd` owns the stable product doc; `writing-plans` owns the per-build plan; `handoff` owns `.claude/STATE.md`, which is run scaffolding rather than a document — it is deleted when the run ends and does not count against the cap at any tier.
