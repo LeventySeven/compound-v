@@ -38,14 +38,14 @@ done
 # 2. Publish boundary: shipped files must never name the internal research corpus.
 #    (scripts/ is excluded on purpose — this file holds the pattern itself.)
 leak="$(grep -rnoE 'BAD_GUIDE|researchfms|teardowns|skills_research|research/(findings|SYNTH|sources)|/Users/[a-z]' \
-  skills/ agents/ references/ README.md .claude-plugin/ 2>/dev/null || true)"
+  skills/ agents/ hooks/ references/ README.md .claude-plugin/ 2>/dev/null || true)"
 if [ -n "$leak" ]; then
   err "internal-corpus references in shipped files (these must never publish):"
   printf '%s\n' "$leak" | sed 's/^/        /'
 fi
 
 # 3. Cross-reference integrity: every compound-v:<name> resolves to a real skill.
-for r in $(grep -rhoE 'compound-v:[a-z][a-z-]+' skills/ agents/ README.md 2>/dev/null | sed 's/compound-v://' | sort -u); do
+for r in $(grep -rhoE 'compound-v:[a-z][a-z-]+' skills/ agents/ hooks/ README.md 2>/dev/null | sed 's/compound-v://' | sort -u); do
   [ -d "skills/$r" ] || err "dangling cross-reference: compound-v:$r (no skills/$r)"
 done
 
