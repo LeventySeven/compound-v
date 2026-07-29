@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+# Stop hook for the Compound V plugin — the mechanical floor under
+# `verification-before-completion`.
+#
+# It refuses exactly ONE failure: the turn edited files, ran no command at all, and then
+# claimed the work was done. It cannot tell whether a command proved anything, so it is a
+# floor, not the gate — the skill remains the contract.
+#
+# Design constraints, each of which is a way this could go wrong:
+#   FAIL OPEN. A crashed gate that wedges someone's session is far worse than a missed
+#   claim, so every guard exits 0 on anything unexpected — no `set -e` (an uncaught non-zero
+#   would surface as a hook error rather than silence), no dependency it can't live without.
+#
+#   CONVERGE, don't wall. `stop_hook_active` is the harness's own prescribed guard and caps
+#   this at one block per turn, so the consecutive-block override is never approached and the
+#   session always gets to end.
+#
+#   Don't false-block. The trigger is anchored on completion CLAIMS at clause start, and any
+#   clause carrying a negation or progress marker is discarded. A bare \bworking\b match would
+#   fire on "I'm still working on it" — that is a bug, not a stricter gate. Over-triggering is
+#   exactly as wrong as under-triggering.
+#
+#   Off switch. COMPOUND_V_STOP_GATE=off disables it; this kit ships to other people's repos.
+#
+# Proven by: bash scripts/hooks-test.sh
+
+set -uo pipefail
+
+[ "${COMPOUND_V_STOP_GATE:-on}" = "off" ] && exit 0
+
+input="$(cat 2>/dev/null)"
+[ -n "$input" ] || exit 0
+
+# jq is not guaranteed. Without it the gate disappears rather than breaking anyone.
+command -v jq >/dev/null 2>&1 || exit 0
+
+# Already blocked once this turn — return success so the turn can end.
+[ "$(printf '%s' "$input" | jq -r 'try (.stop_hook_active // false) catch false' 2>/dev/null)" = "true" ] && exit 0
+
+transcript="$(printf '%s' "$input" | jq -r 'try (.transcript_path // "") catch ""' 2>/dev/null)"
+[ -n "$transcript" ] && [ -r "$transcript" ] || exit 0
+
+# A completion claim, anchored at clause start. Deliberately narrow: a claim buried mid-clause
+# ("the retry logic is done") is allowed through rather than risk a false block.
+CLAIM='^(all )?(done|fixed|it works( now)?|works now|tests? (now )?pass(ing|ed)?|all tests pass(ing|ed)?|готово|исправлено)\b'
+# Anything in the same clause that turns the claim into its opposite, a condition, or a plan.
+NEG='\b(not|isn.?t|aren.?t|won.?t|wasn.?t|doesn.?t|didn.?t|can.?t|cannot|never|still|yet|almost|nearly|once|when|after|unless|todo|не|ещё|еще|пока)\b'
+
+# Only the tail is read: a turn that ran zero commands is short by nature, and if the turn
+# boundary isn't inside the window we fail open instead of guessing at a narrower turn.
+verdict="$(tail -n 500 "$transcript" 2>/dev/null | jq -s -r --arg claim "$CLAIM" --arg neg "$NEG" '
+  # A real user turn starts at a user message that is not a tool result and not harness meta.
+  def is_turn_start:
+    .type == "user" and ((.isMeta // false) | not) and
+    (if (.message.content | type) == "string" then true
+     else (((.message.content // []) | map(select(.type == "tool_result")) | length) == 0) end);
+  . as $t
+  | ([range(0; ($t | length)) | select($t[.] | try is_turn_start catch false)] | last) as $start
+  | if $start == null then "SKIP no-turn-boundary" else
+      ($t[$start:]) as $turn
+      | [$turn[] | select(.type == "assistant") | .message.content[]? | select(.type == "tool_use") | .name] as $tools
+      | [$turn[] | select(.type == "assistant") | .message.content[]? | select(.type == "text") | .text] as $texts
+      | if ([$tools[] | select(. == "Edit" or . == "Write" or . == "MultiEdit" or . == "NotebookEdit")] | length) == 0
+        then "SKIP no-edits"
+        elif ([$tools[] | select(. == "Bash")] | length) > 0
+        then "SKIP bash-ran"
+        elif ($texts | length) == 0
+        then "SKIP no-text"
+        else
+          [ ($texts | last) | split("[.!?\n]"; "")[]
+            | sub("^[\\s*_#>`~-]+"; "")
+            | select(test($claim; "i")) | select((test($neg; "i")) | not) ]
+          | if length > 0 then "BLOCK" else "SKIP no-claim" end
+        end
+    end' 2>/dev/null)"
+
+[ "$verdict" = "BLOCK" ] || exit 0
+
+# Name the command to run. Relative only — an absolute path is noise in a hook message.
+cwd="$(printf '%s' "$input" | jq -r 'try (.cwd // "") catch ""' 2>/dev/null)"
+[ -n "$cwd" ] && [ -d "$cwd" ] || cwd="$PWD"
+if   [ -f "$cwd/scripts/check.sh" ];                                       then cmd='bash scripts/check.sh'
+elif [ -f "$cwd/Makefile" ] && grep -qE '^test:' "$cwd/Makefile" 2>/dev/null; then cmd='make test'
+elif [ -f "$cwd/package.json" ] && grep -q '"test"' "$cwd/package.json" 2>/dev/null; then cmd='npm test'
+elif [ -f "$cwd/pyproject.toml" ] || [ -f "$cwd/pytest.ini" ];             then cmd='the project test command'
+elif [ -f "$cwd/Cargo.toml" ];                                             then cmd='cargo test'
+elif [ -f "$cwd/go.mod" ];                                                 then cmd='go test ./...'
+else cmd='the command that would prove this'
+fi
+
+jq -n --arg cmd "$cmd" \
+  --arg msg 'Compound V: completion claimed, nothing run.' \
+  '{decision: "block",
+    reason: ("You edited files this turn, ran no command at all, and then claimed the work was done. "
+             + "Run `" + $cmd + "`, read the output yourself, and report the real result — "
+             + "including a failure, which is worth more than a false green. "
+             + "If that was not a completion claim, say what is still outstanding and stop; "
+             + "this gate blocks at most once per turn. See compound-v:verification-before-completion."),
+    systemMessage: $msg}'
+exit 0

@@ -15,6 +15,8 @@ description: Run the command that proves a claim and read its output before asse
 4. **Confirm** the output actually says what you're about to claim.
 5. **Then** make the claim — quoting the evidence, not paraphrasing your hope.
 
+A Stop hook ships with this kit as the mechanical floor under the gate: it refuses a completion claim when the turn edited files and ran nothing at all. It is a floor, not the gate — it cannot tell whether the command you ran proved anything, so the steps above remain the contract.
+
 Skipping any step is asserting something you haven't checked. **Step 1 always resolves to a command that observes *behavior*** — a test, a build, a lint, a request, the feature actually used. Re-reading the file you just wrote is not verification and not a step: Edit/Write would have errored if the write had failed, and the file's contents were never the claim.
 
 **Read the value out of the artifact, not out of the sentence describing it.** Running the command is half the gate; reading its result is the other half, and the two can disagree silently. An agent that genuinely ran the code can still describe the result wrongly in prose — the printed variable says one thing, the summary sentence says something ~10,000× different, and asking "did you run it?" returns an honest yes that is still wrong. So take every claimed value from the artifact itself: the printed output, the file on disk, the response body, the exit code. **If the claim is a number, that number must appear in output you actually looked at** — a figure you can't point at in an artifact is a figure you invented, however real the run behind it was.

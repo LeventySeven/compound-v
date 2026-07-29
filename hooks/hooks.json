@@ -22,6 +22,18 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/stop-verify\"",
+            "async": false,
+            "timeout": 10
+          }
+        ]
+      }
     ]
   }
 }
