@@ -37,7 +37,7 @@ Two pieces carry most of the weight:
 | AI systems (architecture, opt-in) | `architecting-ai-systems` (the compound system around the model — harness-as-moat, primitive-not-wrapper, build for the model ~18 months out) and `ai-system-reliability` (keep a built system from corrupting its own state; chain a constellation past one model's ceiling) |
 | Power | `searching-patterns` (the canonical pattern and the anti-pattern it replaces, from primary sources), `dispatching-parallel-agents`, and `handoff` (one `.claude/STATE.md` for work that outlives a session) |
 
-It also ships one agent: `code-reviewer`, the spawnable read-only form of `recheck` — it reads the actual diff, re-runs the tests itself, and returns severity-tagged findings plus one verdict. It never edits; the implementer applies the fixes.
+It also ships one agent: `code-reviewer`, the spawnable read-only form of `recheck` — it reads the actual diff, re-runs the tests itself, and returns severity-tagged findings plus one verdict. In artifact mode it reviews a plan or spec before implementation instead of a diff, resolving every path and command the plan names rather than opining on prose. It never edits; the implementer applies the fixes.
 
 ## Documents earn their place
 
