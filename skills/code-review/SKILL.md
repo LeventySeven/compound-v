@@ -59,7 +59,7 @@ The confidence gate filters hallucinated findings *after* they're generated; the
 
 Default to *not* a finding. These are not findings:
 
-- Pre-existing issues, and issues on untouched lines that stand independent of this change — *unless* the diff is what breaks them, which is the Adjacent bucket, not a non-finding.
+- Pre-existing issues, and issues on untouched lines that stand independent of this change — nothing here blocks the diff (where they are still *reported* is the Adjacent bucket above). An issue the diff *causes* is not in this category at all, however far from the changed lines it sits; the revert test sorts them.
 - Anything a linter / type-checker / compiler / CI would catch — imports, types, formatting, broken tests. Assume those run separately; don't review them. (Exception, at high/ultra or when no CI is wired up: run the static-analysis tools yourself and have the model triage each finding for whether it's real in *this* diff — the model as a filter on top of the tools, not a re-derivation of what CI already reports.)
 - Nitpicks a senior engineer wouldn't raise; general "more tests / more docs" wishes not required by CLAUDE.md.
 - A change the author clearly made on purpose, or one held to a rigor bar the surrounding code doesn't meet — a deliberate design choice is not a bug, and a clean-context reviewer is the one most likely to misread intent it can't see.
@@ -92,6 +92,6 @@ The review **finds**; it does not edit. A reviewer that can edit ships its own u
 |---|---|
 | Posting findings straight from the diff with no confidence gate | Unfiltered review is noise; the one false positive a senior engineer waves off costs you the credibility of the ten real ones. Gate at ~80. |
 | Running `ultra` on a one-file fix "to be safe" | Overkill is a defect. Depth matches the diff; a bigger pass isn't a better pass. |
-| Flagging a pre-existing issue as a blocker on this diff | Out of scope for *this* diff. But a contract the diff **breaks** on an unmodified line is in scope — that's the Adjacent bucket, not a drop. |
+| Flagging a pre-existing issue as a blocker on this diff | Out of scope for *this* diff — Adjacent, reported once, never blocks. But a contract the diff **breaks** is not pre-existing at all: it is a main-list blocker however far from the changed lines it sits. The revert test sorts them. |
 | The reviewer edits the code while reviewing it | The edit it introduces is the one nobody reviews. Review read-only; `--fix` is a separate, explicit, re-verified phase. |
 | Reviewing prose — the PR description or the author's summary instead of the patch | You reviewed the story, not the change. Read the actual diff. |

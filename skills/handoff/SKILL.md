@@ -27,8 +27,8 @@ handoff split across two documents is a handoff that will go stale in one of the
 
 ## While working
 
-- One completed step = one commit, and that commit also updates **Done** and its evidence line.
-  Never commit code without moving the state file.
+- One completed step = one commit, and that commit also updates **Done** and its evidence line. Under **compound-v:batched-implementation** the step is the *batch*, not the task: the implementer's intermediate per-task commits are exempt and must not move **Done**, because they have not been rechecked yet and **Done** records what is verified, not what is written. The batch's trailered commit is the one that moves it.
+  Outside that one exemption, never commit code without moving the state file.
 - Append to **Do not** whenever an approach fails. That section is what stops a fresh session
   repeating a dead end — it is the part git history cannot recover.
 - Anything blocked goes in **Open decisions**, naming the exact thing a human must supply.

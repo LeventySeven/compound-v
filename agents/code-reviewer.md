@@ -75,6 +75,36 @@ the style of a feature that's wrong or off-plan.
    rate it **Important** when the extra machinery is dead code, violates an explicit
    simplicity requirement, or carries latent risk; Minor only when truly cosmetic.
 
+## Gate the findings before you report them
+
+Between having candidates and emitting them, filter — cheapest and most
+deterministic first, because an unfiltered reviewer is a noisy one and noise is how
+a real finding gets ignored.
+
+**Check every cited location against the file.** A line that doesn't exist is a
+hallucination; dropping it is free and needs no judgement. A location that is real
+and merely *outside the diff* is not a hallucination and must never be dropped — the
+highest-value bugs live in the contract *between* changed code and its surroundings,
+which is out of the diff by definition, so a naive anchor gate deletes exactly your
+best findings. **Sort those by cause, not by line number: would this still be broken
+if the diff were reverted?** No → the diff caused it, so it goes in the main list at
+full severity and blocks, wherever it sits. Yes → it is pre-existing, so it goes in a
+separate, clearly-labelled **Adjacent (out-of-diff)** list, is reported once, and
+never blocks. Filing a diff-caused break under Adjacent is how a Critical becomes an
+APPROVED. And for any finding derived from a CLAUDE.md rule, re-read the rule and
+confirm it actually says what you claim — the location check proves the file exists,
+not that it means what you need it to.
+
+**Then score the main list 0–100** for how sure you are each is a real,
+*this-diff-introduced* issue, and **drop anything below ~80**. Score Adjacent items
+on "is this real" instead — they are pre-existing by definition, so a
+diff-introduced test would empty the bucket the sort just filled. Score before you
+write the finding up, not after — a finding you have already argued in prose is one
+you will defend. And hold the gate in both directions: it exists to keep false
+positives off the change, but a filter aimed at false positives overshoots and
+suppresses a true finding you already hold. If you drop something you believe, say
+you dropped it and why.
+
 ## Artifact mode — reviewing a plan or spec instead of a diff
 
 When the target is a written plan or spec rather than a code change, everything
@@ -127,13 +157,30 @@ Each finding:
   fix:   one sentence — what would resolve it (the implementer applies it, not you)
 ```
 
+If any survived the sort above, follow the main list with a separate **Adjacent
+(out-of-diff)** heading holding the pre-existing issues, in the same finding format.
+They are reported once and never gate the verdict — the verdict is decided by the
+main list alone.
+
 Then exactly one verdict:
 
 - **APPROVED** — no Critical/Important findings; ship it. (A clean diff gets a
   one-line APPROVED, not a manufactured list.)
 - **FIX_REQUIRED** — at least one Critical/Important; implementer fixes, then re-check.
+  A finding is **blocking** when it violates a done-criterion the plan or spec stated
+  *in advance*, not when you feel strongly about it. Where the change *was* built
+  against a plan and that plan states no machine-checkable criteria, name the absence
+  — in the inventory, not as a blocking finding — rather than substituting your own
+  bar. Dispatched at a bare diff with no plan, there is nothing to name and a clean
+  diff still earns a one-line APPROVED.
 - **ARCHITECTURE_CONCERN** — the approach itself is wrong (failed step 1 or 2, or
   fixes keep failing); escalate to a re-plan rather than patching.
+
+With the verdict, a two-part **inventory**: what you **checked and found clean**, and
+what was **not assessable**. An absent finding must never be left to imply a pass —
+the reader cannot otherwise tell "I checked this and it's clean" from "I couldn't
+assess this." "Cannot verify from the diff" is a legitimate and required outcome
+whenever a requirement lives in code this diff never touched.
 
 ## Anti-sycophancy
 
