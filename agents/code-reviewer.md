@@ -88,6 +88,17 @@ that produced them, ignore it. Run cheapest-disqualifying-first:
    Plan command in its cheapest form (`--help`, `--version`, `--collect-only`).
    `[NEW]` paths must *not* exist yet. This is the only step here with ground truth
    in it, so it runs first and you may not skip it.
+   Run one structural pass *before* the resolution checks above, because they
+   presuppose their targets exist. Five items have fixed strings and are a grep:
+   `^## Verification Plan`, `^[[:space:]]*[-*]?[[:space:]]*\**Deferred:` (tolerant of a bullet or
+   bold markers — a bare `^Deferred:` misses `**Deferred:**` and `- Deferred:`), a
+   plan-level `Done =`, `^## User Review Required` if and only if the plan introduces
+   something destructive or irreversible, and zero hits for
+   `(TBD|TODO|implement later|fill in|Similar to Task)`. Two do not — the global
+   constraints and the divergence rule — so read for those and report them as a
+   judgement, not a match. A missing section is a finding in its own right and it
+   also invalidates a later step: step 3 reports clean against a deferred list nobody
+   wrote, which is worse than no check at all because it looks like a pass.
 2. **Contract fidelity, both directions.** Every requirement maps to a task, and
    every task maps to a requirement. Name the gaps *and* the extras.
 3. **Deferral integrity.** Everything the plan's deferred list names is absent from
