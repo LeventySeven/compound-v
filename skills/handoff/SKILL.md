@@ -8,6 +8,15 @@ description: Open, continue, or close the state file for work that will outlive 
 One state file per repo: `.claude/STATE.md`. Never a second "plan" or "analysis" sibling — a
 handoff split across two documents is a handoff that will go stale in one of them.
 
+## Which repo
+
+`git -C <the files you are changing> rev-parse --show-toplevel`. The state file goes there — not
+in the working directory, which may be a folder that merely *contains* repos. A state file outside
+a git work tree describes no single project and is loaded by every session that opens that folder.
+
+If the run touches two repos, write two state files, each covering only its own repo and naming
+the other in one line. Never a shared one above them.
+
 ## If `.claude/STATE.md` already exists
 
 1. `git log --oneline -20` and `git status --porcelain`.
