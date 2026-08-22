@@ -11,7 +11,7 @@ The moment a conclusion feels *obviously* right and nobody is pushing back is th
 - You're about to commit to a conclusion, recommendation, design rationale, or "this is the answer" — and your own confidence is the main thing backing it.
 - The call is load-bearing or hard to reverse, or you notice you've only gathered evidence that agrees with you.
 - You're converging on a design in **compound-v:brainstorming** — pressure-test the approach you're about to recommend instead of confirming your first instinct (it should beat the *real* alternative, not a strawman). This is the discipline's prime home during design.
-- **Skip it** for trivial or reversible calls — red-teaming a rename is its own overkill; this is for reasoning with consequences. And it is self-skepticism over your OWN in-flight reasoning: **compound-v:recheck** reviews finished work, **compound-v:verification-before-completion** runs the command that proves an output, **compound-v:startup-taste** judges whether to build at all.
+- **Skip it** for trivial or reversible calls — red-teaming a rename is its own overkill; this is for reasoning with consequences. And it is self-skepticism over your OWN in-flight reasoning: **compound-v:recheck** reviews finished work, **compound-v:verification-before-completion** runs the command that proves an output, **compound-v:startup-taste** judges whether to build at all. And when the call is load-bearing, has no checker, and your own gates keep landing on "I can't tell from here" — that is the handoff to **compound-v:council**, which buys independent fresh-context takes instead of more solo reasoning.
 
 ## The gates (run the relevant ones; name what you find)
 
