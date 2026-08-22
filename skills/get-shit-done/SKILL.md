@@ -9,7 +9,7 @@ Most projects that look impossible are a handful of parts, two of which are genu
 
 That is not optimism. Thorsten Ball built a working code-editing agent in ~300 lines and three tools — *"an LLM, a loop, and enough tokens. The rest … Elbow grease."* — and answered the sceptic directly: *"I bet it's a lot farther than you think."* Overestimating is the default failure, and models are worse at it than people: asked for a hard thing, a model reaches for architecture instead of for the two facts that would collapse it.
 
-This skill is the **project-level spine**: four stages, each handing the actual work to a skill that already owns it.
+This skill is the **project-level spine**: five stages, each handing the actual work to a skill that already owns it. It is a loop rather than a line — the last stage is what makes the next turn of it cheap.
 
 ## When to use
 
@@ -136,6 +136,18 @@ The **clamp** is there too: a finding blocks only if it names a real user blocke
 - **DRIFTED** — what exists is no longer what was asked for. Route back to the original ask, not to the plan.
 
 A hand-off is not a verdict: "pushed", "PR opened", "ready for review", "agents still running" are all stopping while work is open, and a list of manual steps handed back to the user is unfinished work relabelled. **The next action is the one that closes the biggest gap to MEP, not the most comfortable one** — name the biggest gap, name the comfortable alternative you were about to do instead, and say why you are not doing it. Say all of it in the conversation; the durable residue is one line in the landing commit.
+
+## Stage 5 — Discharge: hand the run's claims to something that outlives it
+
+The measured cost of the AI era sits *after* the merge, not before it: across ~28M workflows, feature-branch throughput rose while median main-branch throughput fell and time-to-green climbed, and the industry's own delivery research keeps finding AI adoption negatively related to *stability* rather than to speed. A spine that ends at the merge ends one step before the expensive part.
+
+**Discharge the ledger; do not just delete it.** A row has two halves with opposite half-lives. Its `status` is run-scoped — every row reads `passed` forever the day after the merge, which is a stale claim the next agent will trust as fact — so the file still goes. But its `steps` and `evidence` are a regression contract the run already paid to write, and throwing those away is what makes every later phase impossible. So before the landing commit removes it, every passed row names a durable target: a command someone can re-run, a production observable and the query that reads it, or a named human and the check they own. `bash scripts/ledger.sh --discharge` refuses the landing until that holds.
+
+**Merging is not releasing.** An agent that can merge must not thereby be able to ship to users; keep the release a separate, named act. Arm automatic rollback only for a slice whose `irreversible` array is empty — where it is not, the revert restores the code and not the migrated rows or the sent messages, so that deploy waits for a named forward-fix path instead.
+
+**An incident opens a row before it opens a fix** — `from: "incident"`, `steps` = the reproduction, status `todo`. It is red-first by construction, because it is failing in production right now. This is deliberately *not* a maintenance lane: a second-class path is exactly where the missing 10% relocates, because rows declared nowhere are rows the gate cannot see. The next change re-enters at Carve like everything else, which is what makes this a loop.
+
+**What this stage refuses to become.** No monitoring phase, no maintenance phase, no lifecycle document, no design-doc stage, no change-approval board, no staging-soak gate, no lights-off tier where nobody reads the diff. Each was considered and rejected against evidence — `references/sources.md` records which, and why, so they are not re-proposed as improvements.
 
 ## Red flags
 

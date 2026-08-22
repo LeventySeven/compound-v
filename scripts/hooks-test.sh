@@ -253,6 +253,25 @@ led "ledger.sh: dropped needs attribution"   1 '[{"id":"s1","rows":[{"id":"r1","
 led "ledger.sh: no rows -> cannot tell"      2 '[{"id":"s1","capability":"x"}]'                        "no rows found"
 led "ledger.sh: bad status -> cannot tell"   2 '[{"id":"s1","rows":[{"id":"r1","status":"done"}]}]'    "outside"
 led "ledger.sh: never prints a blank field"  1 '[{"id":"s1","rows":[{"id":"r1","status":"todo"}]}]'    "discovered +0"
+# --discharge: the landing gate. A passed row may only stop existing once it names something that
+# outlives the file. The partial-form cases matter most — half a target is no target.
+dis() { # dis <name> <expect-exit> <ledger-json>
+  local name="$1" want="$2" f="$lg_dir/dis.json" rc
+  printf '%s' "$3" > "$f"; bash scripts/ledger.sh --path "$f" --discharge >/dev/null 2>&1; rc=$?
+  if [ "$rc" = "$want" ]; then pass=$((pass + 1)); printf '%-46s %-8s ok\n' "$name" "exit$want"
+  else miss=$((miss + 1)); failures+=("$name — --discharge exited $rc, expected $want")
+       printf '%-46s %-8s MISS exit %s\n' "$name" "exit$want" "$rc"; fi
+}
+dis "discharge: passed row, no target"       1 '[{"id":"s","rows":[{"id":"a","status":"passed"}]}]'
+dis "discharge: rerun command"               0 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"rerun":"npm test"}}]}]'
+dis "discharge: observable + query"          0 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"observable":"login rate","query":"sum(x)"}}]}]'
+dis "discharge: named owner + check"         0 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"owner":"slava","check":"eyeball the invoice"}}]}]'
+dis "discharge: observable with no query"    1 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"observable":"login rate"}}]}]'
+dis "discharge: owner with no check"         1 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"owner":"slava"}}]}]'
+dis "discharge: run not finished"            1 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"rerun":"x"}},{"id":"b","status":"todo"}]}]'
+dis "discharge: blocked blocks the landing"  1 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"rerun":"x"}},{"id":"b","status":"blocked"}]}]'
+dis "discharge: dropped needs no target"     0 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"rerun":"x"}},{"id":"b","status":"dropped","dropped_by":"s","dropped_why":"cut"}]}]'
+
 if timeout 5 bash scripts/ledger.sh --path >/dev/null 2>&1; then :; fi
 if [ "$?" -ne 124 ]; then pass=$((pass + 1)); printf '%-46s %-8s ok\n' "ledger.sh: --path with no value" "exit2"
 else miss=$((miss + 1)); failures+=("ledger.sh --path with no value hangs")

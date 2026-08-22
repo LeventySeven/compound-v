@@ -14,6 +14,7 @@
 #
 #   bash scripts/ledger.sh              # the scope-delta line
 #   bash scripts/ledger.sh --open       # + every row not closed, with its slice
+#   bash scripts/ledger.sh --discharge  # can this ledger be deleted yet? (the landing gate)
 #   bash scripts/ledger.sh --path P     # a ledger somewhere other than .claude/slices.json
 #
 # Proven by: bash scripts/hooks-test.sh
@@ -24,9 +25,11 @@ here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 extract="$here/ledger-extract.jq"
 ledger=".claude/slices.json"
 show_open=0
+discharge=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --open) show_open=1; shift ;;
+    --discharge) discharge=1; shift ;;
     --path)
       # A bare `--path` with nothing after it used to shift past the end and then read the
       # ledger from stdin, which hangs forever. Fail loudly instead.
@@ -73,6 +76,32 @@ if [ "$show_open" -eq 1 ] && [ $(( n_open + n_blocked )) -gt 0 ]; then
   printf '%s' "$report" | jq -r '.rows[]
     | select(.status == "todo" or .status == "building" or .status == "blocked")
     | "  [\(.status)] \(.id // "?") — \(.does // .capability // "(no description)")"'
+fi
+
+# --discharge: the landing gate. A row's `status` is run-scoped and reads `passed` forever the day
+# after the merge, so keeping the ledger as a live document makes a stale claim an agent will trust
+# as fact — but its `steps` and `evidence.how` are a regression contract the run already paid to
+# write. Deleting is right; deleting UNDISCHARGED is the bug. Every passed row must first name a
+# durable target that outlives the file: a command someone can re-run, a production observable and
+# the query that reads it, or a named human and the check they own.
+if [ "$discharge" -eq 1 ]; then
+  undischarged="$(printf '%s' "$report" | jq -r '[.rows[] | select(.status == "passed")
+    | select((.discharge // {}) as $d
+        | (($d.rerun // "") | tostring | length) == 0
+          and ((($d.observable // "") | tostring | length) == 0 or (($d.query // "") | tostring | length) == 0)
+          and ((($d.owner // "") | tostring | length) == 0 or (($d.check // "") | tostring | length) == 0))
+    | "  " + (.id // "?") + " — " + (.does // "(no description)")] | join("\n")')"
+  if [ -n "$undischarged" ]; then
+    printf '\nnot dischargeable — %s passed row(s) name no durable target:\n%s\n' \
+      "$(printf '%s\n' "$undischarged" | grep -c '^')" "$undischarged"
+    printf 'each needs one of: discharge.rerun (a command), discharge.observable + .query, or discharge.owner + .check\n'
+    exit 1
+  fi
+  if [ "$n_open" -gt 0 ] || [ "$n_blocked" -gt 0 ] || [ -n "$unattributed" ]; then
+    printf '\nnot dischargeable — the run is not finished yet\n'; exit 1
+  fi
+  printf '\ndischargeable: every passed row names a durable target; the ledger may be deleted in the landing commit\n'
+  exit 0
 fi
 
 [ "$n_open" -gt 0 ] && exit 1

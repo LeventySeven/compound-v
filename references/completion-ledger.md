@@ -46,7 +46,12 @@ for a row that is not an object, a duplicate row id, and status buckets that do 
 count. An unreadable ledger resolves toward open, never toward done — the audit command refuses to
 print a number at all in those cases, because a number that does not add up is worse than none.
 
-`from` is `prd` · `plan` · `discovered` · `user`. `evidence` on a passed row is
+`from` is `prd` · `plan` · `discovered` · `user` · `incident`. A passed row also carries a
+**`discharge`** target — the thing that outlives this file — in exactly one of three forms:
+`{"rerun": "<command>"}` for anything re-runnable, `{"observable": "...", "query": "..."}` for
+behaviour only production can show you, or `{"owner": "...", "check": "..."}` for a judgement only a
+named person can make. `bash scripts/ledger.sh --discharge` refuses the landing while any passed row
+has none. `evidence` on a passed row is
 `{"how": "<what you actually ran or drove>"}` — one line a third party could repeat. `steps` is the part people skip and
 it is the part that works — a numbered walk is checkable by someone who was not there, and a row
 without one degrades into a vibe within two sessions.
@@ -73,7 +78,12 @@ Three conditions, all of them:
    **compound-v:test-driven-development**'s red step applied to the ledger, and it is the cheapest
    high-value gate on this page — **including the half of that step people drop: the red has to fail
    for the right reason.** A run that fails because the route does not exist yet is guaranteed and
-   tells you nothing about whether the check measures the property. So for the row classes where the
+   tells you nothing about whether the check measures the property. **When the agent wrote the check
+   as well as the code, use the mutation form:** run the check against the real implementation and
+   again with the body of the thing under test replaced by a no-op stub, and require pass-then-fail.
+   The measured dominant failure of agent-written tests is assertions that are trivially true on a
+   stubbed implementation — the check covers the function and cannot tell whether it does anything.
+   A check that passes both ways is not a check; rewrite it to assert observable post-state. So for the row classes where the
    check binds weakest to the implementation — a latency budget, an authz property, a refactor with
    no behavior change — and for any row guarding behavior that already exists, use the other form:
    break the thing on purpose and confirm the check notices.
@@ -96,6 +106,16 @@ bottleneck and buys little; placed on the action boundary — money moving, data
 sent, a migration run — it is the only thing that works. Mark those rows in the ledger, and give the
 person the row's steps to check rather than a request to approve, or you have added a signature and
 not a gate. The same axis **compound-v:make-it-stable** already draws.
+
+## The irreversible surface, declared per slice
+
+Each slice carries an **`irreversible`** array naming what a revert would not undo: a schema
+migration, an outbound message, money moved, a third-party write, a deletion. Empty is the common
+and good case, and it is what licenses automatic rollback as the first response to a bad release.
+Non-empty means rollback is not a strategy there — the deploy waits until a named forward-fix path
+exists, because the revert lands, the code comes back, and the migrated rows and the sent emails do
+not. This is the axis **compound-v:make-it-stable** already draws, written down where the release
+can read it instead of left as a thing someone was supposed to remember.
 
 ## R3 — The delta: scope moves, and it must move visibly
 
