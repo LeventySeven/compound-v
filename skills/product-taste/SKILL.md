@@ -21,7 +21,7 @@ Useful drills: "If a rival shipped this, would I be impressed or relieved?" "Nam
 
 ## Slop detector — every default is a decision you didn't make
 AI hands you mediocre defaults; the skill is knowing which to override (the load-bearing ones, not all). The slop aesthetic is recognizable — grep your own output for it, and each hit carries its fix:
-- Uniform rounded corners on everything → pick a radius scale on purpose, or square the cases that should read as structural.
+- Uniform rounded corners on everything → pick a radius scale on purpose, square the cases that should read as structural, and make nested corners **concentric**: an inner radius is the parent's radius minus the padding between them (16px card, 12px padding → 4px on the image inside). Corners that read pinched or flared are that arithmetic being skipped, not a taste disagreement — check artwork and inputs nested in cards first.
 - Gradients that don't match the brand → drop them or pull from the actual palette.
 - Copy edited to be **inoffensive instead of clear** → rewrite for clarity and opinion.
 - Layouts grid-perfect but tonally flat → add deliberate emphasis/asymmetry; flatness is the absence of a hierarchy decision.
@@ -46,8 +46,8 @@ Users can't articulate why one interaction feels alive and another dead, but the
 
 ## Animation gate — motion has a job or it's noise
 Decoration kills UX. Run every motion through six checks; any fail → cut or fix:
-1. Natural (not robotic).
-2. Right speed.
+1. **Eased, not linear** — a real curve, or a spring whose weight matches the element; linear is the tell that nobody chose.
+2. **Duration scaled to travel** — within the 200–300ms default, a toggle sits at the bottom of the band and a full-screen sheet at the top. One duration applied to everything is *uniformity*, which this skill already names as a defect.
 3. **Clear purpose — it communicates a state change.**
 4. 60fps.
 5. **Interruptible mid-flight** (a spring that argues with the user when they act feels like the app fighting them).
@@ -57,7 +57,7 @@ Motion added "because it looks nice," with no state change to communicate, fails
 
 Craft refinements: animate only **`transform` and `opacity`** — they ride the GPU's composite-only path, while animating layout or color forces repaints that drop frames; keep durations in the **200–300ms** range, `ease-out` for enter/exit. And invert the intuition for *frequency*: an element seen 100+ times a day should **lose** its animation — repeated motion stops reading as delight and becomes noise.
 
-Prototype animation, keyboard nav, and touch in **code, not Figma**. A static design tool cannot represent easing, interruptibility, or input modes — it shows you the keyframes, not the *feel*. The only honest medium for a motion or interaction decision is the running thing.
+Prototype animation, keyboard nav, and touch in **code, not Figma**. A static design tool cannot represent easing, interruptibility, or input modes — it shows you the keyframes, not the *feel*. The only honest medium for a motion or interaction decision is the running thing — and your own source is a static design tool too: you cannot see cramped spacing, a flat hierarchy, or a dead hover state in CSS. Backend work has a test suite telling it when it's wrong; the felt surface has no such signal, so the only check is that you actually looked. Before you name a property, render it and drive the real surface — a browser tab, the simulator, a screenshot at the sizes it ships at — and exercise the interaction.
 
 ## Latency gates — perceived speed is taste work, not an infra afterthought
 Hold the perceptual cliffs:

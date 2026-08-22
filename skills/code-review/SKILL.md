@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: On-demand and pre-merge reviewer for a specific change — point it at a pull request, a branch, or your uncommitted diff, or let it run automatically as the gate before anything is merged; it returns confidence-gated, severity-tagged findings at a depth that matches the change, and can post them to GitHub or apply the fixes. Use when someone hands you a change to review — "review this PR", "review my diff", "look over this branch", "is this change ok", "code review #123" — AND automatically before merging or landing a PR/branch ("merge this PR", "is this ready to merge", "land #123", "merge these PRs"): anything about to hit the base branch gets reviewed first, even when no one names a review. Outside the build pipeline, where compound-v:recheck owns the in-loop gate.
+description: On-demand and pre-merge reviewer for a specific change — a pull request, a branch, or your uncommitted diff — returning severity-tagged findings, optionally posted to GitHub or applied as fixes. Use when someone hands you a change to review — "review this PR", "review my diff", "look over this branch", "is this change ok", "code review #123" — AND automatically before merging or landing a PR/branch ("merge this PR", "is this ready to merge", "land #123"): anything about to hit the base branch gets reviewed first, even when no one names a review. Outside the build pipeline, where compound-v:recheck owns the in-loop gate.
 ---
 
 # Code Review
@@ -78,6 +78,8 @@ path/to/file.ext:line — issue: one sentence, what is wrong
 ```
 
 Then one verdict: **APPROVED** (no Critical/Important — a clean diff gets a one-line approval, not a manufactured list), **FIX_REQUIRED** (at least one Critical/Important), or **ARCHITECTURE_CONCERN** (the approach itself is wrong — escalate to a re-plan, don't patch). No praise-padding, no "great job", no "you might consider" hedging; if you can't name the trigger, it isn't a finding.
+
+APPROVED means "nothing survived the gate," never "no bugs here" — that gap is the price of the ~80 confidence bar and the four excluded categories. So carry the ceiling with the verdict: name what you checked and found clean, name what this diff left unassessable, and on a one-way-door change say plainly that a gated pass is not a substitute for a human read.
 
 ## Posting and fixing — the review stays read-only
 

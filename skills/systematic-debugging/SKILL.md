@@ -1,6 +1,6 @@
 ---
 name: systematic-debugging
-description: Find the root cause before changing any code — reproduce, trace to the source, form one hypothesis, then fix. Use when hitting a bug, test failure, crash, or any unexpected behavior, before proposing or trying a fix, and escalate to questioning the design when fixes keep failing.
+description: Find the root cause before changing any code. Use when hitting a bug, test failure, crash, hang, flaky or intermittent behavior, a CI failure that won't reproduce locally, output that's wrong in a way you can't explain, or a green result you can't account for — and before proposing or trying any fix, including one that looks obvious. Also when fixes keep failing, or when a subagent hands back a bug it couldn't resolve. Not for a one-line typo the compiler already points at.
 ---
 
 # Systematic Debugging
@@ -22,7 +22,7 @@ For a one-line obvious typo (wrong variable name the compiler points at), just f
 You don't always need all four, but you may not skip *ahead* of a phase you haven't satisfied. You cannot hypothesize a cause (Phase 3) before you've reproduced and traced (Phase 1).
 
 ### Phase 1 — Find the root cause
-- **Read the code before you hypothesize — and expect that to feel expensive.** Models are trained with token-use penalties, so the pull is always toward firing off one cheap hypothesis immediately instead of spending tokens reading; the felt experience is urgency, as if the budget will run out mid-task. It won't. Reading the relevant code first can legitimately consume a large fraction of a session's tokens and still be the fastest path to the fix — five guesses cost more, in tokens and in damage. Naming the bias is what lets you override it.
+- **Read the code before you hypothesize — and expect that to feel expensive.** The pull is always toward firing off one cheap hypothesis immediately instead of spending tokens reading; the felt experience is urgency, as if the budget will run out mid-task. It won't. Reading the relevant code first can legitimately consume a large fraction of a session's tokens and still be the fastest path to the fix — five guesses cost more, in tokens and in damage. Naming the bias is what lets you override it.
 - **Read the actual error.** The full message, the full stack trace, the exit code. Not the gist — the literal text. The answer is often in a line people skip.
 - **A green you can't explain is a defect, not a pass.** AI/agent code fails silently — the loop exits 0 with a confidently-wrong answer and no error ever fires, so a passing-looking result you cannot account for is a bug *lead*, not a finish. Go simple-to-complex and never trust an output you can't explain; distrust the passing signal, don't just chase visible crashes.
 - **Reproduce it consistently.** A bug you can't trigger on demand, you can't verify you fixed. Find the exact inputs/steps. If it's flaky, make it deterministic before going further (e.g. control the timing/seed/ordering that makes it intermittent). For a nondeterministic agent/LLM there is no single reproducible stack trace — a bug that fires 1-in-5 runs defeats both "reproduce on demand" and "write one failing test." Build a small graded example set (**compound-v:evals**) and treat *where it fails across runs* as your repro and your regression guard — the same role a failing test plays for deterministic code. (No eval system is the #1 reason AI products fail.)
@@ -50,6 +50,8 @@ You don't always need all four, but you may not skip *ahead* of a phase you have
 ## The 3-attempt rule — stop digging, question the design
 
 Track your fix attempts. The empirical cap before escalating is **three** — production coding agents converge on it independently — across CI-failure loops, lint-fix loops, and retry caps. This is the canonical home of the 3-attempt rule; **compound-v:recheck** and **compound-v:batched-implementation** cross-ref here for their fix↔recheck cap rather than restating it.
+
+**Decide what counts as the same attempt, or the cap never fires.** Two failure shapes need two reads. *Identical error text to the last attempt* — you changed nothing that mattered: stop at **two**, not three, because a third pass over an unchanged failure is the shape that eats whole runs (one production coding agent lost ~20 of 89 benchmark tasks to exactly this, circling on the same error). *A different error every round* — not progress, whack-a-mole; it slips a cap anchored on "the same failure keeps happening" precisely because the failure never repeats, so count those attempts too: a fresh symptom each round is itself the evidence that your model of the system is wrong. And the count does not reset because you re-described the problem — strip the per-run noise (temp paths, timestamps, run ids) before deciding whether two failures are the same one.
 
 ```dot
 digraph debug {

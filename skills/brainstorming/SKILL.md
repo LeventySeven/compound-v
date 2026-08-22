@@ -19,7 +19,7 @@ Pin down what you're building and why, and get it approved, before you touch cod
 
 For a Standard-or-larger build, do not write code, scaffold, or invoke an implementation skill until you have presented a design and the user has approved it.
 
-The reason is leverage: a wrong assumption caught in conversation costs a sentence; the same assumption caught after implementation costs the whole branch. "This is too simple to need a design" is the trap — the simple-looking builds are where unexamined assumptions do the most damage, because nobody slowed down. A design can be three sentences for a small feature; it still gets presented and approved.
+The reason is leverage: a wrong assumption caught in conversation costs a sentence; the same assumption caught after implementation costs the whole branch. "This is too simple to need a design" is the trap — the simple-looking builds are where unexamined assumptions do the most damage, because nobody slowed down. A design can be three sentences for a modest Standard build; it still gets presented and approved.
 
 The gate's strongest form is a **capability lock**, not a politeness rule. When you're running autonomously (no human turn between you and the editor), stay in read/search/plan tools only — Read, Grep, Glob, the design write-up — until the design is approved. Treat "design approved" as the event that unlocks Edit/Write/Bash-that-mutates, the way exiting plan mode does. A soft "please ask first" you can rationalize past at 2am; a tool you don't reach for, you can't.
 
@@ -35,7 +35,7 @@ The gate's strongest form is a **capability lock**, not a politeness rule. When 
 
 5. **Present the design in sections, approved as you go.** Scale each section to its weight — a sentence for the obvious parts, a paragraph for the nuanced ones. Cover the architecture, the components and their boundaries, the data flow, error handling, and how it gets tested. Confirm each section before the next so a wrong turn gets caught at the turn, not at the end.
 
-6. **Write the design down, then self-review it.** Save the approved design to `docs/specs/YYYY-MM-DD-<topic>.md` (the user's location preference wins). Then read it back with fresh eyes for the four things below and fix them inline. The written spec is the input to `compound-v:writing-plans` next — its quality caps the quality of everything downstream.
+6. **Write the design down, then self-review it.** Save the approved design to `docs/specs/YYYY-MM-DD-<topic>.md` (the user's location preference wins), and give it one piece of fixed structure: a **numbered list of the requirements** this design must deliver, one line each, carrying the hard constraints in the user's own words. `compound-v:writing-plans` is told to map *each requirement in the spec* to the task that implements it and to the Verification Plan line that proves it — prose is not enumerable, so against a spec whose requirements live only inside paragraphs that check quietly degrades into a re-read. Then read it back with fresh eyes for the four things below and fix them inline. The written spec is the input to `compound-v:writing-plans` next — its quality caps the quality of everything downstream.
 
 A committed spec file is the default for anything you'll build over more than a sitting; for a small in-session feature, an approved design in the conversation is enough. Don't manufacture ceremony the task doesn't need.
 

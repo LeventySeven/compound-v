@@ -1,6 +1,6 @@
 ---
 name: writing-prd
-description: Write or maintain a PRD — the product's stable, model-agnostic source of truth that a person or a fresh AI session reads first to get most of the context in one pass: what the product is, what it does, and what it runs on. Use when asked for a PRD, a product doc, or a product spec, when bootstrapping `docs/` for a new product, when a fresh session keeps re-deriving the same product context, or when onboarding a human or agent to an existing product. Not for per-build decisions (that's writing-plans) or designing one feature (that's brainstorming).
+description: Write or maintain a PRD — the product's stable, model-agnostic source of truth that a person or a fresh AI session reads first to get most of the context in one pass: what the product is, what it does, and what it runs on. Use when asked for a PRD, a product doc, or a product spec, when bootstrapping `docs/` for a new product, when a fresh session keeps re-deriving the same product context, when onboarding a human or agent to an existing product, or when the product's durable facts have moved and the doc hasn't. Not for per-build decisions (that's writing-plans) or designing one feature (that's brainstorming).
 ---
 
 # Writing a PRD
@@ -10,7 +10,7 @@ A PRD is the product's **stable source of truth** — the durable record of what
 ## When to use
 - You're asked for a PRD, a product doc, a product spec, or "the doc that explains this product."
 - You're bootstrapping `docs/` for a new product, or a fresh session keeps re-deriving the same product context.
-- You're onboarding a human or an agent to an existing product.
+- You're onboarding a human or an agent to an existing product. When the product already exists its durable facts live in the code, not in anyone's memory — recover the contract with **compound-v:extracting-specs** and write the architecture and core-functions sections from what it returns. A rejected alternative reconstructed from memory is an invented one.
 - **Skip it** for one feature's design (that's **compound-v:brainstorming**), for per-build / how-to-build-it work (that's **compound-v:writing-plans**), and for a one-off script. Unsure of the effort? Route via **compound-v:using-compound-v**.
 
 This skill owns the *boundary* — the stable source of truth. The per-build **workflow** that consumes it (tier routing, adversarial grill, plan-gate, parallel build) belongs to a build pipeline that *composes* this skill — see **compound-v:writing-plans** / **compound-v:brainstorming** for that per-build layer; don't re-implement that workflow here.
@@ -29,7 +29,7 @@ Keep the whole thing to roughly two pages — if it doesn't fit, the scope is to
 Per-build content rots the stable doc on every feature — it stays in the **plan** (**compound-v:writing-plans**): the scope-cut for this build, the risks, the one verifiable ship signal, the approach, the task breakdown. Also keep out the **model name, exact prompts, and model-specific scaffolding** — those are the swappable execution layer the next model washes away (prompt sets are not PRDs). The test for any line: *would it still be true and useful against a clearly smarter model next year?* If an upgrade would force a rewrite, it doesn't belong here.
 
 ## Keep it the single source of truth
-- **One PRD, edited in place.** Never a `prd-v2` or `PRD-final` fork — versioned forks are how the source of truth fragments. If the product is genuinely superseded, leave a one-line forward pointer instead of deleting.
+- **One PRD, at one path, edited in place.** It lives at `docs/prd.md` with `CLAUDE.md`/`AGENTS.md` linking to it, so a cold session and a sibling skill both find it without guessing a filename. Never a `prd-v2` or `PRD-final` fork — versioned forks are how the source of truth fragments. If the product is genuinely superseded, leave a one-line forward pointer instead of deleting.
 - **Prune on a cadence.** A stale durable doc an agent trusts as fact is worse than no doc.
 - **One fact, one home.** The PRD *links* to `AGENTS.md`, the plan, and the design spec rather than restating them (and they link back). See **compound-v:context-engineering** for the rot/maintenance mechanics — don't re-teach them here.
 - **Entry point.** The PRD is read first for *product* context; `CLAUDE.md`/`AGENTS.md` points at it and holds *operating* context (build/test/run, code map, conventions); the plan holds the per-build decisions. No overlap means nothing goes stale by duplication.
@@ -37,4 +37,4 @@ Per-build content rots the stable doc on every feature — it stays in the **pla
 ## Writing discipline
 Prose where precision matters — writing the sentence forces the thinking a bullet lets you skip. Cite or tag every load-bearing claim (`[ASSUMPTION]` when you're guessing); an unsourced magic number is a defect. Encode only what transfers across model generations. Keep it lean: if `CLAUDE.md` links it, you pay for it at every session start.
 
-Before you call it done, run the self-check: **every durable section above is present and non-empty.** A missing or stubbed section isn't a shorter PRD — it's a silent gap the next reader will fill with a guess. If a section genuinely doesn't apply, say so explicitly ("no external services") rather than omitting it.
+Before you call it done, run the self-check: **every durable section above is present and non-empty.** A missing or stubbed section isn't a shorter PRD — it's a silent gap the next reader will fill with a guess. If a section genuinely doesn't apply, say so explicitly ("no external services") rather than omitting it. Then apply the cite-or-tag rule above to what you filled in, because present-and-non-empty is a check an invented section passes cleanly: "Unknown — [ASSUMPTION]" is an acceptable fill, and a confident sentence nobody sourced is not.
