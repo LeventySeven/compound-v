@@ -38,6 +38,14 @@ on the dashboard".
  "evidence": null}
 ```
 
+**`status` is a closed set of exactly five words — `todo` · `building` · `passed` · `dropped` ·
+`blocked` — and anything else counts as OPEN.** Not as an error to shrug at: a row whose status is
+`done`, `in_progress`, `Passed`, `" todo "`, `null`, or missing is an unbuilt row hiding from both
+counters, and treating it as absent is how a ledger reports 93% on unfinished work. The same goes
+for a row that is not an object, a duplicate row id, and status buckets that do not sum to the row
+count. An unreadable ledger resolves toward open, never toward done — the audit command refuses to
+print a number at all in those cases, because a number that does not add up is worse than none.
+
 `from` is `prd` · `plan` · `discovered` · `user`. `evidence` on a passed row is
 `{"how": "<what you actually ran or drove>"}` — one line a third party could repeat. `steps` is the part people skip and
 it is the part that works — a numbered walk is checkable by someone who was not there, and a row

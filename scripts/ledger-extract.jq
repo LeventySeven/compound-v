@@ -14,8 +14,11 @@
 
 def vocab: ["todo","building","passed","dropped","blocked"];
 
-# Every object anywhere in the document that claims to be a row.
-def rows: [.. | objects | select(has("status"))];
+# Every object anywhere in the document that claims to be a row. A container is NOT a row even
+# when it carries its own status: slices in the documented shape have both a `status` and a
+# `rows` array, and counting them inflated the denominator by one per slice on the first real
+# ledger this was pointed at (18 rows read as 23).
+def rows: [.. | objects | select(has("status") and (has("rows") | not))];
 
 # Anything sitting inside a "rows" array that is not an object is a row we cannot read.
 def malformed_members: [.. | objects | select(has("rows")) | .rows

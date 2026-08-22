@@ -196,6 +196,35 @@ lg "turn 3: regression, passed -> todo"      BLOCK   '[{"id":"s1","rows":[{"id":
 lg "turn 4: all closed, one blocked"         NOTDONE '[{"id":"s1","rows":[{"id":"a","status":"passed"},{"id":"b","status":"passed"},{"id":"c","status":"blocked"},{"id":"d","status":"passed"}]}]'
 lg "turn 5: the blocker cleared"             ALLOW   '[{"id":"s1","rows":[{"id":"a","status":"passed"},{"id":"b","status":"passed"},{"id":"c","status":"passed"},{"id":"d","status":"passed"}]}]'
 
+# The documented shape: slices carry their OWN status alongside their rows. A recursive
+# extractor counts those containers as rows and inflates the denominator by one per slice —
+# 18 rows read as 23 on the first real ledger this was pointed at. Regression, not hypothesis.
+DOCSHAPE='[{"id":"s1","capability":"c1","status":"todo","rows":[{"id":"a","status":"passed"},{"id":"b","status":"passed"}]},{"id":"s2","capability":"c2","status":"todo","rows":[{"id":"c","status":"passed"}]}]'
+got_rows="$(printf '%s' "$DOCSHAPE" > "$lg_dir/probe.json"; bash scripts/ledger.sh --path "$lg_dir/probe.json" 2>&1 | head -1)"
+if printf '%s' "$got_rows" | grep -qF 'declared 3'; then
+  pass=$((pass + 1)); printf '%-46s %-8s ok\n' "slice-with-status is not a row" "3 rows"
+else
+  miss=$((miss + 1)); failures+=("slice-with-status counted as a row — got: $got_rows")
+  printf '%-46s %-8s MISS\n' "slice-with-status is not a row" "3 rows"
+fi
+
+# Both Stop hooks are registered on the same event and share one stop_hook_active budget.
+# Neither may exit non-zero, and neither may emit anything but a single JSON object.
+sv_out="$(printf '{"hook_event_name":"Stop","cwd":"%s","stop_hook_active":false}' "$lg_dir" | bash hooks/stop-verify 2>/dev/null)"; sv_rc=$?
+sl_out="$(printf '{"hook_event_name":"Stop","cwd":"%s","stop_hook_active":false}' "$lg_dir" | bash hooks/stop-ledger 2>/dev/null)"; sl_rc=$?
+both_ok=1
+[ "$sv_rc" -eq 0 ] && [ "$sl_rc" -eq 0 ] || both_ok=0
+for o in "$sv_out" "$sl_out"; do
+  [ -z "$o" ] && continue
+  printf '%s' "$o" | jq -e . >/dev/null 2>&1 || both_ok=0
+done
+if [ "$both_ok" -eq 1 ]; then
+  pass=$((pass + 1)); printf '%-46s %-8s ok\n' "both Stop hooks on one payload" "exit0+json"
+else
+  miss=$((miss + 1)); failures+=("two Stop hooks on one payload: rc=$sv_rc/$sl_rc, output not both valid JSON")
+  printf '%-46s %-8s MISS\n' "both Stop hooks on one payload" "exit0+json"
+fi
+
 printf '%s' "$OPEN" > "$lg_dir/.claude/slices.json"
 out="$(printf '{"hook_event_name":"Stop","cwd":"%s","stop_hook_active":false}' "$lg_dir" \
       | COMPOUND_V_LEDGER_GATE=off bash hooks/stop-ledger 2>/dev/null)"
