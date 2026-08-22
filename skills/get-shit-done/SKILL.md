@@ -9,7 +9,7 @@ Most projects that look impossible are a handful of parts, two of which are genu
 
 That is not optimism. Thorsten Ball built a working code-editing agent in ~300 lines and three tools — *"an LLM, a loop, and enough tokens. The rest … Elbow grease."* — and answered the sceptic directly: *"I bet it's a lot farther than you think."* Overestimating is the default failure, and models are worse at it than people: asked for a hard thing, a model reaches for architecture instead of for the two facts that would collapse it.
 
-This skill is the **project-level spine**: five stages, each handing the actual work to a skill that already owns it. It is a loop rather than a line — the last stage is what makes the next turn of it cheap.
+This skill is the **project-level spine**: four stages, each handing the actual work to a skill that already owns it, and a loop rather than a line — an incident re-enters at the top.
 
 ## When to use
 
@@ -29,7 +29,7 @@ A **row** is one function inside a slice, at the grain of a thing a person could
 | 1 Carve | the slices, their order, their checks | **compound-v:frame-the-goal** turns a fuzzy check into a real one |
 | 2 Recon | how much research each slice earns | **compound-v:searching-patterns** for the pattern + anti-pattern |
 | 3 Build | one slice at a time; what closes it | **compound-v:writing-plans** → **compound-v:batched-implementation** → **compound-v:recheck** |
-| 4 Reckon | the verdict over the assembled product | **compound-v:finishing** lands the branch first |
+| 4 Reckon | the verdict, and what outlives the run | **compound-v:finishing** lands the branch first |
 
 Cede rather than re-derive: whether to build at all is **compound-v:startup-taste**, one claim is **compound-v:verification-before-completion**, a pass rate over a probabilistic path is **compound-v:evals**, reaching anyone is **compound-v:founder-distribution**. This skill never reads a diff and never emits a severity-tagged finding list.
 
@@ -41,9 +41,10 @@ A long run degrades silently unless its procedure and its state live on disk: se
 
 You reach 100% by passing a row or by cutting it out loud with a name on it, never by forgetting it. That is what makes *"we're at about 90%"* unsayable. Four rules hold it up, and **references/completion-ledger.md** carries the row shape, the status vocabulary and the reasoning — read it when you open a ledger and again at the gate:
 
+0. **The floor** — a capability with open rows and no passing row **did not ship**, whatever the percentage says. Rows are not spread evenly across slices, so one that delivered nothing disappears into a healthy aggregate; it is reported by capability, ahead of any row.
 1. **Denominator** — rows come from the brief, the plan, and whatever the build discovers. **A requirement with zero rows is scope nobody was assigned**, the largest single source of the missing 10%, because it never looked like it was failing; it never looked like anything.
 2. **Flip** — green only on a check seen **red first, for the right reason** (**compound-v:test-driven-development**'s red step, applied to the ledger) plus an end-to-end run driven as a user, with one line recording what you ran.
-3. **Delta** — appending is always legal, flipping is not; the gate reports the movement so a shifting denominator is visible rather than silent.
+3. **Delta** — appending is always legal, flipping is not. Discovered work enters as `discovered: true` the moment it is found, and a drop declares its kind: `void` (the requirement does not exist, nothing owed) or `moved` (it changed shape, so a successor row is mandatory). A requirement that moved and named no successor is how a capability quietly empties out.
 4. **Blocked is not done** — three failed attempts marks a row `blocked` with the blocker named (**compound-v:systematic-debugging** owns the cap). Give the run a legal way to say *this did not work* and it stops needing an illegal one.
 
 **The agent may not edit what grades it.** The only legal write is a status flip and its evidence. Anthropic's reward-tampering work found models trained on gameable environments generalize to *directly rewriting their own reward function*; where a harness can express this as a tool schema rather than a rule, that is the stronger form.
@@ -58,7 +59,7 @@ The run holds two files, both scaffolding, both deleted when it ends: **`.claude
 
 **If nobody has yet asked whether this should exist, that gate runs before the carve, not after it** — **compound-v:startup-taste**. Carving a project is a commitment to build it, and this skill is decisive enough at the routing layer to crowd out the question if you don't ask it deliberately.
 
-Quote the **original ask verbatim** into `STATE.md` before anything else. Not the plan and not the spec — both get written mid-run and absorb the drift, so alignment to them proves nothing.
+Quote the **original ask verbatim** into the ledger's `ask` field before anything else — verbatim, not your summary of it. Not the plan and not the spec — both get written mid-run and absorb the drift, so alignment to them proves nothing.
 
 Stage 1's output is `slices.json`, and it exists before any code. Per slice, four things and no more:
 
@@ -67,7 +68,7 @@ Stage 1's output is `slices.json`, and it exists before any code. Per slice, fou
 - **Unknown** — the one line naming what might not work.
 - **Confidence** — Steinhardt's buckets, which are coarse on purpose: *"I am confident that this can be done and that there are no unforeseen difficulties"* (~95%), *"modulo Murphy's law"* (~90%), *"I see the basic path … and all the steps seem like they should work"* (~65%), *"I have the intuition that this should be possible but only have a murky view of the path"* (~30%).
 
-**Then fill each slice with its rows** — every function the goal declares, each with its numbered steps, all starting failing. This is the stage that decides whether the run can ever reach 100%: a function that is not a row here is one no later check can miss.
+**Then fill each slice with its rows** — every function the goal declares, each phrased as a witness case with a concrete input and an observable outcome, all starting failing. This is the stage that decides whether the run can ever reach 100%: a function that is not a row here is one no later check can miss.
 
 **Nothing else will write this file for you, and the gate is silent without it.** The engine reads `.claude/slices.json`; no ledger means no rows, no rows means nothing to refuse, and the run ends exactly as it would have. Skipping stage 1 does not get you a lenient pipeline, it gets you no pipeline.
 
@@ -75,7 +76,7 @@ Stage 1's output is `slices.json`, and it exists before any code. Per slice, fou
 
 **Slice 1 is the burning function, end to end, with the hard parts faked.** Steinhardt calls this a ceiling: substitute a cheating version of the difficult component and wire the whole path anyway — *"If the system works, we know that a sufficiently good implementation of the difficult component will yield a working system. If the system doesn't work, we've saved the time of implementing the difficult component."* The pair to it is a baseline, the dumb off-the-shelf version, because *"complicated methods often underperform simple baselines"* — and a baseline that already clears the check deletes the slice outright.
 
-**Then say what the ask named that is not a slice, and who asked for it.** Anything with no answer is drift-in before a line is written. This is where a sprawling brief gets honest: *an AI that runs the whole agency* is not a project. It is four named parts — the context store, the metrics, the follow-ups, the proactive nudges — and the one that would actually change someone's week is a job that reads a date and sends a message.
+**Then say what the ask named that is not a slice, and who asked for it** — as `notSlices`, one entry per item with `item`, `askedBy` and `why`. Anything with no answer is drift-in before a line is written. This is where a sprawling brief gets honest: *an AI that runs the whole agency* is not a project. It is four named parts — the context store, the metrics, the follow-ups, the proactive nudges — and the one that would actually change someone's week is a job that reads a date and sends a message.
 
 ## Stage 2 — Recon: research that is allowed to delete slices
 
@@ -100,15 +101,15 @@ Feed the result forward the way **compound-v:searching-patterns** already prescr
 
 The failure this shape prevents is measured. Anthropic ran a frontier model in a loop from a high-level prompt: it *"tended to try to do too much at once"*, and later *"a later agent instance would look around, see that progress had been made, and declare the job done."* Their fix is the one adopted here — work **one feature at a time**, *"This incremental approach turned out to be critical"*.
 
-**The order is a chain of artifacts, not a recommendation**, because an artifact is the only part of a sequencing rule anyone can check afterwards: **no file:line map → no plan; no plan → no code; no red-first check → no row may go green.** A step whose artifact is missing has not run, whatever the transcript says. Where the harness can withhold the write tools until the plan is approved, use that too — but do not assume it does. In at least one shipped coding harness the plan-mode mutation ban is prompt text and the write tools stay registered, so a sequencing rule that leans on tool availability is leaning on something you have to verify per harness.
+**The order is a chain of artifacts, not a recommendation**, because an artifact is the only part of a sequencing rule anyone can check afterwards: **no file:line map → no plan; no plan → no code; no red-first check → no row may go green.** A step whose artifact is missing has not run, whatever the transcript says.
 
 Per slice, in order:
 
 1. **Run what already exists first.** Start the thing, do one primary action, confirm the previous slice still works. Anthropic's finding on skipping this: if the agent starts implementing instead, *"it would likely make the problem worse."*
 2. **Plan and build it** — **compound-v:writing-plans**, then **compound-v:batched-implementation**, then **compound-v:recheck** over the diff. The spine adds nothing to those three; do not re-derive them here.
 3. **Declare the hit band before you build, not after.** What fraction of real inputs does this slice handle, and what do the misses see? *"It breaks"* is not an answer; *"it says X and routes to a human"* is. Build to the middle and give the tail a named exit — an exit is a feature, chasing the tail is the defect. Exception, on the axis **compound-v:make-it-stable** draws: irreversible writes, money movement, data loss, silent corruption or a stranger-facing surface get the full production bar on the bad path too.
-4. **Walk it as a user, on the assembled product** — every row whose steps are user-visible gets driven, and a single slice walk may close only the rows it demonstrably exercised. Then, and only then, flip those rows to `passed`.
-5. **Scan the slice's diff for what you left behind**, and do it before you close: `TODO`, `FIXME`, `stub`, `placeholder`, `mock`, `hardcoded`, `for now`, a skipped or `.only` test, a swallowed error. Each hit becomes a row at `todo` or is waived in the ledger with a name and a reason. This is the hole the denominator cannot see on its own — a declared function that is missing is a `todo` row, but a stub the implementer *left* was never declared by anyone, so it is invisible to every later check. The upstream this skill was ported from keeps a separate defect register for exactly this and blocks its ship gate on it; the ledger already is that register, so the scan feeds rows into it rather than opening a second file.
+4. **Walk it as a user, on the assembled product** — every row describing user-visible behaviour gets driven, and a single slice walk may close only the rows it demonstrably exercised. Then, and only then, flip those rows to `passed`.
+5. **Scan the slice's diff for what you left behind**, and do it before you close: `TODO`, `FIXME`, `stub`, `placeholder`, `mock`, `hardcoded`, `for now`, a skipped or `.only` test, a swallowed error. Each hit becomes a row at `todo` or is waived in the ledger with a name and a reason. This is the hole the denominator cannot see on its own — a declared function that is missing is a `todo` row, but a stub the implementer *left* was never declared by anyone, so it is invisible to every later check.
 
 **When the walk fails, it is a root-cause question, not a retry** (**compound-v:systematic-debugging**). On the third failed close, stop trying to pass the check and say which is true: the slice splits, the check was wrong, or stage 1's unknown was real and the shape changed. Mark it `blocked` with which one and move on — three failures is information about the plan, not about your patience.
 
@@ -117,7 +118,7 @@ Per slice, in order:
 - **Never edit a check to make it pass** — *"It is unacceptable to remove or edit tests because this could lead to missing or buggy functionality"*. A threshold quietly widened at hour six is indistinguishable from success. If a check was wrong, say so in the ledger and fix it as its own decision.
 - **One slice, one commit, and the commit moves the ledger.** **compound-v:handoff** owns the prose state file; this is the same discipline at slice granularity.
 
-**Serial by default.** Cognition argued against fanning writers out, then revised it ten months later and kept the line where it matters: what works is *"setups where multiple agents contribute intelligence to a task while writes stay single-threaded."* Slices share a codebase and a house style, so parallel writers reconcile conflicting implicit decisions at merge time. Fan out reads — recon parallelises well — never slice-writes, and only through **compound-v:dispatching-parallel-agents**. Treat this as contested rather than settled: at least one shipped orchestrator template prescribes one agent per plan step in parallel, so the disagreement is between real systems, not between a rule and nobody.
+**Serial by default.** Cognition argued against fanning writers out, then revised it ten months later and kept the line where it matters: what works is *"setups where multiple agents contribute intelligence to a task while writes stay single-threaded."* Slices share a codebase and a house style, so parallel writers reconcile conflicting implicit decisions at merge time. Fan out reads — recon parallelises well — never slice-writes, and only through **compound-v:dispatching-parallel-agents**.
 
 ## Stage 4 — Reckon: the MEP bar over the assembled product
 
@@ -138,17 +139,7 @@ The **clamp** is there too: a finding blocks only if it names a real user blocke
 
 A hand-off is not a verdict: "pushed", "PR opened", "ready for review", "agents still running" are all stopping while work is open, and a list of manual steps handed back to the user is unfinished work relabelled. **The next action is the one that closes the biggest gap to MEP, not the most comfortable one** — name the biggest gap, name the comfortable alternative you were about to do instead, and say why you are not doing it. Say all of it in the conversation; the durable residue is one line in the landing commit.
 
-## Stage 5 — Discharge: hand the run's claims to something that outlives it
-
-The measured cost of the AI era sits *after* the merge, not before it: across ~28M workflows, feature-branch throughput rose while median main-branch throughput fell and time-to-green climbed, and the industry's own delivery research keeps finding AI adoption negatively related to *stability* rather than to speed. A spine that ends at the merge ends one step before the expensive part.
-
-**Discharge the ledger; do not just delete it.** A row has two halves with opposite half-lives. Its `status` is run-scoped — every row reads `passed` forever the day after the merge, which is a stale claim the next agent will trust as fact — so the file still goes. But its `steps` and `evidence` are a regression contract the run already paid to write, and throwing those away is what makes every later phase impossible. So before the landing commit removes it, every passed row names a durable target: a command someone can re-run, a production observable and the query that reads it, or a named human and the check they own. `bash scripts/ledger.sh --discharge` refuses the landing until that holds.
-
-**Merging is not releasing.** An agent that can merge must not thereby be able to ship to users; keep the release a separate, named act. Arm automatic rollback only for a slice whose `irreversible` array is empty — where it is not, the revert restores the code and not the migrated rows or the sent messages, so that deploy waits for a named forward-fix path instead.
-
-**An incident opens a row before it opens a fix** — `from: "incident"`, `steps` = the reproduction, status `todo`. It is red-first by construction, because it is failing in production right now. This is deliberately *not* a maintenance lane: a second-class path is exactly where the missing 10% relocates, because rows declared nowhere are rows the gate cannot see. The next change re-enters at Carve like everything else, which is what makes this a loop.
-
-**What this stage refuses to become.** No monitoring phase, no maintenance phase, no lifecycle document, no design-doc stage, no change-approval board, no staging-soak gate, no lights-off tier where nobody reads the diff. Each was considered and rejected against evidence — `references/sources.md` records which, and why, so they are not re-proposed as improvements.
+**Discharge before the landing commit.** A row has two halves with opposite half-lives: its `status` is run-scoped and reads `passed` forever the day after the merge — a stale claim the next agent trusts as fact — while its `does` and `evidence` are a regression contract the run already paid to write. So the ledger goes, but never undischarged: every passed row first names a durable target — a command someone can re-run, a production observable and the query that reads it, or a named human and the check they own. `bash scripts/ledger.sh --discharge` refuses the landing until that holds. **An incident opens a row before it opens a fix** (`discovered: true`, the reproduction as its `does`), red-first by construction and re-entering at Carve — not a maintenance lane, because a second-class path is where undeclared work hides.
 
 ## Red flags
 
@@ -160,7 +151,6 @@ Nothing here blocks on its own; every row routes back to a stage, and the clamp 
 | A slice with a check like "it looks right" | Not a slice yet. The verifiable criterion is what makes the speed real — the famous fast agent builds all had one; real software only gets one if you write it. **compound-v:frame-the-goal**. |
 | The architecture arrived before the second fact | The overestimate failing loud. Two lookups usually collapse the design; do them first. |
 | "Basically done, just polish left" | The last mile is most of the remaining work and where the value is. Name what's left; that list is the remaining project. |
-| v1 · simplified · static for now · hardcoded · placeholder · wired later | Scope reduction. Re-run stage 3 step 4 on that capability. Grep the work *and your own report* — the report is where they hide. |
 | "This laid the foundations" | Nothing a user can do today that they couldn't yesterday. Horizontal work disguised as vertical — the shape slicing exists to prevent. |
 | A ledger bit flipped without a walk, or a check edited late in the run | The two failure modes this skill is built around. Confirm the check goes red without the change, and suspect it hardest at the end of a long run. |
 | The same gap N rounds running, or a different gap every round | **compound-v:systematic-debugging**'s attempt cap. The product-level addition: if every remaining gap needs something you don't hold — a real user, a credential, a live environment — no round closes any of them. Name the blocker and stop. |

@@ -92,6 +92,26 @@ fi
 open_n="$(printf '%s' "$report" | jq -r 'try .counts.open catch 0' 2>/dev/null)"
 case "$open_n" in ''|*[!0-9]*) exit 0 ;; esac
 
+# A capability with zero passed rows did not ship, whatever the percentage says. It is named FIRST,
+# by capability rather than by row id, because the failure this catches is a dead capability hiding
+# inside a healthy aggregate — and the aggregate is what an agent reads when deciding it is done.
+# Read the floor from the extractor rather than re-deriving it here: two halves computing the same
+# predicate separately is exactly how they end up disagreeing about whether a run is finished.
+dead="$(printf '%s' "$report" | jq -r '(.counts.deadSlices // []) as $d
+  | [.counts.bySlice[]? | select(.id as $i | $d | index($i)) | "  " + .id + " — " + .capability] | join("\n")' 2>/dev/null)"
+if [ -n "$dead" ]; then
+  jq -n --arg dead "$dead" --arg audit "$audit" \
+    '{decision: "block",
+      reason: ("A declared capability has no passing row — it did not ship, whatever the completion "
+        + "percentage says:\n\n" + $dead + "\n\nThe aggregate cannot see this: rows are not spread "
+        + "evenly across capabilities, so one that delivered nothing disappears into a healthy-looking "
+        + "number. Take one of its rows to a real close, or drop the capability itself with a name and "
+        + "a reason on it. If a row was dropped because the requirement moved rather than vanished, the "
+        + "replacement row is what is missing. Run `" + $audit + "`. See compound-v:get-shit-done."),
+      systemMessage: "Compound V: a declared capability has no passing row."}'
+  exit 0
+fi
+
 # Nothing open, but not necessarily done. A blocked row is a legal terminal answer and must not
 # hold the stop — wedging a run on the one thing it cannot do is worse than letting it end. It is
 # still not success, and letting the turn close in silence is how "12 of 15 blocked" reads as

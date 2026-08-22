@@ -200,7 +200,7 @@ lg "turn 5: the blocker cleared"             ALLOW   '[{"id":"s1","rows":[{"id":
 # extractor counts those containers as rows and inflates the denominator by one per slice —
 # 18 rows read as 23 on the first real ledger this was pointed at. Regression, not hypothesis.
 DOCSHAPE='[{"id":"s1","capability":"c1","status":"todo","rows":[{"id":"a","status":"passed"},{"id":"b","status":"passed"}]},{"id":"s2","capability":"c2","status":"todo","rows":[{"id":"c","status":"passed"}]}]'
-got_rows="$(printf '%s' "$DOCSHAPE" > "$lg_dir/probe.json"; bash scripts/ledger.sh --path "$lg_dir/probe.json" 2>&1 | head -1)"
+got_rows="$(printf '%s' "$DOCSHAPE" > "$lg_dir/probe.json"; bash scripts/ledger.sh --path "$lg_dir/probe.json" 2>&1 | grep -F 'declared ')"
 if printf '%s' "$got_rows" | grep -qF 'declared 3'; then
   pass=$((pass + 1)); printf '%-46s %-8s ok\n' "slice-with-status is not a row" "3 rows"
 else
@@ -253,6 +253,31 @@ led "ledger.sh: dropped needs attribution"   1 '[{"id":"s1","rows":[{"id":"r1","
 led "ledger.sh: no rows -> cannot tell"      2 '[{"id":"s1","capability":"x"}]'                        "no rows found"
 led "ledger.sh: bad status -> cannot tell"   2 '[{"id":"s1","rows":[{"id":"r1","status":"done"}]}]'    "outside"
 led "ledger.sh: never prints a blank field"  1 '[{"id":"s1","rows":[{"id":"r1","status":"todo"}]}]'    "discovered +0"
+# --- the per-capability floor -----------------------------------------------------------------
+# A field run reported 89% with one of four capabilities at zero passed rows. Rows are not spread
+# evenly across capabilities, so the aggregate structurally cannot see it.
+DEAD='{"slices":[{"id":"A","capability":"works","rows":[{"id":"a1","status":"passed"}]},{"id":"B","capability":"never shipped","rows":[{"id":"b1","status":"todo"},{"id":"b2","status":"todo"}]}]}'
+lg "capability with 0 passed + open rows"     BLOCK   "$DEAD"
+lg "…all rows dropped is CUT, not dead"       ALLOW   '{"slices":[{"id":"A","capability":"x","rows":[{"id":"a1","status":"passed"}]},{"id":"B","capability":"cut","rows":[{"id":"b1","status":"dropped","dropped_by":"me","dropped_why":"gone","dropped_kind":"void"}]}]}'
+lg "…only blocked must not wedge the run"     NOTDONE '{"slices":[{"id":"A","capability":"x","rows":[{"id":"a1","status":"passed"}]},{"id":"B","capability":"stuck","rows":[{"id":"b1","status":"blocked"}]}]}'
+# (A slice-level `status: dropped` exemption was written and cut: it lets a run dodge every row in a
+# capability with one edit, and nothing in the field data used it. An all-dropped slice covers the
+# legitimate case, and each of those drops carries its own attribution.)
+led "ledger.sh names the dead capability"     1 "$DEAD" "did not ship, whatever the percentage says"
+led "ledger.sh prints a line per capability"  1 "$DEAD" "B  0/2 passed"
+
+# --- typed drops: a requirement that MOVED owes a successor, one that is VOID does not ----------
+led "moved drop with no successor"            2 '{"slices":[{"id":"A","capability":"x","rows":[{"id":"a1","status":"passed"},{"id":"a2","status":"dropped","dropped_by":"m","dropped_why":"moved to DM","dropped_kind":"moved"}]}]}' "naming no successor"
+led "moved drop naming a stranger"            2 '{"slices":[{"id":"A","capability":"x","rows":[{"id":"a1","status":"passed"},{"id":"a2","status":"dropped","dropped_by":"m","dropped_why":"w","dropped_kind":"moved","replaced_by":["nope"]}]}]}' "naming no successor"
+led "moved drop with a real successor"        0 '{"slices":[{"id":"A","capability":"x","rows":[{"id":"a1","status":"passed"},{"id":"a2","status":"dropped","dropped_by":"m","dropped_why":"w","dropped_kind":"moved","replaced_by":["a1"]}]}]}' "100%"
+led "void drop owes nothing"                  0 '{"slices":[{"id":"A","capability":"x","rows":[{"id":"a1","status":"passed"},{"id":"a2","status":"dropped","dropped_by":"m","dropped_why":"no such field","dropped_kind":"void"}]}]}' "100%"
+led "untyped drop warns, never blocks"        0 '{"slices":[{"id":"A","capability":"x","rows":[{"id":"a1","status":"passed"},{"id":"a2","status":"dropped","dropped_by":"m","dropped_why":"w"}]}]}' "untyped drop"
+
+# --- the delta must read the shape the field actually writes ------------------------------------
+led "discovered: true is counted"             1 '{"slices":[{"id":"A","capability":"x","rows":[{"id":"a1","status":"passed"},{"id":"a2","status":"todo","discovered":true}]}]}' "discovered +1"
+led "from: discovered still counted"          1 '{"slices":[{"id":"A","capability":"x","rows":[{"id":"a1","status":"passed"},{"id":"a2","status":"todo","from":"discovered"}]}]}' "discovered +1"
+led "--open shows the owning slice"           1 "$DEAD" ""
+
 # --discharge: the landing gate. A passed row may only stop existing once it names something that
 # outlives the file. The partial-form cases matter most — half a target is no target.
 dis() { # dis <name> <expect-exit> <ledger-json>

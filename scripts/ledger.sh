@@ -60,8 +60,26 @@ eval "$(printf '%s' "$report" | jq -r '.counts
 closed=$(( n_passed + n_dropped ))
 pct=0; [ "$n_total" -gt 0 ] && pct=$(( closed * 100 / n_total ))
 
+# One line per capability, ABOVE the aggregate. The aggregate is exactly the thing that hid a
+# capability with zero passed rows behind a healthy-looking percentage, so it never appears alone.
+printf '%s' "$report" | jq -r '(.counts.deadSlices // []) as $d | .counts.bySlice[]
+  | . as $s | ($d | index($s.id)) as $isdead
+  | "  \(if $isdead then "✗" else " " end) \($s.id)  \($s.passed)/\($s.total) passed"
+    + (if .open > 0 then ", \(.open) open" else "" end)
+    + (if .blocked > 0 then ", \(.blocked) blocked" else "" end)
+    + "  — \(.capability[0:64])"'
+
 printf 'declared %s · discovered +%s · dropped −%s · passed %s · blocked %s · open %s  →  %s%%\n' \
   "$n_decl" "$n_disc" "$n_dropped" "$n_passed" "$n_blocked" "$n_open" "$pct"
+
+# Advisory findings — surfaced, never blocking.
+printf '%s' "$report" | jq -r '.warn[]? | "note: " + .'
+
+# The floor. A capability with zero passed rows did not ship, whatever the aggregate says, and it
+# is reported as the open item rather than leaving its rows to speak for it.
+# Read the floor from the extractor; re-deriving it here is how the two halves end up disagreeing.
+dead="$(printf '%s' "$report" | jq -r '(.counts.deadSlices // []) as $d
+  | [.counts.bySlice[] | select(.id as $i | $d | index($i)) | "  " + .id + " — " + .capability] | join("\n")')"
 
 # A dropped row with no reason is the failure the attribution rule exists to stop: it is
 # indistinguishable from a row someone quietly deleted.
@@ -73,9 +91,10 @@ unattributed="$(printf '%s' "$report" | jq -r '[.rows[] | select(.status == "dro
 
 if [ "$show_open" -eq 1 ] && [ $(( n_open + n_blocked )) -gt 0 ]; then
   printf '\n'
+  # --help has always promised "with its slice"; until the extractor stamped rows it could not.
   printf '%s' "$report" | jq -r '.rows[]
     | select(.status == "todo" or .status == "building" or .status == "blocked")
-    | "  [\(.status)] \(.id // "?") — \(.does // .capability // "(no description)")"'
+    | "  [\(.status)] \(._slice // "—")/\(.id // "?") — \(.does // .capability // "(no description)")"'
 fi
 
 # --discharge: the landing gate. A row's `status` is run-scoped and reads `passed` forever the day
@@ -104,10 +123,15 @@ if [ "$discharge" -eq 1 ]; then
   exit 0
 fi
 
-[ "$n_open" -gt 0 ] && exit 1
-[ -n "$unattributed" ] && exit 1
+rc=0
+if [ -n "$dead" ]; then
+  printf '\ncapability with no passed row — this did not ship, whatever the percentage says:\n%s\n' "$dead"
+  rc=1
+fi
+[ "$n_open" -gt 0 ] && rc=1
+[ -n "$unattributed" ] && rc=1
 if [ "$n_blocked" -gt 0 ]; then
   printf 'no open rows, but %s blocked — blocked is not success; it counts against completion\n' "$n_blocked"
-  exit 1
+  rc=1
 fi
-exit 0
+exit "$rc"

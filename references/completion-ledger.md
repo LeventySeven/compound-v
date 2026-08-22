@@ -30,13 +30,12 @@ on the dashboard".
 
 ```json
 {"id": "s2-f07",
- "does": "a signed-out visitor who submits a valid login lands on the dashboard",
- "steps": ["open /login signed out", "enter a valid credential", "submit",
-           "confirm the dashboard renders with that user's name"],
- "from": "prd",
+ "does": "a signed-out visitor who submits a valid login lands on the dashboard showing their name",
  "status": "todo",
  "evidence": null}
 ```
+
+**`does` is a witness case, not a title.** One concrete situation with an input and an observable outcome, so a person who was not there can attempt it and disagree with the result. *"auth works"* is not a row; *"a signed-out visitor who submits a valid login lands on the dashboard showing their name"* is. A separate `steps` array was specified here for one revision and cut: in the only real run this has had, it was filled on 0 of 19 rows and read by no code, while `does` plus `evidence` carried the whole thing. One field that gets written beats two where the second is a rule nobody enforces.
 
 **`status` is a closed set of exactly five words — `todo` · `building` · `passed` · `dropped` ·
 `blocked` — and anything else counts as OPEN.** Not as an error to shrug at: a row whose status is
@@ -46,7 +45,7 @@ for a row that is not an object, a duplicate row id, and status buckets that do 
 count. An unreadable ledger resolves toward open, never toward done — the audit command refuses to
 print a number at all in those cases, because a number that does not add up is worse than none.
 
-`from` is `prd` · `plan` · `discovered` · `user` · `incident`. A passed row also carries a
+A row found during the build carries **`discovered: true`** — that one bit is what the scope delta reads, and it is the shape the field actually writes. (A five-value `from` enum was specified and cut: it was never written once, so the delta reported `discovered +0` on a run that discovered two rows and traced them to production.) A passed row also carries a
 **`discharge`** target — the thing that outlives this file — in exactly one of three forms:
 `{"rerun": "<command>"}` for anything re-runnable, `{"observable": "...", "query": "..."}` for
 behaviour only production can show you, or `{"owner": "...", "check": "..."}` for a judgement only a
@@ -107,21 +106,30 @@ sent, a migration run — it is the only thing that works. Mark those rows in th
 person the row's steps to check rather than a request to approve, or you have added a signature and
 not a gate. The same axis **compound-v:make-it-stable** already draws.
 
-## The irreversible surface, declared per slice
+## The floor: a capability with no passing row did not ship
 
-Each slice carries an **`irreversible`** array naming what a revert would not undo: a schema
-migration, an outbound message, money moved, a third-party write, a deletion. Empty is the common
-and good case, and it is what licenses automatic rollback as the first response to a bad release.
-Non-empty means rollback is not a strategy there — the deploy waits until a named forward-fix path
-exists, because the revert lands, the code comes back, and the migrated rows and the sent emails do
-not. This is the axis **compound-v:make-it-stable** already draws, written down where the release
-can read it instead of left as a thing someone was supposed to remember.
+The aggregate cannot see a dead capability. Rows are not spread evenly across slices, so one that
+delivered nothing disappears into a healthy-looking percentage — observed in the field at 89% with
+one of four capabilities at zero. So the report is **per capability first, aggregate second**, and a
+slice with open rows and no passing row is named as the open item rather than leaving its rows to
+speak for it. Two exclusions, each earned: a slice whose rows were *all* dropped was cut, and the
+attribution on those drops covers it; and a slice whose only unresolved rows are `blocked` must not
+hold the stop, or the floor wedges the run on the one thing it cannot do.
 
 ## R3 — The delta: scope moves, and it must move visibly
 
 Appending a row is **always** legal; flipping one is not. The moment the build discovers a
-requirement, it enters at `todo` with `from: "discovered"` — not at the end, when it will be
-forgotten or quietly absorbed. Dropping a row requires a reason and a name.
+requirement, it enters at `todo` with `discovered: true` — not at the end, when it will be forgotten
+or quietly absorbed. Dropping a row requires a reason, a name, and a **kind**:
+
+- **`void`** — the requirement does not exist in the world (the field it needed is not there). The
+  capability legitimately shrinks and nothing is owed.
+- **`moved`** — the requirement still exists and changed shape (*"reply in DMs instead of the
+  thread"*). A successor is mandatory: `replaced_by` must name a row present in this ledger, and a
+  `moved` drop that names none fails validation.
+
+That distinction came from three real drops. The two that named a successor left healthy
+capabilities; the one that named none emptied its capability while the percentage stayed green.
 
 The gate reports the movement, not just the total:
 
