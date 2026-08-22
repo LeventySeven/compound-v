@@ -9,11 +9,13 @@ One state file per repo: `.claude/STATE.md`. Never a second "plan" or "analysis"
 handoff split across two documents is a handoff that will go stale in one of them.
 
 The single exception is **compound-v:get-shit-done**'s `.claude/slices.json`, and it is an exception
-because it is not prose: it holds only the machine-checkable status vector (which slices exist,
-which have passed their check), which is exactly the thing a long run quietly rewrites in its own
-favour. The split is strict and it is what keeps both files honest — no prose in the JSON, no status
-bits in the Markdown, and **Next** naming a slice id rather than restating it. Two files that can
-disagree is the failure above; two files that *cannot* overlap is not.
+because it is not narrative: it holds the declared-scope rows and their status — what exists, what
+has passed its check — which is exactly the thing a long run quietly rewrites in its own favour. A
+row carries the short structured fields that make it checkable by someone who was not there (what it
+does, its numbered steps, the evidence for a pass); what it must not carry is the run's story. The
+split is strict and it is what keeps both files honest — no narrative in the JSON, no status bits in
+the Markdown, and **Next** naming a row id rather than restating it. Two files that can disagree is
+the failure above; two files that *cannot* overlap is not.
 
 ## If `.claude/STATE.md` already exists
 
