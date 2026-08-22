@@ -95,7 +95,10 @@ for f in agents/*.md; do
   fi
 done
 
-# 8. Ledger anchors must still be greppable in the skill they point at.
+# 8. Ledger anchors must still be greppable in the file they point at.
+#    An anchor names either a skill (`recheck`) or a reference (`references/prior-art.md`). Both are
+#    resolved and checked; a target that resolves to neither is reported rather than skipped, because
+#    a silently-skipped anchor is an unchecked claim that looks checked.
 #    references/sources.md states the contract itself: the Anchor phrase is "text that appears
 #    verbatim in the current skill body and can be grepped for". Anchors rot silently whenever a
 #    skill is reworded, and a rotted anchor breaks the "read its row first" lookup several skills
@@ -106,14 +109,19 @@ done
 norm_md() { tr -d '*_`' | tr '[:upper:]' '[:lower:]' | tr '\n' ' ' | tr -s ' '; }
 anchor_pairs="$(mktemp)"; anchor_rot="$(mktemp)"
 trap 'rm -f "$anchor_pairs" "$anchor_rot"' EXIT
-grep -ohE '`[a-z][a-z0-9-]+` *(→|->) *"[^"]+"' references/sources.md 2>/dev/null \
-  | sed -E 's/^`([a-z0-9-]+)` *(→|->) *"(.*)"$/\1|\3/' | sort -u > "$anchor_pairs"
+grep -ohE '`(references/)?[a-z][a-z0-9-]+(\.md)?` *(→|->) *"[^"]+"' references/sources.md 2>/dev/null \
+  | sed -E 's/^`((references\/)?[a-z0-9-]+(\.md)?)` *(→|->) *"(.*)"$/\1|\5/' | sort -u > "$anchor_pairs"
 anchor_last=''
 anchor_body=''
 while IFS='|' read -r sk phrase; do
-  [ -n "${sk:-}" ] && [ -f "skills/$sk/SKILL.md" ] || continue
+  [ -n "${sk:-}" ] || continue
+  case "$sk" in
+    references/*) anchor_file="$sk" ;;
+    *)            anchor_file="skills/$sk/SKILL.md" ;;
+  esac
+  [ -f "$anchor_file" ] || continue
   if [ "$sk" != "$anchor_last" ]; then
-    anchor_body="$(norm_md < "skills/$sk/SKILL.md")"
+    anchor_body="$(norm_md < "$anchor_file")"
     anchor_last="$sk"
   fi
   needle="$(printf '%s' "$phrase" | norm_md)"
@@ -123,7 +131,7 @@ while IFS='|' read -r sk phrase; do
   esac
 done < "$anchor_pairs"
 if [ -s "$anchor_rot" ]; then
-  note "$(wc -l < "$anchor_rot" | tr -d ' ') ledger anchor(s) no longer appear in the skill they point at:"
+  note "$(wc -l < "$anchor_rot" | tr -d ' ') ledger anchor(s) no longer appear in the file they point at:"
   sed 's/^/        /' "$anchor_rot"
 fi
 

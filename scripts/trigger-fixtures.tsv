@@ -53,3 +53,22 @@ we launched last week and nobody has signed up	founder-distribution
 i'm out of time — make sure the next session can pick this up	handoff
 fix the typo in the readme	NONE
 what's the capital of france	NONE
+# A/B RESULT, recorded so nobody re-derives or over-reads it (2026-08-22): these four rows were
+# also run against the PRE-spine get-shit-done (the end-gate-only version). It fired on 3 of the 4
+# anyway — its old "before declaring any Standard-or-larger project complete" clause was already
+# broad enough. The only routing delta was the overnight row, where the old version fired handoff
+# alone. So the spine rewrite is NOT justified by routing; it is justified by what the skill does
+# once invoked, which this instrument cannot see (see the honest-limits header above).
+# Second observation: the old version co-fired startup-taste on the first row; the new one fired
+# get-shit-done alone in 3/3 reps, no variance. That is why stage 1 now names startup-taste as an
+# explicit gate instead of ceding to it in passing — the routing layer will not do it for you.
+#
+# get-shit-done — the project spine (added 2026-08-22). One obvious project-scale ask,
+# one sprawling brief where the parts are unnamed, one straight-to-work jump, plus the
+# original end-gate trigger. The last row is the over-trigger control: one clear feature
+# is brainstorming's, not the spine's.
+i want to build an internal tool that tracks every client project, works out when each one is actually going to be late, and pings the right person	get-shit-done
+here is what i want: full context on all our projects, the metrics, automatic follow-ups, and it should be proactive. where do we even start	get-shit-done
+ok start building the whole thing tonight, i am going to bed, i want something real by morning	get-shit-done,handoff
+we have been at this for six hours, tests are green, is any of this actually real	get-shit-done
+add a --json flag to the export command	NONE

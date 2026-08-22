@@ -1,6 +1,6 @@
 ---
 name: searching-patterns
-description: Look up the canonical pattern and its matching anti-pattern from primary sources before writing unfamiliar or security-sensitive code, then feed both forward into the plan and the review. Use when about to write an unfamiliar API, a non-obvious or security-sensitive pattern, or pick a library/API shape; when unsure how a framework wants something done; or to confirm a best practice during a code review. Skip it for trivial, well-known code.
+description: Look up the canonical pattern and its matching anti-pattern from primary sources before writing unfamiliar or security-sensitive code. Use when about to code a third-party API, endpoint, or price from a spec, PRD, ticket, or memory rather than its current docs; when writing an unfamiliar API or library, a non-obvious or security-sensitive pattern (auth, secrets, retries, concurrency, SQL, path handling), or picking a library/API shape; when unsure how a framework wants something done or which major version you are on; or to confirm a best practice during a code review — even if nobody asks. Skip it for trivial, well-known code.
 ---
 
 # Searching Patterns
@@ -24,10 +24,11 @@ Don't search for trivial, well-trodden code you'd write correctly from memory (a
 The default tools need zero setup. Reach for the heaviest one that fits, lightest first:
 
 - **Check the local convention first.** If the repo already has an established shape for this — a house wrapper, an AGENTS.md/CLAUDE.md rule, a pattern in neighboring files — that overrides the external canonical one. Match the local shape; don't import a clashing "correct" pattern. Only reach outward when the repo has no precedent. Preserve an existing design system's established patterns rather than replacing them.
+- **The copy you actually installed** — `node_modules/<lib>` and its `.d.ts`, `site-packages/<pkg>`, the vendored source. It *is* the API contract, it is version-exact by construction (a lockfile-vs-docs mismatch is impossible), and it costs one `grep` with no network — which is also why it is the only rung that survives a sandboxed run. Read it first when the question is a signature, a parameter, an enum, an error class or a default; go outward when the question is *why* or how the pieces are meant to compose, which types don't carry.
 - **A docs-MCP server** (context7-style `resolve-library-id` + `query-docs`), *when one is available* — the lightest step for library/framework docs: it returns the current, version-pinned API surface without you hunting a URL. Prefer it ahead of `WebSearch`/`WebFetch`; fall through to those when no such server is wired up.
 - **`WebSearch`** — find the current canonical page when you don't have the URL ("`<lib> <version>` retry middleware docs").
 - **`WebFetch`** — read one known page (a docs section, a guide). The common case.
-- **`gh`** — read the upstream repo directly: `gh api` for file contents, releases, or the `CHANGELOG`; `gh search code` to see how the library itself uses a thing. This is how you reach the *real* source and private/authed pages.
+- **`gh`** — read the upstream repo directly: `gh api` for file contents, releases, or the `CHANGELOG`; `gh search code` to see how the library itself uses a thing. This is how you reach the *real* source and private/authed pages — pin it to the tag in your lockfile, because the default branch is HEAD, not the version you're running.
 
 Prefer the library's own repo and docs over blog posts and forum answers — primary sources outrank secondary ones. **Pin the version**: default docs often render an older major than you're on, so read the docs for the version in your lockfile and note which version the pattern applies to. And don't stop at the first hit — the top search result is often a stale major or an SEO blog, so run a second query with different wording and prefer the result that matches your lockfile version. (Look past the first seemingly relevant result; run multiple searches with different wording, and include version numbers in technical queries.)
 
@@ -44,7 +45,7 @@ For a stack you hit repeatedly, skip the discovery and go straight to its **cano
 | FastAPI (Python) | `fastapi.tiangolo.com` — the official docs *are* the reference, examples included |
 | DOM / React testing | `testing-library.com` — the canonical query/interaction patterns (pairs with compound-v:test-driven-development) |
 
-The bar that stops this from rotting into a link farm: add a stack **only** if it's popular enough to recur *and* has *one* widely-agreed reference. No clear canonical exemplar → leave it out — the "primary source over a blog" rule above already covers the long tail, and a mediocre pointer is worse than none. That deliberately excludes the contested layers (state management, auth, the ORM wars, any "best-practices" listicle): no single right answer there, so a named pick is just an opinion aging into wrong. And these are **starting points, not pins** — still read the version in your lockfile, because even the canonical exemplar moves.
+Most stacks have no row here and that is the rule working, not a gap — the "primary source over a blog" rule above covers the long tail. It deliberately excludes the contested layers (state management, auth, the ORM wars, any "best-practices" listicle): no single right answer there, so a named pick is just an opinion aging into wrong — read the primary sources and say the choice is contested rather than asserting one. And these are **starting points, not pins** — still read the version in your lockfile, because even the canonical exemplar moves.
 
 ### When you must navigate: drive a real browser
 
@@ -64,5 +65,7 @@ Then *use* both:
 
 - **Feed it into the plan.** Write the canonical pattern (with its source) into the implementation plan so the implementer codes from the real shape, not a guess.
 - **Feed it into the review.** Hand the anti-pattern to compound-v:recheck as a *named, checkable* item, not a vibe. Worked end-to-end: you looked up SQL access in the **v4.2** docs (the version in your lockfile, not whatever default the docs rendered) → found the trap: a string-interpolated query is an injection hole, and v4.2's canonical form is a parameterized query → record both with the version → that becomes a concrete recheck assertion — "does the diff build any query by string interpolation?" — which turns a vague best-practice opinion into a test the review can actually run *against the right API*.
+
+**A different question, one level up.** This skill asks *how is this used correctly* at the moment you write the line, and hands back a pattern. Asking *has someone already solved this whole slice, and what does that let me delete* — before a design exists, with the answer measured in work removed rather than in a snippet — is stage 2 of **compound-v:get-shit-done**, and its method (budgeting research by uncertainty, the practitioner/X channel and its filter) is in **references/prior-art.md**. Same sources, different output. Use this one when you are about to type; use that one when you are about to commit to building something.
 
 Designing your own tool's API (an MCP tool, a CLI an agent will call)? That's a different problem — see compound-v:designing-agents for the agent-computer-interface rules.
