@@ -109,12 +109,125 @@ else
   miss=$((miss + 1)); failures+=("hooks.json does not register hooks/stop-verify under Stop")
   printf '%-42s %-6s MISS (%s)\n' "hooks.json registers Stop" "WIRED" "$keys"
 fi
+if [ "$(jq -r '[.hooks.Stop[0].hooks[].command] | map(select(test("stop-ledger"))) | length' hooks/hooks.json 2>/dev/null)" = "1" ]; then
+  pass=$((pass + 1)); printf '%-42s %-6s ok\n' "hooks.json registers stop-ledger" "WIRED"
+else
+  miss=$((miss + 1)); failures+=("hooks.json does not register hooks/stop-ledger under Stop")
+  printf '%-42s %-6s MISS\n' "hooks.json registers stop-ledger" "WIRED"
+fi
 
-for h in hooks/session-start hooks/user-prompt-submit hooks/stop-verify; do
-  if [ -x "$h" ]; then pass=$((pass + 1)); printf '%-42s %-6s ok\n' "$h is executable" "MODE"
-  else miss=$((miss + 1)); failures+=("$h is not executable — the harness cannot run it")
-       printf '%-42s %-6s MISS\n' "$h is executable" "MODE"; fi
-done
+# ---- the ledger gate + scripts/ledger.sh -----------------------------------------------
+# Rewritten after an adversarial recheck found the previous suite 39/39 green with eight live
+# defects, the worst of which reproduced the exact failure the gate exists to prevent: one
+# typo'd status made a row invisible to BOTH halves, so the hook stayed silent and ledger.sh
+# printed 93% and exited 0 on unfinished work. The invariant below is the fix for the suite,
+# not just for the code.
+lg_dir="$(mktemp -d)"; mkdir -p "$lg_dir/.claude"
+trap 'rm -rf "$lg_dir"' EXIT
+
+# THE COHERENCE INVARIANT, asserted on every fixture: the two halves must never both wave a run
+# through. ledger.sh exit 0 is permitted ONLY when the hook is silent, and a non-zero ledger.sh
+# must be matched by the hook either blocking or saying not-done out loud.
+# expect: BLOCK (refuses the stop) | NOTDONE (allows, but says so) | ALLOW (genuinely finished)
+lg() { # lg <name> <expect> <ledger-json|-> [active]
+  local name="$1" expect="$2" body="$3" active="${4:-false}" out d m got rc lrc
+  [ "$body" = "-" ] || printf '%s' "$body" > "$lg_dir/.claude/slices.json"
+  out="$(printf '{"hook_event_name":"Stop","cwd":"%s","stop_hook_active":%s}' "$lg_dir" "$active" \
+        | bash hooks/stop-ledger 2>/dev/null)"; rc=$?
+  d="$(printf '%s' "$out" | jq -r 'try .decision catch ""' 2>/dev/null)"
+  m="$(printf '%s' "$out" | jq -r 'try .systemMessage catch ""' 2>/dev/null)"
+  if   [ "$d" = "block" ]; then got=BLOCK
+  elif [ -n "$m" ];        then got=NOTDONE
+  else                          got=ALLOW; fi
+  if [ "$rc" -ne 0 ]; then
+    miss=$((miss + 1)); failures+=("$name — hook exited $rc (a Stop hook must always exit 0)")
+    printf '%-46s %-8s MISS exit %s\n' "$name" "$expect" "$rc"; return
+  fi
+  if [ "$got" != "$expect" ]; then
+    miss=$((miss + 1)); failures+=("$name — expected $expect, got $got")
+    printf '%-46s %-8s MISS got %s\n' "$name" "$expect" "$got"; return
+  fi
+  # Coherence, on the same bytes the hook just judged. Exempt only stop_hook_active: there the
+  # hook is ABSTAINING so the turn can end (the harness's convergence guard), not certifying the
+  # run — there is no judgment to compare against. Any other silent ALLOW must mean done.
+  if [ "$body" != "-" ] && [ "$active" != "true" ]; then
+    bash scripts/ledger.sh --path "$lg_dir/.claude/slices.json" >/dev/null 2>&1; lrc=$?
+    if [ "$lrc" -eq 0 ] && [ "$got" != "ALLOW" ]; then
+      miss=$((miss + 1)); failures+=("$name — INCOHERENT: ledger.sh exit 0 while the hook said $got")
+      printf '%-46s %-8s MISS incoherent\n' "$name" "$expect"; return
+    fi
+    if [ "$lrc" -ne 0 ] && [ "$got" = "ALLOW" ]; then
+      miss=$((miss + 1)); failures+=("$name — INCOHERENT: ledger.sh exit $lrc while the hook waved it through silently")
+      printf '%-46s %-8s MISS incoherent\n' "$name" "$expect"; return
+    fi
+  fi
+  pass=$((pass + 1)); printf '%-46s %-8s ok\n' "$name" "$expect"
+}
+OPEN='[{"id":"s1","rows":[{"id":"r1","does":"login works","status":"todo"}]}]'
+DONE='[{"id":"s1","rows":[{"id":"r1","status":"passed"},{"id":"r2","status":"dropped","dropped_by":"x","dropped_why":"y"}]}]'
+
+lg "no ledger at all"                        ALLOW   -
+lg "a row still todo"                        BLOCK   "$OPEN"
+lg "same, stop_hook_active"                  ALLOW   "$OPEN" true
+lg "every row genuinely closed"              ALLOW   "$DONE"
+lg "flat row array (hand-written)"           BLOCK   '[{"id":"r1","status":"todo"}]'
+lg "12+ open rows (truncated list)"          BLOCK   "$(jq -nc '[{id:"s",rows:[range(0;15)|{id:("r"+(.|tostring)),status:"todo"}]}]')"
+# --- the scope-loss channel: an unknown status must be OPEN, never invisible -----------------
+lg "status typo: done"                       BLOCK   '[{"id":"s1","rows":[{"id":"a","status":"passed"},{"id":"b","status":"done"}]}]'
+lg "status typo: in_progress"                BLOCK   '[{"id":"s1","rows":[{"id":"r1","status":"in_progress"}]}]'
+lg "status capitalised: Passed"              BLOCK   '[{"id":"s1","rows":[{"id":"r1","status":"Passed"}]}]'
+lg "status padded: \" todo \""                BLOCK   '[{"id":"s1","rows":[{"id":"r1","status":" todo "}]}]'
+lg "status null"                             BLOCK   '[{"id":"s1","rows":[{"id":"r1","status":null}]}]'
+lg "status numeric"                          BLOCK   '[{"id":"s1","rows":[{"id":"r1","status":7}]}]'
+lg "status is an array"                      BLOCK   '[{"id":"s1","rows":[{"id":"r1","status":["todo"]}]}]'
+lg "non-object element beside real rows"     BLOCK   '[{"id":"s1","rows":["a note",{"id":"r2","status":"todo"}]}]'
+lg "duplicate row ids"                       BLOCK   '[{"id":"s1","rows":[{"id":"r1","status":"passed"},{"id":"r1","status":"passed"},{"id":"r9","status":"todo"}]}]'
+lg "nested slice -> sub-slice -> rows"       BLOCK   '[{"id":"s1","rows":[{"id":"sub","rows":[{"id":"r1","status":"todo"}]}]}]'
+lg "malformed ledger (not json)"             BLOCK   'not json'
+lg "slices present but no rows"              BLOCK   '[{"id":"s1","capability":"x"}]'
+# --- nothing open, still not done: must speak rather than wave through -----------------------
+lg "only a blocked row left"                 NOTDONE '[{"id":"s1","rows":[{"id":"r1","status":"blocked"}]}]'
+lg "dropped with no attribution"             NOTDONE '[{"id":"s1","rows":[{"id":"r1","status":"dropped"}]}]'
+lg "dropped, who but no why"                 NOTDONE '[{"id":"s1","rows":[{"id":"r1","status":"dropped","dropped_by":"x"}]}]'
+# --- a realistic multi-turn sequence ---------------------------------------------------------
+lg "turn 1: 3 open"                          BLOCK   '[{"id":"s1","rows":[{"id":"a","status":"todo"},{"id":"b","status":"todo"},{"id":"c","status":"todo"}]}]'
+lg "turn 2: closed one, discovered one"      BLOCK   '[{"id":"s1","rows":[{"id":"a","status":"passed"},{"id":"b","status":"todo"},{"id":"c","status":"todo"},{"id":"d","status":"todo","from":"discovered"}]}]'
+lg "turn 3: regression, passed -> todo"      BLOCK   '[{"id":"s1","rows":[{"id":"a","status":"todo"},{"id":"b","status":"todo"},{"id":"c","status":"todo"},{"id":"d","status":"todo","from":"discovered"}]}]'
+lg "turn 4: all closed, one blocked"         NOTDONE '[{"id":"s1","rows":[{"id":"a","status":"passed"},{"id":"b","status":"passed"},{"id":"c","status":"blocked"},{"id":"d","status":"passed"}]}]'
+lg "turn 5: the blocker cleared"             ALLOW   '[{"id":"s1","rows":[{"id":"a","status":"passed"},{"id":"b","status":"passed"},{"id":"c","status":"passed"},{"id":"d","status":"passed"}]}]'
+
+printf '%s' "$OPEN" > "$lg_dir/.claude/slices.json"
+out="$(printf '{"hook_event_name":"Stop","cwd":"%s","stop_hook_active":false}' "$lg_dir" \
+      | COMPOUND_V_LEDGER_GATE=off bash hooks/stop-ledger 2>/dev/null)"
+if [ -z "$out" ]; then pass=$((pass + 1)); printf '%-46s %-8s ok\n' "kill switch (env)" "ALLOW"
+else miss=$((miss + 1)); failures+=("COMPOUND_V_LEDGER_GATE=off did not disable the gate")
+     printf '%-46s %-8s MISS\n' "kill switch (env)" "ALLOW"; fi
+
+# --- ledger.sh: exit codes AND the line it prints, which nothing used to assert ---------------
+led() { # led <name> <expect-exit> <ledger-json> [substring-that-must-appear]
+  local name="$1" want="$2" f="$lg_dir/probe.json" o rc
+  printf '%s' "$3" > "$f"; o="$(bash scripts/ledger.sh --path "$f" 2>&1)"; rc=$?
+  if [ "$rc" != "$want" ]; then
+    miss=$((miss + 1)); failures+=("$name — ledger.sh exited $rc, expected $want")
+    printf '%-46s %-8s MISS exit %s\n' "$name" "exit$want" "$rc"; return
+  fi
+  if [ -n "${4:-}" ] && ! printf '%s' "$o" | grep -qF -e "$4"; then
+    miss=$((miss + 1)); failures+=("$name — output missing '$4' (got: $(printf '%s' "$o" | head -1))")
+    printf '%-46s %-8s MISS output\n' "$name" "exit$want"; return
+  fi
+  pass=$((pass + 1)); printf '%-46s %-8s ok\n' "$name" "exit$want"
+}
+led "ledger.sh: open rows -> nonzero"        1 "$OPEN"                     "open 1"
+led "ledger.sh: all closed -> zero"          0 "$DONE"                     "100%"
+led "ledger.sh: blocked is not success"      1 '[{"id":"s1","rows":[{"id":"r1","status":"blocked"}]}]' "blocked is not success"
+led "ledger.sh: dropped needs attribution"   1 '[{"id":"s1","rows":[{"id":"r1","status":"dropped"}]}]' "without attribution"
+led "ledger.sh: no rows -> cannot tell"      2 '[{"id":"s1","capability":"x"}]'                        "no rows found"
+led "ledger.sh: bad status -> cannot tell"   2 '[{"id":"s1","rows":[{"id":"r1","status":"done"}]}]'    "outside"
+led "ledger.sh: never prints a blank field"  1 '[{"id":"s1","rows":[{"id":"r1","status":"todo"}]}]'    "discovered +0"
+if timeout 5 bash scripts/ledger.sh --path >/dev/null 2>&1; then :; fi
+if [ "$?" -ne 124 ]; then pass=$((pass + 1)); printf '%-46s %-8s ok\n' "ledger.sh: --path with no value" "exit2"
+else miss=$((miss + 1)); failures+=("ledger.sh --path with no value hangs")
+     printf '%-46s %-8s MISS hangs\n' "ledger.sh: --path with no value" "exit2"; fi
 
 printf '\n%s/%s cases behaved\n' "$pass" "$((pass + miss))"
 if [ "${#failures[@]}" -gt 0 ]; then

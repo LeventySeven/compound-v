@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+# Stop hook for the Compound V plugin — the engine under `get-shit-done`'s completion ledger.
+#
+# The ledger withholds the verdict. On its own that changes nothing, because an agent that has
+# already stopped talking never reads it. This refuses the exit: while any row in
+# .claude/slices.json is still `todo` or `building` — or while the ledger cannot be read
+# honestly — the stop is blocked and the open rows come back as an error.
+#
+# It is a goal loop bound to a row set rather than to a prose objective, which is the strict
+# part: a prose goal can be reinterpreted down to whatever fits the turn; a row can only be
+# closed. The working part is the message, not the refusal — it re-injects the declared scope
+# into a context that has drifted away from it.
+#
+# Design constraints, each a way this could go wrong:
+#   NEVER FAIL TOWARD DONE. A ledger this cannot parse is treated as OPEN, not as empty. An
+#   adversarial recheck reproduced the opposite: one typo'd status (`done` for `passed`) made a
+#   row invisible to both this hook and scripts/ledger.sh, so an unfinished run got silence here
+#   and exit 0 there — the exact stall this exists to abolish, certified by the tool built to
+#   abolish it. Validation lives in scripts/ledger-extract.jq, shared by both halves so they
+#   cannot disagree.
+#
+#   FAIL OPEN ON THE ENVIRONMENT, NOT ON THE DATA. No ledger, no jq, no extractor file, bad
+#   stdin: exit 0 silently, because most repos have no ledger and must never see this hook.
+#   That is different from a ledger that exists and does not parse, which blocks.
+#
+#   CONVERGE, don't wall. `stop_hook_active` caps this at one block per turn (the harness's own
+#   guard), so a turn always gets to end. That is the ONLY convergence mechanism, deliberately:
+#   an earlier version added a stale-progress counter in a state file, and a recheck found it
+#   defeated by a passed->todo regression, resettable with a fake `blocked`, shared across
+#   concurrent sessions, unable to advance on a read-only .claude/, and — worst — designed to
+#   disarm the gate after three quiet turns, which is the signature of a hard tail rather than
+#   of busywork. It made the gate weakest exactly where it was needed. Deleted, not fixed.
+#
+#   BLOCKED IS NOT OPEN. A `blocked` row does not hold the stop — it is a legal terminal answer
+#   and holding on it would wedge the run on the one thing it cannot do. It is still not
+#   success: scripts/ledger.sh exits non-zero on it, and the message below says so.
+#
+#   Off switch. COMPOUND_V_LEDGER_GATE=off disables it; this kit ships to other people's repos.
+#
+# Proven by: bash scripts/hooks-test.sh
+
+set -uo pipefail
+
+[ "${COMPOUND_V_LEDGER_GATE:-on}" = "off" ] && exit 0
+
+input="$(cat 2>/dev/null)"
+[ -n "$input" ] || exit 0
+command -v jq >/dev/null 2>&1 || exit 0
+
+# Already blocked once this turn — let the turn end.
+[ "$(printf '%s' "$input" | jq -r 'try (.stop_hook_active // false) catch false' 2>/dev/null)" = "true" ] && exit 0
+
+cwd="$(printf '%s' "$input" | jq -r 'try (.cwd // "") catch ""' 2>/dev/null)"
+[ -n "$cwd" ] && [ -d "$cwd" ] || cwd="$PWD"
+ledger="$cwd/.claude/slices.json"
+[ -f "$ledger" ] || exit 0
+
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)" || exit 0
+extract="$here/../scripts/ledger-extract.jq"
+[ -r "$extract" ] || exit 0
+# An absolute path, because in a consumer repo the plugin is not under $cwd, and a relative
+# `bash scripts/ledger.sh` names a file that does not exist there.
+audit="the ledger audit command"
+[ -r "$here/../scripts/ledger.sh" ] && audit="bash $here/../scripts/ledger.sh --open"
+
+report="$(jq -c -f "$extract" "$ledger" 2>/dev/null)"
+if [ -z "$report" ]; then
+  # The file exists and jq could not read it at all. That is a ledger, unreadable — block.
+  jq -n --arg audit "$audit" \
+    '{decision: "block",
+      reason: ("The completion ledger at .claude/slices.json could not be parsed, so nothing can be "
+        + "concluded about whether the work is finished. Do not treat an unreadable ledger as an empty "
+        + "one — that is how an unfinished run gets a green light. Fix the JSON, then run `" + $audit
+        + "`. See compound-v:get-shit-done."),
+      systemMessage: "Compound V: the ledger is unreadable — the run cannot be called done."}'
+  exit 0
+fi
+
+ok="$(printf '%s' "$report" | jq -r 'try .ok catch "false"' 2>/dev/null)"
+if [ "$ok" != "true" ]; then
+  why="$(printf '%s' "$report" | jq -r 'try .why catch "the ledger did not validate"' 2>/dev/null)"
+  jq -n --arg why "$why" --arg audit "$audit" \
+    '{decision: "block",
+      reason: ("The completion ledger does not validate, so the run cannot be called done: " + $why
+        + ".\n\nAn unreadable row is an open row. Repair the ledger — every row needs a status that is one "
+        + "of todo, building, passed, dropped, blocked — then run `" + $audit + "` and continue closing "
+        + "rows. See compound-v:get-shit-done."),
+      systemMessage: ("Compound V: ledger invalid — " + $why)}'
+  exit 0
+fi
+
+open_n="$(printf '%s' "$report" | jq -r 'try .counts.open catch 0' 2>/dev/null)"
+case "$open_n" in ''|*[!0-9]*) exit 0 ;; esac
+
+# Nothing open, but not necessarily done. A blocked row is a legal terminal answer and must not
+# hold the stop — wedging a run on the one thing it cannot do is worse than letting it end. It is
+# still not success, and letting the turn close in silence is how "12 of 15 blocked" reads as
+# finished to whoever comes back to it. Say so without blocking.
+if [ "$open_n" -eq 0 ]; then
+  short="$(printf '%s' "$report" | jq -r '
+    ([.rows[] | select(.status == "dropped")
+      | select(((.dropped_by // "") | tostring | length) == 0 or ((.dropped_why // "") | tostring | length) == 0)] | length) as $u
+    | if (.counts.blocked > 0) or ($u > 0)
+      then "Compound V: no open rows, but this run is NOT done — "
+           + (if .counts.blocked > 0 then (.counts.blocked|tostring) + " blocked" else "" end)
+           + (if (.counts.blocked > 0 and $u > 0) then " and " else "" end)
+           + (if $u > 0 then ($u|tostring) + " dropped without who-and-why" else "" end)
+           + ". Blocked is not success and an unattributed drop is a deletion."
+      else "" end' 2>/dev/null)"
+  [ -n "$short" ] && jq -n --arg m "$short" '{systemMessage: $m}'
+  exit 0
+fi
+
+openlist="$(printf '%s' "$report" | jq -r '[.rows[] | select(.status == "todo" or .status == "building")
+  | "  [" + .status + "] " + (.id // "?") + " — " + (.does // .capability // "(no description)")]
+  | .[0:12] | join("\n")' 2>/dev/null)"
+more="$(printf '%s' "$report" | jq -r 'if .counts.open > 12 then "\n  …and " + ((.counts.open - 12)|tostring) + " more" else "" end' 2>/dev/null)"
+
+jq -n --argjson n "$open_n" --arg rows "$openlist$more" --arg audit "$audit" \
+  '{decision: "block",
+    reason: ("The goal is not finished: " + ($n|tostring) + " declared row(s) are still open.\n\n" + $rows
+      + "\n\nThis goal persists across turns — ending the turn does not shrink it. Keep the full scope: do "
+      + "not redefine success around what already works. Pick ONE open row and take it to a real close — "
+      + "passed (its check seen red first, then an end-to-end run driven as a user), dropped (naming who "
+      + "dropped it and why), or blocked (naming the blocker). Rough edges elsewhere are fine while the "
+      + "work is moving; a row closes only on its real end state, verified.\n\nDo not do adjacent work "
+      + "instead: a turn that closes no row is not progress. If a row is genuinely impossible, mark it "
+      + "blocked — that is a legal answer and it is not success, so it still counts against completion. "
+      + "Run `" + $audit + "` for the full list. See compound-v:get-shit-done."),
+    systemMessage: ("Compound V: " + ($n|tostring) + " ledger row(s) still open.")}'
+exit 0

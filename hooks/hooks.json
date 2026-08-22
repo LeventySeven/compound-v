@@ -31,6 +31,12 @@
             "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/stop-verify\"",
             "async": false,
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/stop-ledger\"",
+            "async": false,
+            "timeout": 10
           }
         ]
       }
