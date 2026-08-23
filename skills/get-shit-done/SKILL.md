@@ -5,7 +5,7 @@ description: Take a whole project from a stated goal to a real, working thing so
 
 # Get Shit Done
 
-Most projects that look impossible are a handful of parts, two of which are genuinely unknown. Find those two first, find out how they are already solved, and most of what is left is typing.
+Most projects that look impossible are a handful of parts, two of which are genuinely unknown. Find those two first, find out how they are already solved, and most of what is left is typing. **Buildability is rarely the constraint; effectiveness past the demo is** — the barrier to entry has fallen while *"creating products and systems that are effective—beyond a demo—remains deceptively difficult."* That is the class where "we can build anything now" stops being true, and it is what stages 3 and 4 are aimed at rather than the build itself.
 
 That is not optimism. Thorsten Ball built a working code-editing agent in ~300 lines and three tools — *"an LLM, a loop, and enough tokens. The rest … Elbow grease."* — and answered the sceptic directly: *"I bet it's a lot farther than you think."* Overestimating is the default failure, and models are worse at it than people: asked for a hard thing, a model reaches for architecture instead of for the two facts that would collapse it.
 
@@ -39,17 +39,17 @@ A long run degrades silently unless its procedure and its state live on disk: se
 
 > **The done rule — every declared row is `passed` or `dropped`-with-attribution. Nothing may remain `todo` or `building` at the verdict, and `blocked` is not success.**
 
-You reach 100% by passing a row or by cutting it out loud with a name on it, never by forgetting it. That is what makes *"we're at about 90%"* unsayable. Five invariants hold it up — they are conditions that are true or false at any moment, not steps in an order. **references/completion-ledger.md** carries the row shape, the status vocabulary and the reasoning; read it when you open a ledger and again at the gate.
+You reach 100% by passing a row or by cutting it out loud with a name on it, never by forgetting it — which is what makes *"we're at about 90%"* unsayable. Five invariants hold it up; they are conditions true or false at any moment, not steps in an order. **references/completion-ledger.md** carries the slice and row schema, the status vocabulary and the reasoning — read it when you open a ledger and again at the gate.
 
-- **The floor** — a capability with open rows and no passing row **did not ship**, whatever the percentage says. Rows are not spread evenly across slices, so one that delivered nothing disappears into a healthy aggregate; it is reported by capability, ahead of any row.
-- **Denominator** — rows come from the brief, the plan, and whatever the build discovers. **A requirement with zero rows is scope nobody was assigned**, the largest single source of the missing 10%, because it never looked like it was failing; it never looked like anything.
+- **The floor** — a capability with open rows and no passing row **did not ship**, whatever the percentage says. Rows are not spread evenly, so a slice that delivered nothing vanishes into a healthy aggregate; report by capability, ahead of any row.
+- **Denominator** — rows come from the brief, the plan, and whatever the build discovers. **A requirement with zero rows is scope nobody was assigned** — the largest single source of the missing 10%, because it never looked like it was failing; it never looked like anything.
 - **Flip** — green only on a check seen **red first, for the right reason** (**compound-v:test-driven-development**'s red step, applied to the ledger) plus an end-to-end run driven as a user, with one line recording what you ran.
-- **Delta** — appending is always legal, flipping is not. Discovered work enters as `discovered: true` the moment it is found, and a drop declares its kind: `void` (the requirement does not exist, nothing owed) or `moved` (it changed shape, so a successor row is mandatory). A requirement that moved and named no successor is how a capability quietly empties out.
+- **Delta** — appending is always legal, flipping is not. Discovered work enters as `discovered: true` when found; a drop declares `void` (nothing owed) or `moved` (a successor row is mandatory). A `moved` that names no successor is how a capability quietly empties out.
 - **Blocked is not done** — three failed attempts marks a row `blocked` with the blocker named (**compound-v:systematic-debugging** owns the cap). Give the run a legal way to say *this did not work* and it stops needing an illegal one.
 
-**The agent may not edit what grades it.** The only legal write is a status flip and its evidence. Anthropic's reward-tampering work found models trained on gameable environments generalize to *directly rewriting their own reward function*; where a harness can express this as a tool schema rather than a rule, that is the stronger form.
+**The agent may not edit what grades it** — the only legal write is a status flip and its evidence. Models trained on gameable environments generalize to *directly rewriting their own reward function*; where a harness can express this as a tool schema rather than a rule, that is the stronger form.
 
-**The ledger needs an engine, or it is only a record of where you stopped.** This kit ships one: a `Stop` hook that **refuses the exit** while any row is open, or while the ledger cannot be read honestly — an unreadable row counts as open, never as done. The harness caps it at one block per turn, so unattended it is one hard shove rather than a loop; say at the start of a run what else re-invokes you. `bash scripts/ledger.sh --open` prints the same number for a human.
+**The ledger needs an engine, or it is only a record of where you stopped.** This kit ships one: a `Stop` hook that **refuses the exit** while any row is open, or while the ledger cannot be read honestly — an unreadable row counts as open, never as done. It is capped at one block per turn, so unattended it is one hard shove rather than a loop. `bash scripts/ledger.sh --open` prints the same number for a human.
 
 The run holds two files, both scaffolding, both deleted when it ends: **`.claude/STATE.md`** (prose, owned by **compound-v:handoff** — its **Next** names a row id) and **`.claude/slices.json`** (the slices and their rows). JSON deliberately: Anthropic reached the same choice after finding the model *"less likely to inappropriately change or overwrite JSON files compared to Markdown files"*.
 
@@ -82,28 +82,29 @@ Stage 1's output is `slices.json`, and it exists before any code. Per slice, fou
 
 **Ask one question per slice, and make it this one:** *what is the simplest thing that has actually shipped for this, and what did it cost the people who shipped it?* Not "what do the sources say about X": an open question over a good corpus returns mostly restatement, and it is the question, not the number of lanes, that makes recon expensive.
 
-**The output is a decision, not a report.** Name the **shape** — the architecture someone experienced would reach for here — and the **trap** that shape has. This is the whole reason the corpus exists: an agent has read more code than any of us and has none of the scar tissue, and the shape-plus-trap pair is exactly what scar tissue is. Hand the mechanism call to **compound-v:simplest-thing-that-works**, which owns the climb from a rule to a query to a call to an agent; hand the API-level pattern to **compound-v:searching-patterns**. This stage owns only the question and the budget.
+**The output is a decision, not a report — and it lands in `slices.json` or it did not happen.** Name the **shape** (the architecture someone experienced would reach for here), its **trap** (the second-order cost invisible on day one), and what the shape lets you **delete**. That pair is the whole reason the corpus exists: an agent has read more code than any of us and has none of the scar tissue. All three are slice fields in **references/completion-ledger.md** — a shape left in the conversation dies with the session, and the next project pays to mine it again. The mechanism climb, and the simple/effective/scalable test the shape has to pass, are **compound-v:simplest-thing-that-works**; the API-level pattern is **compound-v:searching-patterns**. This stage owns only the question and the budget.
 
-**The shape has to pass three tests at once, and dropping any one of them is the failure:**
+**Look the shape up before you research it.** compound-v:searching-patterns carries a curated table of arrangement-plus-trap pairs, and a hit *is* the whole of recon for that slice. It is a cache with a miss path, not an index — a dozen rows deliberately, so most slices miss it, and a miss is the rule working. On a miss you get **one hunt, scoped to that one domain**, asked at build time, never as a standing sweep. The budget is the `confidence` stage 1 already wrote down:
 
-- **Simple** — you can hold it in your head and say it in a sentence. If explaining it needs a diagram, it is not the shape yet.
-- **Effective** — it passes the slice's `check`. A simpler thing that does not is not simpler, it is unfinished.
-- **Scalable** — the next 10× does not force a rewrite. This is the one that gets dropped, and it is why "simplest" is not the same as "smallest".
+| `confidence` | what recon costs |
+|---|---|
+| ~95% — *no unforeseen difficulties* | nothing. Write the shape you already hold. |
+| ~90% — *modulo Murphy's law* | the lookup only; on a miss, write what you know and move. |
+| ~65% — *the basic path, and the steps should work* | one lane, the one question, one pass. |
+| ~30% — *a murky view of the path* | the full ladder — three channels cheapest-first, **references/prior-art.md**. |
 
-Then the two lists fall out of the shape rather than being hunted separately:
+When the hunt dispatches an agent, its brief is **references/prior-art.md**'s dispatch block, pasted verbatim — the worker inherits none of the method otherwise, and the corpus is enumerated live rather than indexed, because it grows.
 
-- **DELETE** — what the shape means you no longer build: someone shipped it, a library covers it, the platform already does it, the hard version turned out unnecessary.
-- **FORCE** — what the shape makes you handle: a rate limit, an auth dance, a data shape, the named trap.
+**The band is a pre-investigation guess, so an observable signal can overturn it.** A miss in the shape table on a slice you banded ~0.9, or a first read that contradicts the slice's `unknown`, is evidence the band was wrong: re-band once, out loud, in the ledger. **The legal revision is upward** — re-banding down mid-hunt to justify stopping is the same move as editing a check to make it pass. Both failures are live and opposite: the measured sweeps over-researched what was already known, while the one real ledger skipped recon on exactly the slices that needed it.
 
-**An empty DELETE list is a red flag, not a clean bill.** It almost always means you searched for *how to build it* rather than *whether to*, and it is how a plan comes back from research bigger than it went in.
+**An empty `delete` is a red flag, not a clean bill** — it means you searched for *how to build it* rather than *whether to*. Write `[]`, never nothing: an empty list says you looked.
 
-**Stop when you can name the shape and its trap, or when two independent sources converge on the same shape.** Not when the lanes are exhausted. Coverage and depth are different axes: every source lane gets touched — a lane at zero is a defect you justify, not a gap you pass over, and the corpus grows so it is enumerated live rather than from a remembered list — but how far you read in each is bought with the slice's confidence. A ~95% slice gets no recon at all; a ~30% slice gets the full ladder. If the environment ships a corpus-investigation skill (`workflow-investigation` is one), invoke it rather than re-deriving where things live.
+**Stop when you can name the shape and its trap, or when two independent sources converge on the same one** — not when the lanes are exhausted. Every lane still gets touched, and a lane at zero is a defect you justify rather than a gap you pass over; how far you read in each is bought with the band above. If the environment ships a corpus-investigation skill (`workflow-investigation` is one), invoke it rather than re-deriving where things live.
 
-Three channels, cheapest first — what is on disk, then primary web sources at your lockfile's version, then practitioners in public, X included. How to search each and how the retrieval fails is **references/prior-art.md**.
+**Recon returns a file:line map, not prose.** A confidently hallucinated architecture reads exactly like a real one; a cited line either exists or it does not, so the map is grep-checkable by someone who was not there.
 
-**Recon returns a file:line map, not prose.** Name the exact file and line for each claim. Prose is unfalsifiable and a confidently hallucinated architecture reads exactly like a real one; a cited line either exists or it does not, so the map is grep-checkable by someone who was not there.
+Feed it forward: the shape into the plan, the trap into **compound-v:recheck** as a named checkable assertion, all three into the ledger. At Reckon, a shape that will recur graduates into the table — the only way this gets cheaper over time.
 
-Feed it forward: the shape into the plan, the trap into **compound-v:recheck** as a named checkable assertion, and DELETE/FORCE into the ledger — a deletion nobody recorded gets rebuilt by the next session.
 
 ## Stage 3 — Build one slice at a time
 
@@ -127,6 +128,8 @@ Build it however you build things — **compound-v:writing-plans**, **compound-v
 ## Stage 4 — Reckon: the MEP bar over the assembled product
 
 Put the goal beside what exists and say plainly how much is real — including *"we have been busy for six hours and the product is not closer to a user."* The bar is **MEP, the minimum evolvable product**: it survived contact with a real person, and the next change does not require a rewrite. Not MVP — *viable* is a bar an agent clears by writing code that runs, which is the bar that produced the six-hour run with nothing real at the end.
+
+**100% is over a declared denominator, never over every axis.** The bar is every row you *declared*, passed or dropped with a name on it — not every requirement anyone could name. Those are different targets, and the second one does not ship: against a list running reliability, harmlessness, factual consistency, usefulness, scalability, cost, security, privacy and fairness, the practitioners' verdict is *“If we try to tackle all these requirements at once, we’re never going to ship anything”*, and the same page concludes *“We have to accept that the first version won’t be perfect, and just launch and iterate”* (Yan et al., *What We've Learned From a Year of Building with LLMs*). So the honest form of the rule is: choose the denominator deliberately at Carve, put everything you are *not* doing into `notSlices` with a name against it, then finish **all** of what remains. A run that closed every declared row and named what it left out is at 100%. A run measuring itself against every axis it can imagine is at 80% forever by construction — and its missing 20% is undeclared, not unbuilt, which is precisely the failure the ledger exists to make unsayable.
 
 Four checks, each run against the assembled system — **references/mep-gate.md** carries how:
 **alignment** (does it still answer the ask the plan already absorbed, and what exists that nobody asked for), **reachability** (walk every capability entry-point → handler → data → what the user sees, twice, once on an input you did not construct, then cold-start it), **survival** (who used it who did not build it, what they tried, what broke, what you changed — on a clean artifact), and **evolvability** (the two most likely next changes, and whether either forces a rewrite).
@@ -159,3 +162,4 @@ Nothing here blocks on its own; every row routes back to a stage, and the clamp 
 | A ledger bit flipped without a walk, or a check edited late in the run | The two failure modes this skill is built around. Confirm the check goes red without the change, and suspect it hardest at the end of a long run. |
 | The same gap N rounds running, or a different gap every round | **compound-v:systematic-debugging**'s attempt cap. The product-level addition: if every remaining gap needs something you don't hold — a real user, a credential, a live environment — no round closes any of them. Name the blocker and stop. |
 | "Too complex / would take days" | Not authorization to deliver less — only to say so out loud, and to go back to stage 2 and find who already solved it. |
+| Round after round of engineering and the metric will not move | Suspect an **invisible asymptote** — *"a ceiling that our growth curve would bump its head against if we continued down our current path"* (Eugene Wei). Some ceilings belong to the path, not to the effort, and no amount of the same work clears them. The move is a different path, named out loud, not another round. |

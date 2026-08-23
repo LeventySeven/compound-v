@@ -47,6 +47,16 @@ def malformed_members: [.. | objects | select((.rows | type) == "array") | .rows
     | select([(.replaced_by // []) | if type=="array" then .[] else . end] as $rb
              | ($rb | length) == 0 or any($rb[]; . as $x | ($ids | index($x)) == null))
     | .id // "?"]) as $dangling
+# Stage 2's output lands on the SLICE (`shape`, `trap`, `delete`) or it lands nowhere. In the only
+# field ledger that exists all three were absent on 4 of 4 slices while recon ran and cost real
+# tokens, and `force` was written on both 0.9-confidence slices and skipped on both at 0.65 — the
+# depth-by-confidence rule exactly inverted. These warn rather than refuse, for the same reason
+# untyped drops warn: requiring the keys outright would brick every ledger written before them.
+| ([$sl[] | select([.rows[]? | select(type=="object") | select(has("status"))] | length > 0)
+    | select((((.confidence | tonumber?) // null) as $c | $c != null and $c < 0.7))
+    | select((((.shape // "") | tostring) | length) == 0) | .id // "?"]) as $noshape
+| ([$sl[] | select((((.shape // "") | tostring) | length) > 0)
+    | select((((.trap  // "") | tostring) | length) == 0) | .id // "?"]) as $notrap
 | if ($doc | type) != "array" and ($doc | type) != "object" then
     {ok:false, why:"ledger is neither an array nor an object", warn:[], rows:[], counts:null}
   elif ($bad | length) > 0 then
@@ -94,7 +104,13 @@ def malformed_members: [.. | objects | select((.rows | type) == "array") | .rows
                 # catches the failure typing only diagnoses.
                 (if ($untyped|length) > 0
                  then ["untyped drop(s) — say `void` (the requirement does not exist) or `moved` (it changed shape and owes a successor): " + ($untyped|join(", "))]
-                 else [] end)),
+                 else [] end)
+                + (if ($noshape|length) > 0
+                   then ["slice(s) below 0.7 confidence carrying no `shape` — recon either did not run or its answer died with the session: " + ($noshape|join(", "))]
+                   else [] end)
+                + (if ($notrap|length) > 0
+                   then ["slice(s) with a `shape` and no `trap` — a shape without its trap is a diagram, and recheck receives nothing checkable: " + ($notrap|join(", "))]
+                   else [] end)),
          counts:{open:($todo+$building), resolved:($passed+$dropped+$blocked),
                  passed:$passed, dropped:$dropped, blocked:$blocked,
                  todo:$todo, building:$building,

@@ -22,6 +22,45 @@ You reach 100% by passing a row or by cutting it out loud with a name attached �
 it. This is what makes "we're at 90%" unsayable: the ledger either names the other 10% and who
 dropped each one, or the run is not finished.
 
+## The slice — and where recon lands
+
+A slice carries `id`, `capability`, `check`, `unknown`, `confidence` and its `rows`. Stage 2 adds
+four more, and they are the only durable record that recon happened at all:
+
+```json
+{"id": "s2", "capability": "...", "check": "...", "unknown": "...", "confidence": 0.65,
+ "shape": "mirror the provider's data locally, advanced by one durable cursor per account",
+ "trap": "the cursor expires, so a full-resync path is a day-one requirement",
+ "delete": ["per-rule API round trips — the mirror answers them", "our own retry queue — the page-loop is the retry"],
+ "force":  [{"what": "an event-type filter filters but does not project; omit delete events and the mirror diverges silently"}],
+ "rows": [...]}
+```
+
+**`shape` and `trap` are one thought, never one without the other.** A shape with no trap is a
+diagram; the trap is the part only somebody who operated the thing would know, and it is the half
+worth carrying to the next project. `trap` is also what **compound-v:recheck** receives as a named
+checkable assertion, so a slice with a shape and no trap hands the review nothing.
+
+**`delete` is a list and it may be empty — but empty must be written, not omitted.** `[]` says recon
+looked for work to remove and found none; a missing key says nobody looked. The skill's rule is that
+an empty DELETE is a red flag rather than a clean bill, and a red flag you cannot see is not one.
+This is the only field in the ledger that measures whether research made the build *smaller*.
+
+**Why these four and not more.** The bar here is set by two fields this document already cut —
+`steps` and the five-value `from` enum — both specified, both written zero times, both removed with
+the same reasoning: *one field that gets written beats two where the second is a rule nobody
+enforces.* These four clear that bar on evidence rather than on intent. In the only field ledger
+that exists, `shape`, `trap` and `delete` appear **zero** times across four slices while stage 2 ran
+and cost real tokens, so its entire output died with the session — and `force` was written on the
+two slices at confidence `0.9` and skipped on both at `0.65`, which is the rule exactly inverted.
+They also differ from the cut pair in the way that matters: `steps` duplicated `does` + `evidence`
+and `from` duplicated `discovered: true`, whereas nothing else in the ledger carries an architecture
+or its cost. **And they have a reader** — `ledger-extract.jq` warns when a slice below `0.7`
+confidence carries no `shape`, which is the enforcement `steps` never had.
+
+It warns rather than refuses, for the same reason untyped drops warn: requiring the key outright
+would brick every ledger written before it existed.
+
 ## The row
 
 Nest rows under their slice in `.claude/slices.json`. A row is one thing a user can do, phrased so a
@@ -51,9 +90,9 @@ A row found during the build carries **`discovered: true`** — that one bit is 
 behaviour only production can show you, or `{"owner": "...", "check": "..."}` for a judgement only a
 named person can make. `bash scripts/ledger.sh --discharge` refuses the landing while any passed row
 has none. `evidence` on a passed row is
-`{"how": "<what you actually ran or drove>"}` — one line a third party could repeat. `steps` is the part people skip and
-it is the part that works — a numbered walk is checkable by someone who was not there, and a row
-without one degrades into a vibe within two sessions.
+`{"how": "<what you actually ran or drove>"}` — one line a third party could repeat, and it is the
+part people skip: a walk a stranger can repeat is checkable, and a row without one degrades into a
+vibe within two sessions.
 
 ## R1 — The denominator: rows come from three places, and the third is where the 10% hides
 

@@ -68,6 +68,51 @@ Where technique appears months before documentation, and the only channel that a
 try this in anger and what broke?"* Also the noisiest by a wide margin, so it needs a retrieval path
 that works and a filter that cuts most of what it returns.
 
+**Seed the account list from people already in your corpus, not from reach.** Anyone whose essay,
+talk or paper already cleared the bar offline has cleared it as a person; their feed is the live
+edge of the same judgment. Extract the author list from what you already trust, then add the
+practitioners those authors cite. **Do not rank accounts by following count** — measured on 47
+accounts pulled this way, engagement selects audience size, not source quality: the single account
+whose essay is the one public primary behind a shape-table row returned **zero** posts clearing a
+likes-and-length filter, while a million-follower account returned **75%**, nearly all of it release
+news and virality commentary. A metric filter would have dropped the best practitioner and kept the
+noise.
+
+**The unit to extract is the outbound link, not the post.** A practitioner's post is a pointer;
+the essay it points at is the source, and the corpus bar is written for essays. Pull
+`entities.urls[].expanded_url`, drop self-links and media, and dedupe against what the corpus
+already holds — the survivors are the channel's actual product. Measured on 66 accounts seeded this
+way: **1,081 original posts → 166 links the corpus did not already have → 71 essay-shaped, about
+7% of posts.** The other 95 were product pages, release notes, jobs, events, gists and one Google
+Form. A low yield is the channel working correctly; it is a discovery lane, worth one pass and never
+a standing sweep.
+
+**Engagement over-selects announcements — reliably in direction, not in size.** Measured on two
+independent harvests: announcement-shaped links out-engaged the rest by **7.8x mean / 6.8x median**
+on a 66-account roster and **2.7x / 3.2x** on a broader 120-account one; announcements filled **9 of
+the top 10** by likes in the first and **3 of 10** in the second, against ~10% of each tail. The
+direction held both times and the magnitude did not — it tracks how **exec-heavy the roster is**,
+because a founder's most-liked post is a launch and a researcher's is not. So the rule is
+directional: **never rank by engagement, and never quote a multiplier as if it were a constant.**
+A frontier-lab press release is the single most-liked thing this channel produces, and the corpus
+bar cuts it on sight as *"news, hype takes, 'X just dropped' reactions with no durable insight."*
+
+**Roster composition decides which noise class you get, so name it before you harvest.** The
+exec-and-company-heavy roster produced a vendor-blog and event-page class the personal-account
+roster did not (Databricks, Dell, NVIDIA, event registration pages — 4% of links) — the bar's
+*"vendor / devrel marketing dressed as education"* row, arriving as a measurable share rather than
+as a warning. Yield itself was stable across both: **6.6% and 6.1% of posts.** Expect ~6-7%, expect
+the noise to change shape with the roster, and re-measure the mix rather than inheriting it.
+
+**Two stages, and the second one is a read.** A cheap mechanical pass narrows — drop replies and
+retweets, drop anything opening with an announcement marker (*excited to*, *introducing*, *now
+available*, *check this out*), keep what carries causal or mechanism language or a number with its
+cause. Measured: **705 original posts → 109 claim-shaped, about 15%**, which is the "expect to keep a
+minority" rule showing up as a number. But the mechanical pass **cannot make the call** — its
+numeric signal reliably promotes news that happens to quote figures (a model release, a traffic
+share). Read the survivors and decide on the claim. A regex narrows; a read decides, and pretending
+otherwise is how a filter that was working starts passing polished noise.
+
 ### Retrieval — check before you trust
 
 Access to X in particular changes without notice, and the failure is silent-looking rather than
@@ -121,6 +166,91 @@ post is the most common way noise gets through a filter that was working. Expect
 of any batch — that ratio is a calibration expectation, not a law, but keeping most of a batch means
 the bar slipped, and padding a keep-list to hit a number is the failure this filter exists to
 prevent. Keeping zero is a normal outcome.
+
+## The dispatch block — paste this into every agent you launch
+
+**A worker inherits none of this file.** The orchestrator reads the channels and the filter; the
+worker gets what the brief says and nothing else, so the method has to travel with the work. This is
+the whole of "give the agents the search patterns": not an index of the corpus — the corpus grows
+most days and an index rots while `grep -n` stays current by construction — but the *method*, handed
+over per dispatch. Paste it verbatim, fill the four slots, change nothing else.
+
+> **Tool affirmation.** You have full tool access (Read, Grep, Bash, WebSearch/WebFetch, silver).
+> Nothing below restricts your *inputs*. Do NOT answer from memory — open and read the source first.
+>
+> **Enumerate live, never from a remembered list.** `ls` and `grep` your assigned folders *this run*;
+> they grow. Do not build or consult an index.
+>
+> **Burst the query before running it.** Write 5–8 differently-worded variants first: the literal
+> term, its aliases, its verb form, the phrasing a *speaker* would use, its failure mode, its
+> opposite. One `grep -il <topic>` under-retrieves prose by construction — a file about "the top
+> navigation" is named `header.tsx`.
+>
+> **Rank, then read; never open a file to decide whether to open it.** Score by how many of your
+> variants surfaced it, tie-broken by hits per 1,000 lines. Declare the cut in writing.
+>
+> **Size-triggered reading.** `wc -l` first. ≤2,000 lines: read it whole. Larger: `grep -nE '^#{1,2} '`
+> for the heading index, then `sed -n 'A,Bp'` in ≤1,500-line chunks. **Never open a file over
+> `<MAX_LINES>` lines.** This one is not style: a worker that opens a 200,000-line transcript stalls
+> and returns nothing at all, which costs more than a shallow answer.
+>
+> **Round two, on the proper nouns the sources actually used — required, not optional.** After your
+> first reads, collect every product, person, paper title, config constant and API name the text
+> itself named, and `grep -n` those exact strings across the corpus. Say which terms you harvested
+> and what they surfaced. This is the one step that finds the file discussing your topic without
+> ever using your keyword, and it is why mining is recursive rather than a single sweep.
+>
+> **The bar, and it is the same bar on disk and on the web.** Primary — the person who did the thing,
+> in their own words, not a commentary account summarising them. Non-obvious — not answerable by a
+> two-minute search. Load-bearing — it changes the decision in front of you. Cut on sight regardless
+> of polish: listicles, SEO "ultimate guide" pages, summaries of summaries, vendor content dressed as
+> education, and a credible name on a thin post, which is the most common way noise gets through a
+> filter that was working. **Expect to keep a minority.** Returning few or zero is the correct
+> outcome when nothing clears; padding to hit a count is the failure this bar exists to prevent.
+>
+> **Budget: at most `<N>` tool calls**, then return what you have. Stop when a round returns mostly
+> files you have already seen.
+>
+> **Then read your sources against each other, not just one at a time.** Take the two or three that
+> bear on the same decision, put them side by side, and write down the claim that follows from them
+> **jointly and that none of them states alone**. Return it as a `CONNECTION`: one claim, an `AT` for
+> each source it rests on, and one line naming what each contributes. A connection is only real if you
+> can say what each source adds and neither states the conclusion — if one of them already says it,
+> that is a quote, not a connection. Report at most three; this is the step that produces something
+> the corpus does not already contain, and three real ones beat ten restatements.
+>
+> **Return inline as text, at most `<K>` findings.** Never write a file — the harness forbids worker
+> report files and the attempt is wasted. Each finding: a one-sentence CLAIM, ONE verbatim line as
+> QUOTE, and `path:LINE` as AT. Every quote is relocated with
+> `sed -n '<LINE>p' <path> | grep -Fq -e "$Q"` — one that does not relocate gets the whole finding
+> dropped, so copy bytes exactly and use one line only. Any value not inside a quote is `[ASSUMED]`,
+> and a number and its causal explanation must come from the same sentence or the explanation goes.
+> **"I could not ground this" is an accepted, non-penalised return** — never invent a citation to
+> finish tidily.
+
+**Why the connection step exists, and why it is the only "make the agent reason" instruction here.**
+Structure that tells a model *how to think* measures inert or worse — a structured rendering of the
+same document lost 8.4–27.4 percentage points, and prompt scaffolding recovers ~73% of a *base*
+model's gap but only ~7% of a post-trained one. The connection step is not that: it carries
+information the model does not have. A model pre-trained on 20,000 relations recalls them at **99%
+when they are in context** and scores **"absolutely zero"** on held-out reversals, with fine-tuning
+scoring *below chance* — so the implied conclusion genuinely does not exist anywhere until something
+writes it down. Reading sources **together** is what puts it in context, and writing it down is what
+makes it survive the session. Measured locally: an agent reading note pairs side by side produced
+**18 verified novel connections and found six real defects** in hand-written notes, including a
+stale cross-reference and two sibling notes making mutually exclusive claims about the same data.
+No retriever finds those, because they are not in any single source.
+
+**This is not a graph, and do not build one.** Constructing an explicit knowledge graph as a study
+step lost to plain retrieval practice by roughly half the retention (0.45 vs 0.67, *d* = 1.50), and
+the initial maps contained *more* ideas than the initial recalls — a better-looking artifact that
+worked worse. What retrieval rewards is **cue diagnosticity**, how uniquely a cue picks out one
+item, and denser linking hurts it by enlarging the candidate set. Sparse and specific beats dense
+and associative: one pointer that uniquely identifies a source beats ten associative links.
+
+Fill `<MAX_LINES>` from the corpus you are pointing it at (5,000 is a safe default over a transcript
+library), `<N>` from the confidence band in **compound-v:get-shit-done** stage 2, and `<K>` at about
+8 — forty small findings bury the one that mattered.
 
 ## Reading the result: demo or production?
 
