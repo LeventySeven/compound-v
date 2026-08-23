@@ -30,6 +30,14 @@ Climb only when the rung below **provably** fails the check. Most goals stop far
 6. **Agent** — a model in a loop with tools when the path can't be predicted in advance.
 7. **Multi-agent / full AI system** — a constellation or compound system when one agent provably can't carry the goal.
 
+**Two axes, and the ladder is only one of them.** The rungs answer *how much machinery*. They do not answer *what arrangement* — "a scheduled job reads a table and sends a message" is rung 2, and the rung number tells you nothing about the parts or their order. The arrangement is the **shape**, and a shape is only worth carrying paired with its **trap**: the second-order cost that is invisible on day one. That pairing is the whole transferable content of experience, and it is precisely what a coding agent lacks — it has read more code than any of us and has been burned by none of it. The curated shape table lives in **compound-v:searching-patterns**; reach for it before inventing an arrangement, and add to it only when a shape will recur.
+
+**The three-way test — a mechanism has to pass all of it at once.** Dropping any one is the failure, and each has its own failure mode:
+
+- **Simple** — you can hold it in your head and say it in a sentence. If explaining it needs a diagram, it is not the answer yet.
+- **Effective** — it provably passes the goal's check on the real input distribution, not the demo slice.
+- **Scalable** — the next 10× does not force a rewrite. This is the one that silently gets dropped, and it is why *simplest* is not *smallest*: the smallest thing that passes today is often the thing you throw away at the first order of magnitude.
+
 Two rules make this honest:
 
 - **The burden of proof is on the higher rung.** Find the simplest solution; add complexity only when it demonstrably improves outcomes — don't build agents for everything. This is the AI restatement of the XP rule: "do the simplest thing that could possibly work," plus YAGNI.
