@@ -45,6 +45,19 @@ For a stack you hit repeatedly, skip the discovery and go straight to its **cano
 | FastAPI (Python) | `fastapi.tiangolo.com` — the official docs *are* the reference, examples included |
 | DOM / React testing | `testing-library.com` — the canonical query/interaction patterns (pairs with compound-v:test-driven-development) |
 
+### The same table, one level up: shapes, not stacks
+
+The rows above answer *how is this API used*. The expensive question is one level up — *what shape should this be* — and it is where an agent is weakest: it has read more code than any of us and carries none of the scar tissue, so it reaches for the architecture rather than for the two facts that collapse it. A **shape** is the architecture an experienced person would reach for, and it is only worth writing down paired with its **trap**, because the trap is what the scar tissue actually is.
+
+| Shape | Reach for it when | Its trap |
+|---|---|---|
+| A scheduled job reading a table and sending a message | anything phrased "when X is late, tell someone" | the schedule is trivial; the trap is whether the dates it reads are true, which is a different slice |
+| One durable objective plus a status the worker may only flip | multi-session work that must not silently shrink | the grader must sit outside the worker's write scope, or it is not a grader |
+| Read-only subagents, writes single-threaded | you want parallel speed on one codebase | parallel writers reconcile conflicting implicit decisions at merge, and that reconciliation is the cost |
+| A held-out check applied after the run | the agent authors both the code and its test | a check the author can see is a check the author can satisfy |
+
+**A recon earns a row here only when the shape will recur**, and most will not — which is the same discipline the stack table runs on, and the reason both stay short enough to stay true. Do not turn this into an index of the corpus: that has been tried and refused, because an index over a growing source set rots while `grep -n` over it is current by construction, and a production findings-cache measured zero hits in 133 attempts. A dozen curated pairs beat a thousand retrievable ones.
+
 Most stacks have no row here and that is the rule working, not a gap — the "primary source over a blog" rule above covers the long tail. It deliberately excludes the contested layers (state management, auth, the ORM wars, any "best-practices" listicle): no single right answer there, so a named pick is just an opinion aging into wrong — read the primary sources and say the choice is contested rather than asserting one. And these are **starting points, not pins** — still read the version in your lockfile, because even the canonical exemplar moves.
 
 ### When you must navigate: drive a real browser

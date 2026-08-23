@@ -78,24 +78,32 @@ Stage 1's output is `slices.json`, and it exists before any code. Per slice, fou
 
 **Then say what the ask named that is not a slice, and who asked for it** — as `notSlices`, one entry per item with `item`, `askedBy` and `why`. Anything with no answer is drift-in before a line is written. This is where a sprawling brief gets honest: *an AI that runs the whole agency* is not a project. It is four named parts — the context store, the metrics, the follow-ups, the proactive nudges — and the one that would actually change someone's week is a job that reads a date and sends a message.
 
-## Stage 2 — Recon: research that is allowed to delete slices
+## Stage 2 — Recon: one question, and the answer is a shape
 
-**The confidence column is the research budget** — stage 1's sort, reused. A ~95% slice gets no recon; looking up what you would write correctly from memory is the overhead **compound-v:searching-patterns** already tells you to skip. A ~30% slice gets the full pass.
+**Ask one question per slice, and make it this one:** *what is the simplest thing that has actually shipped for this, and what did it cost the people who shipped it?* Not "what do the sources say about X": an open question over a good corpus returns mostly restatement, and it is the question, not the number of lanes, that makes recon expensive.
 
-Recon returns exactly two lists per slice, and the first one is the point:
+**The output is a decision, not a report.** Name the **shape** — the architecture someone experienced would reach for here — and the **trap** that shape has. This is the whole reason the corpus exists: an agent has read more code than any of us and has none of the scar tissue, and the shape-plus-trap pair is exactly what scar tissue is. Hand the mechanism call to **compound-v:simplest-thing-that-works**, which owns the climb from a rule to a query to a call to an agent; hand the API-level pattern to **compound-v:searching-patterns**. This stage owns only the question and the budget.
 
-- **DELETE** — what you now do not have to build, because someone shipped it, a library covers it, the platform already does it, or the hard version turns out to be unnecessary.
-- **FORCE** — what you now must handle that the plan did not name: a rate limit, an auth requirement, a data shape, a known trap.
+**The shape has to pass three tests at once, and dropping any one of them is the failure:**
 
-**An empty DELETE list is a red flag, not a clean bill.** It almost always means you searched for *how to build it* rather than *whether to* — and it is how a plan comes back from research bigger than it went in. It can be legitimately empty on genuinely novel work; say so explicitly rather than letting the silence pass as diligence.
+- **Simple** — you can hold it in your head and say it in a sentence. If explaining it needs a diagram, it is not the shape yet.
+- **Effective** — it passes the slice's `check`. A simpler thing that does not is not simpler, it is unfinished.
+- **Scalable** — the next 10× does not force a rewrite. This is the one that gets dropped, and it is why "simplest" is not the same as "smallest".
 
-Three channels, cheapest first, stopping the moment the slice's unknown resolves: **what is already on disk** (the installed library, the vendored source, a neighbouring repo — version-exact, no network), **primary web sources** at your lockfile's version, then **practitioners in public, X included**, where frontier technique shows up months before documentation and where the noise is worst. How to search each, what to keep, and how the retrieval fails is **references/prior-art.md** — read it when a slice's unknown is real and unresolved.
+Then the two lists fall out of the shape rather than being hunted separately:
 
-Where a reference corpus of primary sources exists — essays, product write-ups, talk transcripts on disk — it is channel 1 and it outranks a web search, because a burst of `grep -n` over it is current by construction. If the environment ships a corpus-investigation skill (`workflow-investigation` is one), invoke it rather than re-deriving where things live; it owns the paths and the read discipline, and this stage owns only the budget and the output.
+- **DELETE** — what the shape means you no longer build: someone shipped it, a library covers it, the platform already does it, the hard version turned out unnecessary.
+- **FORCE** — what the shape makes you handle: a rate limit, an auth dance, a data shape, the named trap.
 
-**Recon returns a file:line map, not prose.** Name the exact file and line for each claim — the installed library's signature, the neighbouring repo's handler, the doc section. Prose is unfalsifiable and a confidently hallucinated architecture reads exactly like a real one; a cited line either exists or it does not, so the map is grep-checkable by someone who was not there. A recon output nobody can spot-check has not happened.
+**An empty DELETE list is a red flag, not a clean bill.** It almost always means you searched for *how to build it* rather than *whether to*, and it is how a plan comes back from research bigger than it went in.
 
-Feed the result forward the way **compound-v:searching-patterns** already prescribes — the canonical pattern into the plan, the anti-pattern into **compound-v:recheck** as a named checkable assertion — and write DELETE/FORCE into the ledger, because a deletion nobody recorded gets rebuilt by the next session.
+**Stop when you can name the shape and its trap, or when two independent sources converge on the same shape.** Not when the lanes are exhausted. Coverage and depth are different axes: every source lane gets touched — a lane at zero is a defect you justify, not a gap you pass over, and the corpus grows so it is enumerated live rather than from a remembered list — but how far you read in each is bought with the slice's confidence. A ~95% slice gets no recon at all; a ~30% slice gets the full ladder. If the environment ships a corpus-investigation skill (`workflow-investigation` is one), invoke it rather than re-deriving where things live.
+
+Three channels, cheapest first — what is on disk, then primary web sources at your lockfile's version, then practitioners in public, X included. How to search each and how the retrieval fails is **references/prior-art.md**.
+
+**Recon returns a file:line map, not prose.** Name the exact file and line for each claim. Prose is unfalsifiable and a confidently hallucinated architecture reads exactly like a real one; a cited line either exists or it does not, so the map is grep-checkable by someone who was not there.
+
+Feed it forward: the shape into the plan, the trap into **compound-v:recheck** as a named checkable assertion, and DELETE/FORCE into the ledger — a deletion nobody recorded gets rebuilt by the next session.
 
 ## Stage 3 — Build one slice at a time
 
