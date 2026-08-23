@@ -78,6 +78,20 @@ likes-and-length filter, while a million-follower account returned **75%**, near
 news and virality commentary. A metric filter would have dropped the best practitioner and kept the
 noise.
 
+**The roster is one caliber of person: the people who would clear the corpus bar if they wrote an
+essay.** Founders and CTOs who shipped and operated the thing, founding engineers, AI engineers at
+frontier labs, and working developers at top-tier startups and companies — the same population the
+offline corpus is built from, sampled live. That is the *only* qualification; a title at a famous
+company is not one, and neither is an audience.
+
+**But seed the person, not the org — the distinction is measured, not stylistic.** A practitioner's
+personal feed and their employer's feed are different channels with different products. Widening a
+roster from 66 to 120 by adding lab, vendor and company accounts pulled in vendor-blog posts,
+funding coverage and event-registration pages — which the bar already cuts as *"vendor / devrel
+marketing dressed as education."* Same people, wrong handle. A CTO writing in the first person about
+what broke is the channel working; the company account announcing a partnership is the noise the
+channel is worst at filtering, because it carries the most engagement.
+
 **The unit to extract is the outbound link, not the post.** A practitioner's post is a pointer;
 the essay it points at is the source, and the corpus bar is written for essays. Pull
 `entities.urls[].expanded_url`, drop self-links and media, and dedupe against what the corpus
