@@ -35,7 +35,7 @@ Cede rather than re-derive: whether to build at all is **compound-v:startup-tast
 
 ## The ledger: what makes 100% enforceable
 
-A long run degrades silently unless its procedure and its state live on disk: sessions are discrete — *"each new session begins with no memory of what came before"* — and *"compaction isn’t sufficient"*, because it *"doesn’t always pass perfectly clear instructions to the next agent"*. Anthropic ran the row idea at over 200 rows for a single app, every one marked failing at the outset, and let the coding agent change nothing but the status field.
+A long run degrades silently unless its procedure and its state live on disk: sessions are discrete, and *"compaction isn’t sufficient"* to carry a procedure across them. Anthropic ran the row idea at over 200 rows for a single app, every one marked failing at the outset, and let the coding agent change nothing but the status field.
 
 > **The done rule — every declared row is `passed` or `dropped`-with-attribution. Nothing may remain `todo` or `building` at the verdict, and `blocked` is not success.**
 
@@ -49,7 +49,7 @@ You reach 100% by passing a row or by cutting it out loud with a name on it, nev
 
 **The agent may not edit what grades it.** The only legal write is a status flip and its evidence. Anthropic's reward-tampering work found models trained on gameable environments generalize to *directly rewriting their own reward function*; where a harness can express this as a tool schema rather than a rule, that is the stronger form.
 
-**The ledger needs an engine, or it is only a record of where you stopped.** This kit ships one: a `Stop` hook that **refuses the exit** while any row is open — or while the ledger cannot be read honestly — and hands back the open rows with the contract *the goal persists across turns; do not redefine success around what already works; take ONE row to a real close*. An unreadable row counts as open, never as done. It fails open on the environment (no ledger, no `jq`, or `COMPOUND_V_LEDGER_GATE=off`) and the harness caps it at one block per turn, so unattended it is one hard shove rather than a loop — say at the start of a run what else re-invokes you. `bash scripts/ledger.sh --open` prints the same number for a human and exits non-zero while anything is open.
+**The ledger needs an engine, or it is only a record of where you stopped.** This kit ships one: a `Stop` hook that **refuses the exit** while any row is open, or while the ledger cannot be read honestly — an unreadable row counts as open, never as done. The harness caps it at one block per turn, so unattended it is one hard shove rather than a loop; say at the start of a run what else re-invokes you. `bash scripts/ledger.sh --open` prints the same number for a human.
 
 The run holds two files, both scaffolding, both deleted when it ends: **`.claude/STATE.md`** (prose, owned by **compound-v:handoff** — its **Next** names a row id) and **`.claude/slices.json`** (the slices and their rows). JSON deliberately: Anthropic reached the same choice after finding the model *"less likely to inappropriately change or overwrite JSON files compared to Markdown files"*.
 

@@ -76,6 +76,18 @@ One-sentence core principle.
 - **Match specificity to fragility.** Rigid step-by-step gates only for documented failure modes
   (verification, design-before-code, root-cause-before-fix); everywhere else give the reasoning and
   trust judgment (Ruling C). Over-specifying a robust step is the same defect as overkill.
+- **Default to qualities; script only where the failure is measured.** On a graded eval, listing the
+  **qualities the output should have** moved a prompt from **2.32 → 7.86**; replacing those qualities
+  with a list of **process steps** scored **7.3 — lower**, and the author reverted. The mechanism is
+  that the reasoning path is *already* in a post-trained model's output space and simply does not rank
+  first, so prescriptive steps do not add a capability: scaffolding recovers ~73% of a **base** model's
+  gap and about **7%** of a post-trained one's, and that number keeps falling. The strongest
+  counter-example reconciles rather than overturns — a step-by-step scaffold reporting a ~47-point win
+  was measured on a 2024 base-rung model, and the same author now removes scaffolding. **So: describe
+  what a good answer looks like; script only a step that names the failure it prevents.** Two
+  consequences worth holding: prompting style is per-model rather than per-project, so re-measure
+  rather than inherit; and when a sequence of steps collectively underperforms even though each step
+  performs well, *the decomposition is the bug* — stop hunting for the weak stage.
 - **Match the *form* to the failure, not just the rigidity.** Specificity is one axis; the *shape* of
   the guidance is another, and it's failure-type-specific. A **discipline** failure (the model knows
   the rule but skips it under pressure) wants a prohibition / red-flag row; a **wrong-output-shape**
