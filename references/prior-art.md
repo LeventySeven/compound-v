@@ -52,6 +52,8 @@ by construction and costs nothing. Route through a manifest or a heading index w
 never let a summary stand in for a source that is sitting on disk unopened — that substitution is
 the most common way a grounded-looking answer turns out to be second-hand.
 
+**Find the map before you guess at folder names.** Where an environment carries a local library, its layout and read rules are usually written down already — in the user's `CLAUDE.md` or `AGENTS.md`, or in a corpus-investigation skill the environment ships. Read that first: it names the lanes, the entry point for each (a manifest, a heading index), and the traps that make a naive glob wrong. Guessing at paths is how a lane goes unenumerated, and an unenumerated lane is invisible to every check downstream.
+
 **Enumerate every lane the library has, live, and treat its curation tags as ordering only.** Such a
 library usually holds several distinct kinds — primary essays, product write-ups, raw transcripts,
 curated route-maps — often split across more than one folder and more than one naming convention,
