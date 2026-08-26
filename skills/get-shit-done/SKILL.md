@@ -93,13 +93,15 @@ Stage 1's output is `slices.json`, and it exists before any code. Per slice, fou
 | ~65% — *the basic path, and the steps should work* | one lane, the one question, one pass. |
 | ~30% — *a murky view of the path* | the full ladder — three channels cheapest-first, **references/prior-art.md**. |
 
-When the hunt dispatches an agent, its brief is **references/prior-art.md**'s dispatch block, pasted verbatim — the worker inherits none of the method otherwise, and the corpus is enumerated live rather than indexed, because it grows.
+When the hunt dispatches an agent, its brief is **references/prior-art.md**'s dispatch block, pasted verbatim — the worker inherits none of the method otherwise, and the corpus is enumerated live rather than indexed, because it grows — a lane count written into a doc is stale the week after.
 
 **The band is a pre-investigation guess, so an observable signal can overturn it.** A miss in the shape table on a slice you banded ~0.9, or a first read that contradicts the slice's `unknown`, is evidence the band was wrong: re-band once, out loud, in the ledger. **The legal revision is upward** — re-banding down mid-hunt to justify stopping is the same move as editing a check to make it pass. Both failures are live and opposite: the measured sweeps over-researched what was already known, while the one real ledger skipped recon on exactly the slices that needed it.
 
 **An empty `delete` is a red flag, not a clean bill** — it means you searched for *how to build it* rather than *whether to*. Write `[]`, never nothing: an empty list says you looked.
 
 **Stop when you can name the shape and its trap, or when two independent sources converge on the same one** — not when the lanes are exhausted. Every lane still gets touched, and a lane at zero is a defect you justify rather than a gap you pass over; how far you read in each is bought with the band above. If the environment ships a corpus-investigation skill (`workflow-investigation` is one), invoke it rather than re-deriving where things live.
+
+**Stop on the answer, never on a tag — these are different rules and only one of them is about skimping.** The band buys *depth*; it never licenses skipping a source that bears on the question. A curated corpus grades sources for a human's evening (`MUST`/`STRONG`/`OPTIONAL`, "reading paths"), and those grades set **order, not inclusion** — an agent reads in parallel and does not tire, so `OPTIONAL` means low priority for a person, not low relevance to this slice. Skip a source for a written reason about the question; never because of its grade, and never because a higher-graded one was easier to reach.
 
 **Recon returns a file:line map, not prose.** A confidently hallucinated architecture reads exactly like a real one; a cited line either exists or it does not, so the map is grep-checkable by someone who was not there.
 
