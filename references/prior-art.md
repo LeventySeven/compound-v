@@ -52,6 +52,23 @@ by construction and costs nothing. Route through a manifest or a heading index w
 never let a summary stand in for a source that is sitting on disk unopened — that substitution is
 the most common way a grounded-looking answer turns out to be second-hand.
 
+**Enumerate every lane the library has, live, and treat its curation tags as ordering only.** Such a
+library usually holds several distinct kinds — primary essays, product write-ups, raw transcripts,
+curated route-maps — often split across more than one folder and more than one naming convention,
+and it grows most days. So `ls` the lanes *this run* rather than working from a remembered list or a
+count written into a doc; a lane you never enumerated is invisible to every check downstream, and a
+hardcoded total is stale the week after it is written. Where two folders overlap, enumerate the
+superset: "they are duplicates" is true of the shared files and silently wrong about the ones only
+one side has.
+
+**And a curated library's `MUST`/`STRONG`/`OPTIONAL` grades are a human's time budget, not an agent's
+read set.** They exist to rank what one person should spend an evening on. An agent reads in
+parallel and does not tire, so the grade decides **order, never inclusion** — an `OPTIONAL` tag means
+"low priority for a human", not "low relevance to this question". Read every source that bears on
+the question regardless of grade; skip one only for a written reason about the *question*, never
+because of its tag. The same goes for a guide's own "reading paths": those are routes for a person,
+and following one is not the same as covering the material.
+
 ## Channel 2 — primary web sources
 
 The maintainer's own docs and repo, pinned to your lockfile's version; the paper; the changelog; the
