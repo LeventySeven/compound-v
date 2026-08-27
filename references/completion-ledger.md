@@ -233,9 +233,12 @@ belongs to, you are writing tasks, not rows, and the ledger has started measurin
   denominator honest and visible; it cannot make it complete.
 - **A row set that measures the wrong property — partly.** One row per slice carries the slice's own
   check (`is_check: true`), and `--discharge` refuses a landing where a slice never turned its check
-  into a row. That closes the shape where the goal names a **reference** and no row compares against
-  it — 135 rows passed, every page wrong, because each row was a true statement about the target and
-  none was a comparison to the source. What it does not close is a check-row that is itself weak:
+  into a row. It forces the question *what would show this goal unmet* to be
+  asked once per capability, which is the part that adapts: a behaviour goal is read by a run, a
+  replication goal by a comparison to its source, a property goal by an adversarial probe, a removal
+  goal by absence, a migration by parity. The reference case is where it was first caught — 135 rows
+  passed and every page wrong, each row true about the target and none a comparison to the source —
+  but the mechanism is not about references. What it does not close is a check-row that is itself weak:
   the mechanism guarantees the question gets *asked*, never that it was asked well.
 - **A weak check — partly.** R2's fail-against-nothing catches a check that measures zero. It does
   not catch one that measures one narrow path of five. The available counter is an inverted
