@@ -119,6 +119,16 @@ if [ "$discharge" -eq 1 ]; then
   if [ "$n_open" -gt 0 ] || [ "$n_blocked" -gt 0 ] || [ -n "$unattributed" ]; then
     printf '\nnot dischargeable — the run is not finished yet\n'; exit 1
   fi
+  # A slice whose own `check` was never a row can pass every row it has and still miss the thing it
+  # was for — 135 rows passed and every page wrong, because the goal was a comparison to a reference
+  # and no row made that comparison. During the run this is a note; at the landing gate it refuses,
+  # because discharge is where a run's claims become the durable record.
+  nocheck="$(printf '%s' "$report" | jq -r '[.warn[]? | select(startswith("slice(s) whose own"))] | .[0] // ""')"
+  if [ -n "$nocheck" ]; then
+    printf '\nnot dischargeable — %s\n' "$nocheck"
+    printf 'the slice check is the one row that cannot pass while the goal is missed; write it, then discharge\n'
+    exit 1
+  fi
   printf '\ndischargeable: every passed row names a durable target; the ledger may be deleted in the landing commit\n'
   exit 0
 fi

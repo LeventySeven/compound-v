@@ -57,6 +57,20 @@ def malformed_members: [.. | objects | select((.rows | type) == "array") | .rows
     | select((((.shape // "") | tostring) | length) == 0) | .id // "?"]) as $noshape
 | ([$sl[] | select((((.shape // "") | tostring) | length) > 0)
     | select((((.trap  // "") | tostring) | length) == 0) | .id // "?"]) as $notrap
+# THE SLICE'S OWN CHECK MUST BE A ROW. Field failure, three instances: a run closed with 135 rows
+# passed and every page wrong, because the goal was "make B look like A" and not one row compared B
+# to A — every row was a true statement ABOUT B. Twice more, the row a human had annotated as "the
+# slice's real check" was the one that got dropped. Mark exactly one row per slice `is_check: true`.
+# Missing -> warn (bricking every existing ledger is worse). But a check-row dropped as `void` is
+# REFUSED: `void` means the requirement does not exist in the world, and a slice whose own check does
+# not exist is an unbuilt slice, not a satisfied one. If the check was wrong, that is a `moved` drop
+# with a successor — re-frame it in the open.
+| ([$sl[] | select([.rows[]? | select(type=="object") | select(has("status"))] | length > 0)
+    | select([.rows[]? | select(type=="object") | select(.is_check == true)] | length == 0)
+    | .id // "?"]) as $nocheckrow
+| ([$sl[] | . as $s | ($s.rows[]? | select(type=="object")
+    | select(.is_check == true and .status == "dropped" and (.dropped_kind // "") == "void")
+    | ($s.id // "?") + "/" + (.id // "?"))]) as $voidcheck
 | if ($doc | type) != "array" and ($doc | type) != "object" then
     {ok:false, why:"ledger is neither an array nor an object", warn:[], rows:[], counts:null}
   elif ($bad | length) > 0 then
@@ -69,6 +83,8 @@ def malformed_members: [.. | objects | select((.rows | type) == "array") | .rows
      warn:[], rows:$r, counts:null}
   elif ($dupes | length) > 0 then
     {ok:false, why:"duplicate row id(s): \($dupes | unique | join(", ")) — duplicates inflate the denominator and the passed count together", warn:[], rows:$r, counts:null}
+  elif ($voidcheck | length) > 0 then
+    {ok:false, why:"a slice's own check-row was dropped as `void`: \($voidcheck | join(", ")) — `void` means the requirement does not exist, and a slice whose check does not exist is unbuilt, not satisfied. If the check was wrong, re-frame it in the open as a `moved` drop with a successor", warn:[], rows:$r, counts:null}
   elif ($dangling | length) > 0 then
     {ok:false, why:"`moved` drop(s) naming no successor in this ledger: \($dangling | join(", ")) — a requirement that moved leaves a replacement row, not a hole", warn:[], rows:$r, counts:null}
   else
@@ -102,7 +118,10 @@ def malformed_members: [.. | objects | select((.rows | type) == "array") | .rows
          warn: (# Advisory, not blocking: requiring dropped_kind outright would brick every ledger
                 # written before it existed, and the dead-slice floor is the gate that actually
                 # catches the failure typing only diagnoses.
-                (if ($untyped|length) > 0
+                (if ($nocheckrow|length) > 0
+                 then ["slice(s) whose own `check` is not carried by any row (mark one `is_check: true`) — a run can pass every row and still miss the thing the slice was for: " + ($nocheckrow|join(", "))]
+                 else [] end)
+                + (if ($untyped|length) > 0
                  then ["untyped drop(s) — say `void` (the requirement does not exist) or `moved` (it changed shape and owes a successor): " + ($untyped|join(", "))]
                  else [] end)
                 + (if ($noshape|length) > 0

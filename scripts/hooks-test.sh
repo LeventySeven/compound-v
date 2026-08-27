@@ -288,14 +288,22 @@ dis() { # dis <name> <expect-exit> <ledger-json>
        printf '%-46s %-8s MISS exit %s\n' "$name" "exit$want" "$rc"; fi
 }
 dis "discharge: passed row, no target"       1 '[{"id":"s","rows":[{"id":"a","status":"passed"}]}]'
-dis "discharge: rerun command"               0 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"rerun":"npm test"}}]}]'
-dis "discharge: observable + query"          0 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"observable":"login rate","query":"sum(x)"}}]}]'
-dis "discharge: named owner + check"         0 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"owner":"slava","check":"eyeball the invoice"}}]}]'
+dis "discharge: rerun command"               0 '[{"id":"s","rows":[{"id":"a","is_check":true,"status":"passed","discharge":{"rerun":"npm test"}}]}]'
+dis "discharge: observable + query"          0 '[{"id":"s","rows":[{"id":"a","is_check":true,"status":"passed","discharge":{"observable":"login rate","query":"sum(x)"}}]}]'
+dis "discharge: named owner + check"         0 '[{"id":"s","rows":[{"id":"a","is_check":true,"status":"passed","discharge":{"owner":"slava","check":"eyeball the invoice"}}]}]'
 dis "discharge: observable with no query"    1 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"observable":"login rate"}}]}]'
 dis "discharge: owner with no check"         1 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"owner":"slava"}}]}]'
 dis "discharge: run not finished"            1 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"rerun":"x"}},{"id":"b","status":"todo"}]}]'
 dis "discharge: blocked blocks the landing"  1 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"rerun":"x"}},{"id":"b","status":"blocked"}]}]'
-dis "discharge: dropped needs no target"     0 '[{"id":"s","rows":[{"id":"a","status":"passed","discharge":{"rerun":"x"}},{"id":"b","status":"dropped","dropped_by":"s","dropped_why":"cut"}]}]'
+dis "discharge: dropped needs no target"     0 '[{"id":"s","rows":[{"id":"a","is_check":true,"status":"passed","discharge":{"rerun":"x"}},{"id":"b","status":"dropped","dropped_by":"s","dropped_why":"cut"}]}]'
+
+# The slice's own check must be a row. 135 rows passed and every page wrong, because the goal was
+# "make B like A" and no row compared B to A — every row was a true statement about B.
+dis "discharge: slice check never a row"     1 '{"slices":[{"id":"S1","capability":"B matches A","check":"side by side","rows":[{"id":"a","status":"passed","does":"header renders","discharge":{"rerun":"x"}}]}]}'
+dis "discharge: slice check IS a row"        0 '{"slices":[{"id":"S1","capability":"B matches A","check":"side by side","rows":[{"id":"a","is_check":true,"status":"passed","does":"B/pricing renders identically to A/pricing","discharge":{"rerun":"x"}}]}]}'
+led "check-row void-dropped is refused"      2 '{"slices":[{"id":"S1","capability":"x","rows":[{"id":"a","status":"passed"},{"id":"b","is_check":true,"status":"dropped","dropped_by":"m","dropped_why":"w","dropped_kind":"void"}]}]}' "unbuilt, not satisfied"
+led "check-row moved-with-successor is fine" 1 '{"slices":[{"id":"S1","capability":"x","rows":[{"id":"a","status":"todo"},{"id":"b","is_check":true,"status":"dropped","dropped_by":"m","dropped_why":"reframed","dropped_kind":"moved","replaced_by":["a"]}]}]}' "declared"
+led "no check-row warns, never blocks"       1 '{"slices":[{"id":"S1","capability":"x","check":"c","rows":[{"id":"a","status":"todo"}]}]}' "not carried by any row"
 
 if timeout 5 bash scripts/ledger.sh --path >/dev/null 2>&1; then :; fi
 if [ "$?" -ne 124 ]; then pass=$((pass + 1)); printf '%-46s %-8s ok\n' "ledger.sh: --path with no value" "exit2"

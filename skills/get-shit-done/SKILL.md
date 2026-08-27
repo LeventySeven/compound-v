@@ -64,7 +64,8 @@ Quote the **original ask verbatim** into the ledger's `ask` field before anythin
 Stage 1's output is `slices.json`, and it exists before any code. Per slice, four things and no more:
 
 - **Capability** — the user's sentence.
-- **Check** — what run command, or what one named human, says this slice works. Vague here is fatal; hand it to **compound-v:frame-the-goal**.
+- **Check** — what run command, or what one named human, says this slice works. Vague here is fatal; hand it to **compound-v:frame-the-goal**. **One row carries it, marked `is_check: true`** — the check is the single row that cannot pass while the goal is missed, so a slice that never turns its check into a row can pass everything it has and still miss the thing it was for.
+  **When the ask names a reference — *"like X"*, *"match the design"*, *"port this"*, *"same as v1"* — the ground truth is the reference, and the check is a comparison against it.** This is the failure that looks least like a failure: every row is a true statement *about the target* — the header renders, the button is blue, the page loads — all of them pass, and the result resembles the source not at all. A run closed with 135 passing rows and every page wrong exactly this way. A row that never touches the reference is measuring the wrong thing, however green it goes.
 - **Unknown** — the one line naming what might not work.
 - **Confidence** — Steinhardt's buckets, which are coarse on purpose: *"I am confident that this can be done and that there are no unforeseen difficulties"* (~95%), *"modulo Murphy's law"* (~90%), *"I see the basic path … and all the steps seem like they should work"* (~65%), *"I have the intuition that this should be possible but only have a murky view of the path"* (~30%).
 

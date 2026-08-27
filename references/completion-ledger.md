@@ -231,6 +231,12 @@ belongs to, you are writing tasks, not rows, and the ledger has started measurin
 
 - **An incomplete spec.** No ledger invents a requirement nobody wrote. It makes the *known*
   denominator honest and visible; it cannot make it complete.
+- **A row set that measures the wrong property — partly.** One row per slice carries the slice's own
+  check (`is_check: true`), and `--discharge` refuses a landing where a slice never turned its check
+  into a row. That closes the shape where the goal names a **reference** and no row compares against
+  it — 135 rows passed, every page wrong, because each row was a true statement about the target and
+  none was a comparison to the source. What it does not close is a check-row that is itself weak:
+  the mechanism guarantees the question gets *asked*, never that it was asked well.
 - **A weak check — partly.** R2's fail-against-nothing catches a check that measures zero. It does
   not catch one that measures one narrow path of five. The available counter is an inverted
   diagnostic at the end: **if every row is green and the outcome is still bad, the row set is wrong**
