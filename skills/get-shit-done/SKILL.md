@@ -41,11 +41,11 @@ A long run degrades silently unless its procedure and its state live on disk: se
 
 You reach 100% by passing a row or by cutting it out loud with a name on it, never by forgetting it — which is what makes *"we're at about 90%"* unsayable. Five invariants hold it up; they are conditions true or false at any moment, not steps in an order. **references/completion-ledger.md** carries the slice and row schema, the status vocabulary and the reasoning — read it when you open a ledger and again at the gate.
 
-- **The floor** — a capability with open rows and no passing row **did not ship**, whatever the percentage says. Rows are not spread evenly, so a slice that delivered nothing vanishes into a healthy aggregate; report by capability, ahead of any row.
-- **Denominator** — rows come from the brief, the plan, and whatever the build discovers. **A requirement with zero rows is scope nobody was assigned** — the largest single source of the missing 10%, because it never looked like it was failing; it never looked like anything.
-- **Flip** — green only on a check seen **red first, for the right reason** (**compound-v:test-driven-development**'s red step, applied to the ledger) plus an end-to-end run driven as a user, with one line recording what you ran.
-- **Delta** — appending is always legal, flipping is not. Discovered work enters as `discovered: true` when found; a drop declares `void` (nothing owed) or `moved` (a successor row is mandatory). A `moved` that names no successor is how a capability quietly empties out.
-- **Blocked is not done** — three failed attempts marks a row `blocked` with the blocker named (**compound-v:systematic-debugging** owns the cap). Give the run a legal way to say *this did not work* and it stops needing an illegal one.
+- **The floor** — a capability with open rows and no passing row **did not ship**, whatever the percentage says.
+- **Denominator** — rows come from the brief, the plan, and whatever the build discovers. **A requirement with zero rows is scope nobody was assigned**, the largest single source of the missing 10%.
+- **Flip** — green only on a check seen **red first, for the right reason** (**compound-v:test-driven-development**'s red step, applied to the ledger) plus an end-to-end run driven as a user.
+- **Delta** — appending is always legal, flipping is not. A drop declares its kind: `void` (nothing owed) or `moved` (a successor row is mandatory). A requirement that moved and named no successor is how a capability quietly empties out.
+- **Blocked is not done** — three failed attempts marks a row `blocked`, blocker named (**compound-v:systematic-debugging** owns the cap). Give the run a legal way to say *this did not work* and it stops needing an illegal one.
 
 **The agent may not edit what grades it** — the only legal write is a status flip and its evidence. Models trained on gameable environments generalize to *directly rewriting their own reward function*; where a harness can express this as a tool schema rather than a rule, that is the stronger form.
 
@@ -126,11 +126,11 @@ Build it however you build things — **compound-v:writing-plans**, **compound-v
 
 **When the walk fails, it is a root-cause question, not a retry** (**compound-v:systematic-debugging**). On the third failed close, say which is true: the slice splits, the check was wrong, or stage 1's unknown was real and the shape changed. Mark it `blocked` with which one and move on — three failures is information about the plan, not about your patience.
 
-**The ledger is what stops the skimping — not dispatch.** The failure is measured: an agent identified **20 call sites** needing a change, changed **5**, and stopped. The fix that shipped was an in-context checklist, not a fresh agent per unit. An externalised row set reads the same to a long context and a fresh one; fresh context merely stops it being re-derived, which is not why it works. **Do not dispatch because there are many tasks — that is what the rows are for.**
+**Dispatch the check, not the build.** The measured payoff for a fresh context is in *judging* work, not producing it — a clean-context reviewer finds around two real bugs per pull request on code the same system wrote, most of them severe, and it works best precisely because it shares no context with the author. Every measured result on dispatching the *build* runs the other way.
 
-**Dispatch buys isolation, and it is not free** — every token crossing the boundary is billed twice, and measured against a single agent, delegation *lost* until the delegated reading was enormous. It earns its place only when a unit reads a great deal and returns a little; the measured cautions are **compound-v:dispatching-parallel-agents**'.
+**The condition that decides it: dispatch a slice only where you can re-run its check yourself, without the worker's trace.** Where a row can be confirmed only by the walk the worker performed, the split has bought context isolation at the price of an unauditable ledger — the orchestrator is then grading a walk it never saw, and the single-writer rule buys bookkeeping integrity, not verification integrity. That slice belongs in the main context.
 
-**Where splitting pays, the partition is fixed in advance and the orchestration is dumb** — which is this spine's shape already: the slices are the partition, `ledger.sh` is the executor.
+**The skimping is the ledger's job, not dispatch's.** An agent identified **20 call sites**, changed **5**, and stopped — and what shipped for it was an in-context checklist. **Do not dispatch because there are many tasks.** And note what dispatch makes load-bearing: the ledger becomes the *only* path from one slice's lesson to the next slice's worker, so a run whose `shape` and `trap` sit empty has no carrier at all.
 
 **The worker returns evidence; the orchestrator flips the row.** Workers never write `slices.json` — the single-writer rule **compound-v:handoff** applies to `STATE.md`, plus one this ledger adds: a worker that can flip its own row is a worker grading its own homework. The brief carries the slice's rows, its check, its shape and trap — a worker that has to ask what it is building has already lost the context the split was for.
 
