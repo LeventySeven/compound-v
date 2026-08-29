@@ -32,3 +32,7 @@ A finding blocks **only** if it names **a real user blocked from a capability th
 It reads the assembled product, never a diff — one batch's diff is **compound-v:recheck**, one claim
 is **compound-v:verification-before-completion**, a pass rate over a probabilistic path is
 **compound-v:evals**. And it runs once: a gate re-run until it agrees is not a gate.
+
+## Discharge — what the run leaves behind
+
+**Discharge before the landing commit.** A row has two halves with opposite half-lives: its `status` is run-scoped and reads `passed` forever the day after the merge — a stale claim the next agent trusts as fact — while its `does` and `evidence` are a regression contract the run already paid to write. So the ledger goes, but never undischarged: every passed row first names a durable target — a command someone can re-run, a production observable and the query that reads it, or a named human and the check they own. `bash scripts/ledger.sh --discharge` refuses the landing until that holds. **An incident opens a row before it opens a fix** (`discovered: true`, the reproduction as its `does`), red-first by construction and re-entering at Carve — not a maintenance lane, because a second-class path is where undeclared work hides.

@@ -126,7 +126,11 @@ Build it however you build things — **compound-v:writing-plans**, **compound-v
 
 **When the walk fails, it is a root-cause question, not a retry** (**compound-v:systematic-debugging**). On the third failed close, say which is true: the slice splits, the check was wrong, or stage 1's unknown was real and the shape changed. Mark it `blocked` with which one and move on — three failures is information about the plan, not about your patience.
 
-**Serial by default.** Cognition argued against fanning writers out, then revised it ten months later and kept the line where it matters: what works is *"setups where multiple agents contribute intelligence to a task while writes stay single-threaded."* Fan out reads — recon parallelises well — never slice-writes, and only through **compound-v:dispatching-parallel-agents**.
+**One slice, one fresh context — and that is a different lever from running them at once.** The failure it fixes is attention, not speed: a single context holding every slice spends its best budget on the first and its worst on the last, so the tail gets skimped and nothing announces it. A slice handed to its own agent cannot skimp, because it has one job and a full window. Serial dispatch buys that. **Parallel buys only wall-clock, and pays for it** — Cognition argued against fanning writers out, revised it ten months later, and kept the line where it matters: what works is *"setups where multiple agents contribute intelligence to a task while writes stay single-threaded."*
+
+So: **reads fan out freely** — recon, and the walk that closes rows — while **slice-writes stay serial** unless the slices are disjoint in their *decisions* as well as their files, which is **compound-v:dispatching-parallel-agents**' bar and is rarer than it looks. Two agents building disjoint halves of one feature still invent the same convention twice.
+
+**The worker returns evidence; the orchestrator flips the row.** Workers never write `slices.json` — the single-writer rule **compound-v:handoff** applies to `STATE.md`, plus one this ledger adds: a worker that can flip its own row is a worker grading its own homework. The brief carries the slice's rows, its check, its shape and trap — a worker that has to ask what it is building has already lost the context the split was for.
 
 ## Stage 4 — Reckon: the MEP bar over the assembled product
 
@@ -149,7 +153,7 @@ The **clamp** is there too: a finding blocks only if it names a real user blocke
 
 A hand-off is not a verdict: "pushed", "PR opened", "ready for review", "agents still running" are all stopping while work is open, and a list of manual steps handed back to the user is unfinished work relabelled. **The next action is the one that closes the biggest gap to MEP, not the most comfortable one** — name the biggest gap, name the comfortable alternative you were about to do instead, and say why you are not doing it. Say all of it in the conversation; the durable residue is one line in the landing commit.
 
-**Discharge before the landing commit.** A row has two halves with opposite half-lives: its `status` is run-scoped and reads `passed` forever the day after the merge — a stale claim the next agent trusts as fact — while its `does` and `evidence` are a regression contract the run already paid to write. So the ledger goes, but never undischarged: every passed row first names a durable target — a command someone can re-run, a production observable and the query that reads it, or a named human and the check they own. `bash scripts/ledger.sh --discharge` refuses the landing until that holds. **An incident opens a row before it opens a fix** (`discovered: true`, the reproduction as its `does`), red-first by construction and re-entering at Carve — not a maintenance lane, because a second-class path is where undeclared work hides.
+**Discharge before the landing commit** — the ledger goes, but never undischarged: every passed row first names a durable target that outlives the file, and an incident opens a row before it opens a fix. `bash scripts/ledger.sh --discharge` refuses the landing until that holds; **references/mep-gate.md** carries why and what counts as a target.
 
 ## Red flags
 
