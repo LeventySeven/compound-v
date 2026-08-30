@@ -37,7 +37,9 @@ done
 
 # 2. Publish boundary: shipped files must never name the internal research corpus.
 #    (scripts/ is excluded on purpose — this file holds the pattern itself.)
-leak="$(grep -rnoE 'BAD_GUIDE|researchfms|guidesfm|teardowns|skills_research|AGENTIC_SEARCH|research/(findings|SYNTH|sources)|/Users/[a-z]' \
+#    `~/…` counts as an absolute path too: a tilde form once carried a private repo name
+#    through this gate untouched, because only the /Users/ spelling was matched.
+leak="$(grep -rnoE 'BAD_GUIDE|researchfms|guidesfm|teardowns|skills_research|AGENTIC_SEARCH|research/(findings|SYNTH|sources)|/Users/[a-z]|~/(Desktop|Users|Documents|src|repos|code)/' \
   skills/ agents/ hooks/ references/ README.md .claude-plugin/ 2>/dev/null || true)"
 if [ -n "$leak" ]; then
   err "internal-corpus references in shipped files (these must never publish):"
