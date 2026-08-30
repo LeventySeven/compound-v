@@ -1323,8 +1323,20 @@ whole corpus by concept, re-reading episodes the earlier passes had walked past.
 the verifiers rejected two and the chair cut five more — **four of those five were the same idea
 proposed into two different skills**, a duplication a per-candidate verifier structurally cannot see,
 and one (style-goes-in-an-exemplar-not-the-instruction-file) had already been rejected in pass 2 and
-returned. That failure mode is the reason this block exists: a 28-of-30 pass rate on a default-reject
-gate is a softened gate, not better candidates. Same caption caveat as the blocks above.
+returned.
+
+**Corrected diagnosis (this row was first shipped wrong).** The initial reading was that a 28-of-30
+pass rate meant the gate had softened. It had not. Every verifier was told to grep all 30 skills, and
+every one answered correctly: a duplicate's twin was a *pending candidate*, not committed text, and a
+resurrection had been rejected precisely so it would not be in the files — so "is this new?" honestly
+returned yes in all five cases. Nothing was too lenient, and tightening the verifiers would not have
+caught any of it. A per-item gate is asked *is this true?*, which a duplicate passes twice; the
+question that catches it can only be asked over the pooled set. The high pass rate has a benign
+explanation too — these lanes targeted skills with no prior additions, where "already owned" was rare
+by construction. Recorded because the wrong mechanism is the more expensive error: it points at the
+verifier, which is not where the fix is (`dispatching-parallel-agents` → "no worker can answer it").
+
+Same caption caveat as the blocks above.
 
 | Claim (short) | Anchor | Category | Source / note |
 |---|---|---|---|
@@ -1352,3 +1364,9 @@ gate is a softened gate, not better candidates. Same caption caveat as the block
 | **Make the goal decidable: why these users and not the adjacent ones, plus the standing trade-off and which good wins** — non-goals bound what sits outside; this resolves what sits inside | `writing-prd` → "why these users and not the adjacent ones" | PRIMARY | Kat Wu, Lenny's Podcast — "How Anthropic's product team moves faster than anyone else" — https://www.youtube.com/watch?v=PplmzlgE0kg . The failure it prevents is an agent hitting an unresolved in-scope collision and picking silently. |
 | **A capacity invalidator has a required shape** — ceiling as a quantity, current usage, growth rate, which together project the wall and let you check the lead time exceeds the re-architecture it triggers | `writing-prd` → "that threshold has a required shape" | PRIMARY | Ivan Zhao, same episode as the `make-it-stable` row — https://www.youtube.com/watch?v=IIPKMixTMfE . The two rows are not duplicates: that one is how to *classify a failure*, this one is what to *write in the doc*. "Plenty of room is a reassurance, not a bet" is the kit's phrasing. |
 | **Cut as duplicates or already-owned, recorded so they are not re-proposed** | — | PROCESS RECORD | Five chair-level cuts from this pass: (1) *look at the output before the diff* into `code-review` — same rule as the `recheck` row above, one owner; (2) *style belongs in a committed exemplar, not the instruction file* into `context-engineering` — `batched-implementation` → "paste the exemplar" already owns it, and pass 2 had already rejected this for that reason; (3) *count the code paths under a named screen before sizing* into `extracting-specs` — same idea as the `writing-plans` "Existence is not arity" row, kept in the home where the sizing decision lives; (4) *sweep the diff for temporary scaffolding before landing* into `finishing` — same rule as the "Green says nothing about which default is live" row above; (5) *a capacity ceiling arrives as weirdness, never a status code* into `make-it-stable` — same claim and same source as the exhaustion-date row above. Four of the five are one idea proposed into two skills, which a per-candidate verifier cannot detect by construction; only a pass over the pooled result finds them. |
+
+### Correction, same day — what a per-item gate structurally cannot see
+
+| Claim (short) | Anchor | Category | Source / note |
+|---|---|---|---|
+| **Duplication across workers and the resurrection of an earlier rejection both survive any per-item verifier** — a duplicate honestly passes *is this true?* twice, and its twin is a pending return rather than committed text, so no per-worker check can see it; the fix is a pooled pass at the barrier, not a stricter verifier | `dispatching-parallel-agents` → "no worker can answer it" | **MEASURED (local, this session)** | Three mining fan-outs over one corpus on 2026-08-30: per-item adversarial verifiers passed 11/17, 11/13, then 28/30. Pooling the third set lost **four to cross-worker duplication** (one idea submitted into two skills) and **one to a resurrection** of a candidate the second pass had explicitly rejected. Every verifier had been instructed to grep all 30 skills and every one answered correctly — the twins were pending, and the resurrection was absent *because* it had been rejected. **The first version of this finding blamed a softened gate and was wrong**; the mechanism is scope, not strictness, and the corrected note sits in the pass-3 block above. Sharpened in exchange with a peer session running an unrelated six-agent mining fan-out, which independently named the same shape: "the question that catches it — is this NEW? — cannot be answered from inside one item." |
