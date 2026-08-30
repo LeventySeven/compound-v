@@ -59,6 +59,8 @@ Delete `.claude/STATE.md` in the final commit — and `.claude/slices.json` with
 one. Git history is the record. Both are run scaffolding; leaving either behind is how the next
 session inherits a stale ledger and trusts it.
 
+Sweep before you delete, though — this section calls git the record, and **Do not** is the one part you already wrote down as what git cannot recover. So read it and the evidence lines once more and sort each entry: a dead end that only makes sense against this goal dies with the file, but the command that finally reproduced the bug, the env quirk that cost an hour, and the approach that will look attractive again in a later session are facts about the repo. Their home is `CLAUDE.md`/`AGENTS.md` — the file every session already reads, so a line there takes you out of the loop entirely (**compound-v:context-engineering** owns what qualifies and how to keep it small). Promote in the same commit that deletes; a fact you meant to move afterwards is a fact you lost.
+
 ## Budget
 
 Keep it under 30 lines — the same argument `writing-plans` makes at its 200-line cap. A state file

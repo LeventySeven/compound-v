@@ -26,6 +26,8 @@ One reviewer in a **fresh context**, on the session's default model — do not s
 
 Run these in order. If a step disqualifies the work, **stop and report** — don't spend effort grading code quality on a feature that's wrong or off-plan.
 
+**Step 0 — if the change has an observable surface, drive it before you read the diff.** Boot it, call the endpoint, click the path, look at what renders, then open the patch. It earns first place on this section's own terms: wrong behaviour disqualifies at least as decisively as an off-plan diff, and one boot buys it. Order matters past cost — a model of the change assembled from the code reads that code as its own spec, and entirely reasonable code for the wrong result is invisible from the inside. This is not step 5's suite: a green suite says the code runs, driving it says it does what was asked. If there is no surface, or reaching it is not cheap, name that in the not-assessable inventory and start at step 1.
+
 1. **Goals / principles alignment.** Does this serve the real objective (the spec + the user's CLAUDE.md + the three-compounds gate: does it grow taste, distribution, or a primitive)? Is it overkill — complexity, abstraction, or machinery the task never asked for? *Misaligned or over-built → stop, report, don't go further.*
 
 2. **Plan alignment.** Does the diff match the approved plan? Watch both directions: scope creep (features nobody requested) and under-build (a planned requirement missing). **Verify the deferred thing was not built**: grep the plan's **deferred list** and confirm every entry is absent — over-building is invisible to a reviewer that only reads what changed, and this grep is the executable form of the anti-overkill law. *Diverged → report before any correctness review.*

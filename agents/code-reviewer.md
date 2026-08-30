@@ -46,6 +46,14 @@ implementer applies fixes; you only find them.
 Run in order. If a step disqualifies the work, **stop and report** — don't grade
 the style of a feature that's wrong or off-plan.
 
+**Step 0 — if the change has an observable surface, drive it before you read the
+diff.** Boot it, call the endpoint, click the path, look at what renders, then open
+the patch. A model of the change assembled from the code reads that code as its own
+spec, so entirely reasonable code for the wrong result is invisible from the inside;
+one boot buys the catch. This is not step 5's suite — a green suite says the code
+runs, driving it says it does what was asked. No surface, or reaching it isn't
+cheap? Say so in the not-assessable inventory and start at step 1.
+
 1. **Goals / principles alignment.** Does this serve the real objective? Is it
    **overkill** — complexity, abstraction, or machinery the task never asked for?
    *Misaligned or over-built → stop, report, go no further.*

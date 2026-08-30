@@ -68,6 +68,8 @@ The rows above answer *how is this API used*. The expensive question is one leve
 
 Most stacks have no row here and that is the rule working, not a gap — the "primary source over a blog" rule above covers the long tail. It deliberately excludes the contested layers (state management, auth, the ORM wars, any "best-practices" listicle): no single right answer there, so a named pick is just an opinion aging into wrong — read the primary sources and say the choice is contested rather than asserting one. And these are **starting points, not pins** — still read the version in your lockfile, because even the canonical exemplar moves.
 
+**Judging a dependency, not a reference? Weigh usage, not polish.** Documentation and a green test suite used to be expensive enough to mean somebody had lived with the library; an hour now produces both for code its own author has never run — one prolific maintainer ships exactly that and tags it *alpha*, where the tag mostly means "I haven't used this yet." Presentation has stopped discriminating, so reading it as quality is how you take a dependency on a demo. What he wants from other people's software is that *they* used it for months, and that leaves traces you can check in minutes: issues filed by strangers and answered, a changelog carrying bug fixes and not only features, real dependents. Proof of usage over proof of work.
+
 ### When you must navigate: drive a real browser
 
 `WebFetch` reads one static URL; it can't drive a JS-rendered site, page through multi-section docs behind interaction, or operate a repo UI. For that, reach for whatever **browser-automation tool your environment provides** — prefer one that works through the accessibility tree (stable element refs) over pixel-scraping.
@@ -81,6 +83,8 @@ Don't just copy the snippet. A lookup is only useful if it captures three things
 1. **The canonical pattern** — the current, idiomatic way the library/framework intends it, with the version it applies to. APIs drift across majors, and default docs often render an *older* major than you're on — pin the lookup to the version in your lockfile and record it, so the implementer doesn't code the v2 shape against a v4 dependency.
 2. **The matching anti-pattern** — the wrong-but-tempting version it replaces, and how to recognize it. This is what stops the same mistake recurring; the canonical pattern alone doesn't inoculate against the trap.
 3. **Why** — one line on what the right way buys (avoids a race, preserves the cache, closes an injection path). The reason generalizes to cases the example didn't cover.
+
+It generalizes *within its failure model*, and that boundary is the part people skip. A canonical pattern is canonical against a particular thing going wrong, and outside that thing it is not merely inert — it can push the other way. A team building a crowd-rating system reached for the standard reputation-graph ranking and got exactly what it advertises: a ring of accounts upvoting each other, filtered out. Pilot data, not theory, then showed the real problem was polarization rather than the manipulation vector they had designed against — and where one side outnumbers the other, that class of algorithm *amplifies* the bias instead of correcting it. So record the failure a pattern was built against alongside the pattern, and where that isn't the failure you have, carry it back as unproven here rather than as the answer.
 
 Then *use* both:
 

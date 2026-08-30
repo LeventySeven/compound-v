@@ -28,7 +28,7 @@ Resolve exactly what diff you're reviewing before reading a line of it:
 
 Then a cheap **eligibility check** — bail early and say why if the change is closed, a draft, an automated/bot PR, trivially obvious, or already carries your review. Reviewing what doesn't need it is its own kind of overkill.
 
-Read the touched directories' `CLAUDE.md` / `AGENTS.md` for house rules — those are the contract the diff is held to, and a local convention overrides any external "correct" pattern (compound-v:searching-patterns).
+Read the touched directories' `CLAUDE.md` / `AGENTS.md` for house rules — those are the contract the diff is held to, and a local convention overrides any external "correct" pattern (compound-v:searching-patterns). The traffic runs the other way too. **A convention finding whose only backing is a standard written nowhere in the repo should leave that standard behind it** — name the one-line rule and the file it belongs in, proposed alongside the finding, never written by you (the review stays read-only; compound-v:context-engineering owns what an instruction file should hold). Anything you can state about what good looks like belongs in the repo, where the next review checks the code against it instead of re-deriving the judgement. Propose it only where someone will keep it current with the code; a rule that drifts becomes a stale standard the reviewer then enforces. A nit you raise twice and never write down is a nit you will raise forever.
 
 ## Step 2 — match depth to the diff (route *down* when unsure)
 
@@ -79,7 +79,7 @@ path/to/file.ext:line — issue: one sentence, what is wrong
 
 Then one verdict: **APPROVED** (no Critical/Important — a clean diff gets a one-line approval, not a manufactured list), **FIX_REQUIRED** (at least one Critical/Important), or **ARCHITECTURE_CONCERN** (the approach itself is wrong — escalate to a re-plan, don't patch). No praise-padding, no "great job", no "you might consider" hedging; if you can't name the trigger, it isn't a finding.
 
-APPROVED means "nothing survived the gate," never "no bugs here" — that gap is the price of the ~80 confidence bar and the four excluded categories. So carry the ceiling with the verdict: name what you checked and found clean, name what this diff left unassessable, and on a one-way-door change say plainly that a gated pass is not a substitute for a human read.
+APPROVED means "nothing survived the gate," never "no bugs here" — that gap is the price of the ~80 confidence bar and the four excluded categories. So carry the ceiling with the verdict: name what you checked and found clean, name what this diff left unassessable, and on a one-way-door change say plainly that a gated pass is not a substitute for a human read. And say what that read should be. A model-written diff often arrives larger than a person will line-read, and the lines are mostly right — which is why one team building its own coding agent with that agent replaced line-by-line PR review with a second agent's review plus human **acceptance testing**. So escalate as an acceptance check, not a reading assignment: name the two or three behaviours a person should exercise and what each should do. "Someone should look at this" is not an escalation.
 
 ## Posting and fixing — the review stays read-only
 

@@ -66,6 +66,8 @@ def total(items, currency="USD", rounding="bankers", discount=None):
 
 **REFACTOR.** Now clean up (extract, rename, dedupe) with the green suite as your safety net. Behavior unchanged, tests stay green.
 
+**Dedupe the implementation, not the assertions.** The old rule — a thousand lines of test for a hundred lines of code is a design smell — was a *maintenance* rule: every change forced someone to hand-update those thousand lines. That cost now sits with the agent, and the engineer whose rule it was has since revised it: 100+ tests on a small library, no longer counted as over-testing. So a case you'd once have dropped as excessive is nearly free to keep, and kept cases accumulate into the thing that stops a new feature quietly breaking old behavior. Two limits keep it honest. They have to be good tests the agent can throw away later — a suite pinned to implementation details rather than behavior blocks the refactor instead of protecting it. And this is about the suite you accumulate, not one RED step: still one minimal failing test at a time.
+
 ## Real code, not mocks
 
 The point of a test is to exercise the actual behavior. Mocks that assert on themselves prove nothing.

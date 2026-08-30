@@ -41,7 +41,7 @@ It also ships one agent: `code-reviewer`, the spawnable read-only form of `reche
 
 ## Documents earn their place
 
-The router carries one rule the tier table can't express on its own: writing the spec is the expensive default, not the safe one. Before a document gets written, route the change against the docs the repo already has — amend the one that owns this surface, supersede the decision it reverses, create one, or none — and cap the output at **one new document per change**, with findings and the plan as sections of it rather than siblings. Below Standard that count is zero: the plan is confirmed in the conversation and the commit message is the record. Then name every doc the change makes wrong, make each a task, and treat the change as unshipped until they're updated.
+The router carries one rule the tier table can't express on its own: writing the spec is the expensive default, not the safe one. Before a document gets written, route the change against the docs the repo already has — amend the one that owns this surface, supersede the decision it reverses, create one, retire the one the ground has moved out from under, or none — and cap the output at **one new document per change**, with findings and the plan as sections of it rather than siblings. Below Standard that count is zero: the plan is confirmed in the conversation and the commit message is the record. Then name every doc the change makes wrong, make each a task, and treat the change as unshipped until they're updated.
 
 ## What the kit holds itself to
 
