@@ -86,3 +86,4 @@ When recheck (or the user) hands back findings for the implementer to fix, the f
 | Re-dispatching a `BLOCKED` batch unchanged | Same input → same block. Change the context, split the batch, or escalate. |
 | Skipping recheck "because the batch was simple" | Recheck is the only quality gate in this loop; skipping it removes the gate. |
 | Two implementers on shared files in parallel | Merge conflicts and clobbers. Serial unless file-disjoint. |
+| Deleting pre-existing dead code, or leaving behind the code the change orphaned | The same slip in opposite directions. Remove what *this diff* stranded — the import, helper or branch it just made unreachable; leave what was already dead, and say you saw it. A drive-by deletion is an unreviewed change riding on an unrelated batch, and it lands hardest on code the implementer didn't fully understand. |

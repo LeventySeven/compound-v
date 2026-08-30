@@ -11,7 +11,7 @@
 2. <the one after that>
 
 ## Open decisions
-- <what is genuinely blocked on a human — a credential, a deploy target, a product call — or "none">
+- <a judgment: the call you'd make, the one-line reason, "agree?" — or a thing only a person can hand over (a credential, access): name it exactly and what it unblocks — or "none">
 
 ## Verify with
 ```bash

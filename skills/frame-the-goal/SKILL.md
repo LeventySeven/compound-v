@@ -39,6 +39,8 @@ A genuinely hard goal does not get a weaker frame — it gets a *deeper* one. Th
 
 Decomposing also tells you where the real risk is. Frame the riskiest, most load-bearing sub-goal's check first and confirm it's even satisfiable before building everything that depends on it — order the work by what you learn per unit of effort, not by what's easy to start (a judgment call: de-risk the load-bearing assumption first, so a dead end shows up before you've built on top of it). A tree of green sub-checks is what later lets the mechanism stay as simple as each sub-goal allows while the whole still hits a hard target.
 
+**Derive each sub-check's bar from the top-level check, and write the line that composes them back up.** Bars picked seam by seam don't add up: where every stage has to land and the errors are roughly independent, four stages at 90% each leaves ~66% end to end — so a tree that is green everywhere and red at the goal is the normal outcome, not a surprise. Work in the direction that binds: start from the top check's number, back out what each seam has to hold, and write the one-line composition beside the tree — a product down a chain, a weighted average across a partition of cases, a subset relation for a contribution. Where stages are correlated, or a wrong stage can still produce a right answer, say so and treat the product as a floor; that is still stating the composition. If you can't state one at all, the tree is diagnostic only — it localizes a failure but proves nothing about the goal, so re-cut it rather than build on it. (**compound-v:evals** carries the compounding arithmetic itself; state the composition here, don't restate it.)
+
 ## Worked example — framing "resolve billing disputes end-to-end" (a heavy AI goal)
 
 A founder says: "Build an agent that resolves customer billing disputes end-to-end." Tempting to open a chat loop with tools and see what happens. That skips the frame, and an agent with no success check fails silently on the disputes that matter most. Frame it first.
@@ -51,14 +53,16 @@ A founder says: "Build an agent that resolves customer billing disputes end-to-e
 
 **Hard constraints.** p95 under ~30s; cost per ticket below the human-handling cost it replaces. **Stakes:** issuing a refund is **irreversible** — so any refund above a threshold is gated (the contract carries an `escalate` path on purpose), and that tag tells the later build it needs idempotency and a human gate, not free-running retries.
 
-**Success check (one line).** *On 200 held-out tickets already resolved by senior human agents, the system's decision matches the human decision, and the refund amount is within tolerance, on ≥ X% — with zero over-refunds and zero unhandled tickets.* That is the eval; build it before the agent.
+**Success check (one line).** *On 200 held-out tickets already resolved by senior human agents, the system's decision matches the human decision, and the refund amount is within tolerance, on ≥ 90% — with zero over-refunds and zero unhandled tickets.* That is the eval; build it before the agent.
 
-**Tree of checkable sub-goals**, each with its own one-line check:
+**Tree of checkable sub-goals**, each bar *derived from that 90%*, not chosen at its own seam:
 
-- **Classify** the dispute type → matches the human label on ≥ X% of held-out tickets.
-- **Retrieve** the relevant charge + account history → the right charge is in the retrieved set on ≥ X% (a retrieval check, distinct from the decision check).
-- **Decide** the resolution given dispute + evidence → matches the human decision on ≥ X%.
+- **Classify** the dispute type → matches the human label on ≥ 96.6% of held-out tickets.
+- **Retrieve** the relevant charge + account history → the right charge is in the retrieved set on ≥ 96.6% (a retrieval check, distinct from the decision check).
+- **Decide** the resolution given dispute + evidence → matches the human decision on ≥ 96.6%.
 - **Execute** the action idempotently → a refund is issued exactly once and never above the original charge (the irreversible-action check).
+
+**Composition:** `0.966³ ≈ 0.90` — and a floor, not an estimate, because the stages aren't fully independent and a misclassification can still land the right decision. Execute contributes no rate: it's an invariant that either holds or fails the run.
 
 Now "works" is defined at every seam, the riskiest sub-goal (Decide) is the one to validate first, and the build can pick the *simplest mechanism each sub-goal's check allows* and climb only where a check forces it — without ever having shrunk the original ambition. The mechanism choice is **REQUIRED:** use compound-v:simplest-thing-that-works; making each chosen mechanism hold every time is **REQUIRED:** use compound-v:make-it-stable.
 

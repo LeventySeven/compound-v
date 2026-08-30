@@ -45,7 +45,7 @@ the failure above; two files that *cannot* overlap is not.
 - **One writer owns this file.** When batches fan out in parallel (**compound-v:batched-implementation**), the workers never touch it — the orchestrator writes **Done** itself, one returned batch at a time, in the order verdicts land. File-disjointness between workers buys nothing here: they are disjoint in the code and identical in the path they would both write, and that is the collision, not the exception to it. If two runs genuinely have to be live at once, give each its own branch and its own state file there; a fixed name plus "whoever finishes last wins" is not concurrency safety.
 - Append to **Do not** whenever an approach fails. That section is what stops a fresh session
   repeating a dead end — it is the part git history cannot recover.
-- Anything blocked goes in **Open decisions**, naming the exact thing a human must supply.
+- Anything blocked goes in **Open decisions**. If it's a *judgment* — a retry cap, a deploy target, a product call — write it as a **proposal, not a question**: the answer you'd pick, the one-line reason, "agree?". Whoever holds the constraint rarely holds your context, so an open question comes back "it depends" or not at all, while a concrete proposal is answerable in seconds and a *no* comes back naming the constraint you were missing. Write it to be rejected, not rubber-stamped — a proposal shaped to be nodded through buys a yes and loses the constraint. If it's a thing only a person can hand over — a credential, an account, access — there is nothing to propose: name it exactly, and what it unblocks.
 - No calendar estimates. Size by steps and by what must be verified.
 
 ## Before a session ends with work unfinished

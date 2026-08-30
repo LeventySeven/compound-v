@@ -37,6 +37,8 @@ When the system needs retrieval, the reflex "bolt on a vector DB" conflates docu
 - **Web-scale search:** link-prediction-as-pretraining plus a custom vector store that filters at scale.
 - **Enterprise search:** real-time, permission-aware per-person personalization over a people/role/doc knowledge graph.
 
+**And what you admit into the index is an architecture decision, not an ingestion detail — it sits upstream of the shape choice.** Pointing the agent at the whole drive and letting retrieval sort it out is the named anti-pattern: an unfiltered organizational corpus mixes asserted opinion with validated outcome and the model weights them alike, so a researcher's strongly-held view comes back as fact and nothing ties a past spec to whether it actually worked. Curate by **validation status** rather than relevance — admit a document when its claim was checked, and attach the outcome. Budget for it: on one large platform's internal agents the corpus work outweighed the dedicated build work, and a first attempt that handed the agents everything on the drive "hallucinate[d] like crazy".
+
 This is the architecture *choice*. The token mechanics underneath it — JIT-vs-preload, cache, compaction — are **REQUIRED:** use compound-v:context-engineering, and before you write the retrieval code, **REQUIRED:** use compound-v:searching-patterns to look up how it's actually built.
 
 ## When the primitive is a reward-generating environment
@@ -55,6 +57,10 @@ The reflex for "build a great code-generation product" is either a thin wrapper 
 4. **A fine-tuned AutoFixer** — a small specialized model for the last-mile failures the frontier model leaves behind.
 
 The lesson is the whole skill in one case: the **harness, not the model, was the moat**. Every layer survives a frontier model upgrade — a better Sonnet makes all four *better*, not obsolete — which is exactly the test for whether you built a primitive or a wrapper (same model plus a better harness moved Opus 4.5 from 50.2% to 55.4% on SWE-bench Pro via context management and tool orchestration alone).
+
+## Which layer next — size it by its share of the loop
+
+Before engineering a layer, name the share of end-to-end time the step it automates holds: driving that step to near-zero removes at most that share, so a layer that halves a step holding 15% of the loop is capped at ~8% however good it is. One agentic-IDE team ran this as Amdahl's Law against the "AI writes 90% of the code" inference — engineers also review, test, debug, design, deploy and navigate, so cutting the 30-of-100 units spent writing down to 3 lands at 73: a 27% win, not 10×; their measured gain was 30–40%. Measure the shares in *your* loop rather than inheriting those, but expect generation to stop being the big one once the model writes the output — the time moves onto the human's review-and-accept surface. That surface is not compensating scaffolding and does not expire on the next release: a better model produces *more* output to review. It can also be the cap itself — that team's inline-refactor UI was limited by the host editor's extension API, not by model quality, and rebuilding it **tripled acceptance rate on unchanged models**. When the limiting surface is someone else's, that's the own-your-ceiling gate: **REQUIRED:** use compound-v:startup-taste.
 
 ## What to make thin, and what to delete each release
 
