@@ -71,8 +71,18 @@ on the dashboard".
 {"id": "s2-f07",
  "does": "a signed-out visitor who submits a valid login lands on the dashboard showing their name",
  "status": "todo",
- "evidence": null}
+ "evidence": null,
+ "attempts": [{"what": "raised the gateway timeout to 60s", "result": "still timed out on the 4GB account"}]}
 ```
+
+**`attempts` is where a failed try lives before a row is `blocked`, and it is what both three-strike
+caps count.** Append at any status; never overwrite. Without it a row with two failed attempts is
+still `todo` and reads as untouched, so the next session inherits it and reaches for the approach
+that already failed — which is the precise failure the ledger exists to defeat, since *"compaction
+isn't sufficient"* to carry that history in context. It is also the evidence a `blocked` row owes
+(the attempt count, the named blocker, the evidence per attempt) and the input to
+**compound-v:get-shit-done**'s repair-or-replace call, whose trigger is the third patch onto one
+shape. Appending to it is a legal write; editing an earlier entry is not.
 
 **`does` is a witness case, not a title.** One concrete situation with an input and an observable outcome, so a person who was not there can attempt it and disagree with the result. *"auth works"* is not a row; *"a signed-out visitor who submits a valid login lands on the dashboard showing their name"* is. A separate `steps` array was specified here for one revision and cut: in the only real run this has had, it was filled on 0 of 19 rows and read by no code, while `does` plus `evidence` carried the whole thing. One field that gets written beats two where the second is a rule nobody enforces.
 
