@@ -34,6 +34,31 @@ Run the full suite this turn and read the exit code yourself — the **compound-
 
 Pick the base branch deliberately (the branch this work forked from, usually `main`/`master`). State it so the user can correct it.
 
+## Step 2.5 — Harvest the trap (the step that makes experience compound)
+
+Before you land, ask one question — and expect the answer to be "nothing" most times:
+
+> **What bit us that we could not see on day one, and would it bite the next person the same way?**
+
+A strong engineer's advantage across projects is accumulated scar tissue: the traps they have already
+paid for. An agent starts every session without it, and this is the only step in the kit that adds
+any. Without it, `references/shapes.md` grows only when someone runs a research pass, and the work
+you just finished teaches the next run nothing.
+
+**Harvest the pair — the shape and its trap — and let the trap decide whether it is worth a row.**
+The table's columns are `Shape | Reach for it when | Its trap`, so a trap with no shape attached is
+unusable; you cannot warn about a cost in the abstract. What is asymmetric is scarcity: the shape is
+often reconstructable from the problem, the trap never is, because it is the half somebody paid for.
+
+`references/shapes.md` carries the admission bar and it is deliberately high: the shape must recur in
+a context you can name, the trap is the payload, it must still earn its place on a stronger model,
+and adding a row means being willing to evict one. **Most runs harvest nothing — that is the bar
+working, not a miss.** If the lesson is real but does not clear the bar, put it in the commit message
+and let it earn a row the next time it happens.
+
+Below Standard tier, skip this: a typo teaches nothing, and looking for a lesson in one is how a
+curated table becomes an index.
+
 ## Step 3 — Execute the choice safely
 
 **Merge / PR:** run the merge (or push + `gh pr create`), then **re-run the suite on the merged result** — a clean merge can still produce a broken combination. If the merge hits a **conflict**, **stop and surface it** — resolve it deliberately, or hand it back. The PR path needs the branch pushed first (`git push -u origin <branch>`) and `gh` authenticated; check both before `gh pr create` rather than after it fails. Green locally is not green in CI. After the PR is open, surface the remote check status (`gh pr checks --watch`) rather than declaring done at `gh pr create` — a merged-result suite you ran can still diverge from the repo's CI, and the branch isn't landable until those checks pass.

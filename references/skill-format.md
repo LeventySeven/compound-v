@@ -43,7 +43,7 @@ budget: the skill listing is capped near 1% of the context window, and when the 
   reach for it + searchable keywords. Be slightly *pushy* ("…even if not asked") to fight
   under-triggering. **Never** summarize the steps/flow — a description that encodes the workflow makes
   the model follow the description and skip the body (superpowers' #1 tested failure). Third person.
-  ≤1024 chars; aim for 1–2 sentences.
+  ≤1,536 chars — and that cap counts `description` + `when_to_use` COMBINED. (This spec said 1024 for its whole life; the harness uses that number nowhere, so every description was trimmed against a cap 33% tighter than the real one. Verify a cap before enforcing it.)
 
 ## Body structure (target ≤250 lines; hard ceiling 500)
 
@@ -62,10 +62,69 @@ One-sentence core principle.
 - **One excellent example beats five mediocre ones.** Pick the most relevant language; make it real
   and runnable, not a fill-in-the-blank template.
 
+## The size limit is not only about compaction — a long skill silently sheds its own steps
+
+`scripts/check.sh` warns past ~3,750 words because compaction re-attaches only the first ~5,000
+tokens of a skill. That is real, but it is the *second* reason to stay short. The first is worse,
+because it happens with a full context window and leaves no trace.
+
+Two practitioners report the same failure independently. A team whose flagship workflow prompt
+reached **85 instructions** found it *"silently dropping the deepest ones"* — the agent appeared to
+follow the workflow while shedding exactly the constraints that made it reliable; they split it into
+stages of **under 40 instructions** each and moved the sequencing out of prose into real control
+flow. A second engineer abandoned shipping his harness as a skill for the same reason, and quotes the
+agent saying it outright: *"you told me to do that. I decided not to."*
+
+Both are ASR-derived conference-talk quotes, so treat the wording as approximate and the phenomenon
+as attested twice rather than measured once. The consequence is not approximate: **a skill that grows
+past roughly forty real instructions stops being a procedure and becomes a menu.** It still reads
+well. It still fires. It just quietly stops doing the last third, and nothing reports that.
+
+So when a skill is over the line, splitting the *instruction count* matters more than trimming the
+prose. Cutting 500 words of rationale off a 90-instruction skill leaves 90 instructions.
+
+**Apply the expiry test to THIS kit, not only to the rules it writes for other people.** The kit
+tells others to ask whether a rule would still earn its place on a stronger model; nothing asks it of
+Compound V's own lines. It should, because there is now an outside measurement that a written rule
+can make output **worse**: a DX engineer measured one of his own skills at **77% correct with it
+loaded against 97% without**, and deleting 95% of that generated content (10,000 lines down to 553
+lines of gotchas) made his eval both faster and more accurate. He only knew because he was measuring.
+
+That is the honest bar for every line here: not "is this true?" but "does loading this beat not
+loading it?" — and nothing in this kit currently answers that question with a number. Treat every
+rule as provisional until it has been run both ways.
+
+**And be careful about who does the trimming.** The caution that pairs with the measurement above is
+sharper still: letting a model expand a skill *"converts high-level guidance into brittle procedural steps, and the
+fact that it understood the high-level version is the proof it did not need them."* Keep the guidance
+high-level, keep the gotchas concrete, and prefer deleting to explaining.
+
+**A model upgrade is a silent breaking change, but NOT for the reason it first looks like.** A team's
+agent stopped obeying a skill after a model bump with *"not a single line in the skill changed"*, and
+the obvious diagnosis — the new model weights the top of the file, so move critical instructions to
+the front — **does not survive checking, and the kit briefly carried it.** Zero sources support it.
+Anthropic's own long-context guidance says the opposite (*"putting the instructions at the END of the
+prompt, as we want Claude's recall of them to be as high as possible"*), a Tencent WeChat AI result
+improved instruction-following by moving the instruction *after* the input, and a practitioner source
+in this kit's own registry reports the bias runs to **both** peripheries with degradation by
+instruction count that is uniform rather than positional.
+
+The phenomenon is real and independently attested — a prompt with 17 MUSTs and 11 ALWAYSes treated as
+suggestions after a version step; a 12.8pp compliance gap between two models of one family at
+identical config; Anthropic itself retiring its repeat-critical-instructions advice. Only the
+diagnosis was wrong. So when a skill silently stops working after an upgrade, check in this order:
+
+1. **How far into the SESSION** the failure happens — within-session attenuation was the largest
+   effect anyone measured (~5.6% lower odds of compliance per generated function), and it is a
+   session-position effect, not a file-position one.
+2. **Whether the instruction is an absolute the newer model now reads as defeasible.**
+3. **Whether compaction dropped it.**
+4. Then **re-run the eval on the new model** rather than reasoning about what it must now weight.
+
 ## Authoring checklist (the rules the kit follows but rarely states)
 - **Description = WHAT + WHEN, never the steps** — Ruling A above is the single most load-bearing
   authoring rule; encoding the flow makes the model follow the description and skip the body.
-- **Refs one level deep.** A SKILL points to `references/x.md`; that file does not point to a third
+- **Refs one level deep.** A SKILL points to one `references/…` file; that file does not point to a third
   hop the model has to chase. Any reference material over ~100 lines lives outside the SKILL (see
   progressive disclosure) — a long doc in the body burns context on every load whether it's needed
   or not.

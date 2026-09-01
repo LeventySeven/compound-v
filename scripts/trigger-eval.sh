@@ -32,7 +32,7 @@ fixtures="scripts/trigger-fixtures.tsv"
 filter="${1:-}"
 REPS="${REPS:-1}"
 CASE_TIMEOUT="${CASE_TIMEOUT:-300}"
-pass=0; miss=0
+pass=0; miss=0; quota=0
 declare -a failures=()
 
 # Everything that could write, spend, schedule, or spawn. Skill stays reachable; nothing
@@ -64,6 +64,17 @@ while IFS=$'\t' read -r prompt expected; do
     # A failed run must never score as a pass. Empty output with expected=NONE would
     # otherwise look identical to "ran fine and correctly routed nowhere" — that is the
     # green-because-nothing-ran failure, and it is the one that survives longest.
+    # A rate-limit refusal is NOT a routing result and must not be pooled with one. Running ~90
+    # live turns exhausts a session quota, and every case after that point returns "You've hit your
+    # session limit" — which the old code filed as RUN FAILED alongside genuine harness errors. The
+    # two look identical in a summary and mean opposite things: one says the kit may be broken, the
+    # other says the kit was never asked. Counting them together produced a report reading
+    # "33 ok, 56 failed" that invited exactly the wrong conclusion.
+    if printf '%s' "$raw" | grep -qiE "hit your (session|usage) limit|rate.?limit|resets [0-9]"; then
+      quota=$((quota + 1))
+      printf '%-52.52s %-26.26s ---  NOT RUN (quota exhausted)\n' "$prompt" "$expected"
+      continue
+    fi
     if [ "$rc" -ne 0 ] || [ -z "$raw" ]; then
       miss=$((miss + 1))
       failures+=("$expected — RUN FAILED (exit $rc) — \"$prompt\"")
@@ -100,14 +111,28 @@ while IFS=$'\t' read -r prompt expected; do
   done
 done < "$fixtures"
 
-total=$((pass + miss))
-printf '\n%s/%s fired correctly' "$pass" "$total"
-[ "$total" -gt 0 ] && printf ' (%s%%)' "$((pass * 100 / total))"
-printf '\n'
+# `total` and `ran` were the same expression and `quota` was in neither, so a truncated run
+# printed an impossible denominator ("3 of 1 fixtures NEVER RAN") and still exited 0. An
+# instrument that goes green while most of the suite never executed is the failure this
+# script exists to catch, committed by the script itself.
+ran=$((pass + miss))
+total=$((pass + miss + quota))
+printf '\n%s/%s fired correctly' "$pass" "$ran"
+[ "$ran" -gt 0 ] && printf ' (%s%%)' "$((pass * 100 / ran))"
+printf ' — of %s cases ATTEMPTED\n' "$ran"
+if [ "$quota" -gt 0 ]; then
+  printf '\n%s of %s fixtures NEVER RAN (session quota exhausted mid-suite).\n' "$quota" "$total"
+  printf 'Those are unmeasured, not passing and not failing. The percentage above is over what\n'
+  printf 'actually executed; do not read it as coverage. Re-run the remainder after the reset, or\n'
+  printf 'narrow the suite: bash scripts/trigger-eval.sh <skill-name>\n'
+fi
 
 if [ "${#failures[@]}" -gt 0 ]; then
   printf '\nMisses — each one is either a description that needs a trigger phrase or a\nfixture that needs rewriting. Decide which before editing anything:\n'
   printf '  %s\n' "${failures[@]}"
 fi
 
-[ "$miss" -eq 0 ]
+# Exit 2 for "unmeasured" so a truncated run is distinguishable from both a pass and a fail.
+if [ "$miss" -ne 0 ]; then exit 1; fi
+if [ "$quota" -gt 0 ]; then exit 2; fi
+exit 0

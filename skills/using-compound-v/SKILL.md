@@ -9,6 +9,21 @@ Match effort to the task, and only build what compounds. Overkill is a defect, n
 
 You don't have to remember what each skill does — match the **task** to a trigger and invoke that skill with the `Skill` tool **before acting**, even for a question, even when the user didn't name it. The descriptions fire on intent, not keywords; when a skill might apply, invoke it and let it bow out if it doesn't fit. Silently skipping a skill that applies is the failure this kit exists to prevent.
 
+## Where this kit's own files live — resolve the path before you conclude a file is missing
+Skills cite `references/<file>.md` and `scripts/<file>.sh` **relative to the kit root**, and you are
+almost never standing in it. Two bases are wrong and one is right:
+
+- **Your cwd is the user's project.** `bash scripts/check.sh` there is `No such file or directory`.
+- **The skill's own base directory** — which the harness reports when it loads a skill — is
+  `<kit>/skills/<name>/`, *not* the kit root. So a bare `references/…` citation misses from there too.
+- **The kit root is one level up from that**: `<skill base>/../../`. Use
+  `${CLAUDE_PLUGIN_ROOT}` where it is set (the hooks use it), otherwise take the base directory the
+  harness just printed for the skill you are reading and go up two.
+
+Resolve it, don't route around it. If a reference does not open on the first try that is a path
+problem, not a missing file — several of these carry the operative content, not merely provenance,
+and a skill that silently continues without one is running on the half it happened to have.
+
 ## Instruction priority
 User CLAUDE.md > Compound V skills > default behavior. If the user's instructions contradict a skill (e.g. "don't use TDD here"), the user wins — always. This is a precedence rule, not a load order: a later-loaded instruction does not outrank an earlier one.
 
@@ -34,9 +49,14 @@ The kit's bet is that adaptive effort is something the model is increasingly goo
 | Tier | Trigger | Workflow |
 |---|---|---|
 | **Trivial** | typo, rename, one-liner, config flip | Just do it → `verification-before-completion`. No plan, no agents, no skill. |
-| **Small** | one function/file, clear spec | plan mode for explore-and-plan, then inline `test-driven-development` → verify. Skip the plan doc. |
-| **Standard** | a feature, ~2–8 tasks | (open "should we?" → `startup-taste` first) → `brainstorming` → `writing-plans` → `batched-implementation` → `recheck`. |
+| **Small** | one function/file, clear spec | `gathering-context` (slot 1 only — the installed versions and the repo's own shape) → plan mode for explore-and-plan → inline `test-driven-development` → verify. Skip the plan doc. |
+| **Standard** | a feature, ~2–8 tasks | (open "should we?" → `startup-taste` first) → **`gathering-context`** → `brainstorming` → `writing-plans` → `batched-implementation` → `recheck`. |
 | **Large** | multiple subsystems · a one-way door · schema or public API | `get-shit-done` runs the whole thing: it owns the **one confirmed decomposition** above the sub-projects — never a plan-of-plans — and each slice below it runs its own Standard cycle. Attended, the decomposition is approved before anything touches disk; unattended, it is written down and the run proceeds — what binds in *both* modes is the one-way door (schema, public API, spend, irreversible write), which stops the run either way. Fan out only across disjoint files, in worktrees. Its stage 4 closes over the assembled product, **once**, never per sub-project. |
+
+**The pack scales with what you don't know — this is not "always research more."** Front-loading
+*constraints* is measured to help; front-loading *repository overviews* was measured (one study,
+arXiv 2602.11988) to cost over 20% and help nothing, and an extra preparation phase that cuts against how the model works degrades
+results. Assemble for THIS task, use it, discard it.
 
 If you could describe the whole diff in one sentence, skip the plan. The harness's own explore → plan → code → commit, run through plan mode, is the right default below Standard — reaching past it is the overkill this table exists to prevent.
 

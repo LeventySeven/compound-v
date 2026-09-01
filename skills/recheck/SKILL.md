@@ -64,7 +64,16 @@ path/to/file.ext:line — issue: one sentence, what is wrong
 
 Then exactly one verdict — and with it a two-part inventory: what you **checked and found clean**, and what was **not assessable**. A reviewer that can only annotate leaves the reader unable to tell "I checked this and it's clean" from "I couldn't assess this," so an absent finding must never be left to imply a pass. "Cannot verify from the diff" is a legitimate and required outcome whenever a requirement lives in code this diff never touched — name it rather than staying silent. When this runs inside the batch loop, report the inventory compactly enough that it survives the trip: on `APPROVED` the dispatching agent carries the verdict and a one-line summary of it into the batch commit (**compound-v:batched-implementation**), because an inventory that lives only in this conversation dies at the next compaction, and "checked and clean" is the one review output git cannot infer from the diff.
 
-- **APPROVED** — no Critical or Important findings; ship it.
+- **APPROVED** — no Critical or Important findings; ship it. **APPROVED means nothing survived this
+  gate, never "no bugs here" — and the gap has a shape worth naming, because it decides when a human
+  still has to look.** Neither deterministic checks nor LLM review reliably catch *"misdiagnosis of
+  issues, overengineering and unnecessary features, misunderstood instructions… they'll sometimes
+  catch them, but not reliably enough to reduce supervision."* Those are the failures that come from
+  the goal being wrong rather than the code being wrong: *"correctness is outside any sensor's remit
+  if the human didn't clearly specify what they wanted in the first place."* So a clean pass licenses
+  shipping the code; it never licenses the belief that the right thing was built. This is **well corroborated across the corpus** — but the exact source count once printed here named nothing enumerable, so it is gone rather than left asserting an audit no reader could check.
+  leaves the closing move open and it is worth carrying as an open question rather than a rule — if
+  the sensors never fire, nobody can currently tell high quality from inadequate detection.
 - **FIX_REQUIRED** — at least one Critical/Important; the implementer fixes, then re-check. A finding is **blocking** when it violates a done-criterion the plan stated *in advance*, not when the reviewer feels strongly about it; where the change was built against a plan and that plan states no machine-checkable criteria, name the absence in the inventory above rather than as a blocking finding — and dispatched at a bare diff with no plan, there is nothing to name and a clean diff still earns a short APPROVED.
 - **ARCHITECTURE_CONCERN** — the approach itself is wrong (failed step 1 or 2, or fixes keep failing); escalate to a re-plan rather than patching.
 

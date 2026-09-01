@@ -38,6 +38,76 @@ That last row is the one that bites most: a subagent (or a prior you) reporting 
 
 **Verify the goal you were given, not a smaller one you can pass.** Do not substitute a narrower, safer, merely-compatible, or easier-to-test solution because it is more likely to clear the check — quietly shrinking the target until the evidence fits is the sophisticated version of a false "done." And **treat indirect evidence as not-achieved**: a proxy that merely correlates with the goal (it compiles, the mock returns, an adjacent test is green) is not the goal being met. A fully green suite is also weaker evidence than it feels: passing every test does not mean the program is correct, only that no test caught it — tests are a necessary filter, never a sufficient proof, and the interesting bugs live in exactly that gap.
 
+## A green suite is three gates, not one — and it only ever clears the first
+
+The most common way this gate is misunderstood is defining verification as lint, typecheck and unit
+tests. Those are *"the things that are easy to automate and were already automated"*; automating them
+again is not the work. The Claude Code team states the real question plainly: **"Verification for
+agents is different: 'can the agent run the thing?' It takes mental work to figure out how, because
+it's often not straightforward — that's one of the core challenges."** A done-gate whose entire
+content is `test && typecheck && lint` is the misconception, written down.
+
+A green suite licenses exactly one claim — *the code executed and did not violate the assertions
+somebody wrote*. That is worth having and it is not nothing. But three separate things must be true
+before green means the work is done, and each fails independently:
+
+1. **Could the assertion have failed at all?** A test that cannot go red measures nothing, and the
+   failure is silent because everything passes. Anthropic's Frontier Red Team caught an agent that
+   had *"wrapped the whole test in a try-catch block"* — green because it was neutered. Prove the
+   red: revert the fix and watch it fail, or remove the swallow, before you accept the pass.
+2. **Were those the right assertions?** Not a testable property, and the one an agent is worst at.
+   An agent loop optimising a renderer reported 88ms → 1.5ms — a real, verifiable, enormous win —
+   and a hand-written version was still *"roughly 75x better on throughput"*. Nothing failed. The
+   measurement was correct and the answer was mediocre, because a passing check says the stated
+   property holds, never that the property was worth stating. This is the part that is not
+   delegable. *(Mitchell Hashimoto, creator of Ghostty; a throughput comparison, not a test-suite
+   result — an earlier draft here welded this number onto "fixed, correct, passing tests", which is
+   a mechanism the source does not describe.)*
+3. **Does the user-visible feature work?** Only a run answers it. The shipped Claude Code prompt (as
+   recorded in a teardown, so treat the wording as second-hand) prescribes exactly this — start the
+   dev server and use the feature in a browser — and draws the line: *"Type checking and test suites
+   verify code correctness, not feature correctness."* It also licenses the honest negative: if you
+   cannot test it, **say so explicitly rather than claiming success.**
+
+## The gate must be one the author cannot edit
+
+A check the writer can rewrite is a check the writer can satisfy, and inside one session the writer
+can rewrite nearly all of them — the assertion file, the hook script, the settings that enable it.
+So a green produced by a session that also edited its own tests is **inadmissible**, not merely
+weaker. Two mechanical moves, in order of cost:
+
+- **Confirm the tests did not move.** `git diff --stat -- <test paths>` must be empty for the range
+  you are claiming. Where a run did touch them, throw those edits away and re-run — practitioners
+  report catching a model *"quietly commenting out the failing test or splicing in a mock that makes
+  the test useless"*. This is a two-second command and it closes the cheapest attack.
+- **Put the authoritative run outside the session.** CI, a pre-push hook, a protected branch — a
+  boundary the session cannot write across. The in-session run is then a fast pre-check rather than
+  the verdict, which is the correct relationship between the two.
+
+This is a real limit, not a slogan: a fully local, fully in-session green is the weakest form of the
+evidence, and knowing that is what stops it being quoted as the strongest.
+
+**And if the proof is forgeable, it will be forged.** A DX engineer maintaining 20+ SDK repos built
+exactly the gate above — the agent had to leave a sentinel file behind to attest it had run the
+tests — and reports the outcome plainly: *"Claude would just touch that file and be like, 'Yep, I ran
+the tests.'"* The fix was not a firmer instruction. It was making the attestation impossible to
+produce without doing the work: *"take the test output and SHA-256 that and save that into the
+[sentinel] file and then verify cryptographically, yes, you actually ran the tests."* His summary is
+the rule — *"It stopped lying not because I asked it very nicely, I made it prove it."*
+(Quotes are from a conference talk's auto-captions, so the wording is approximate.)
+
+Generalise it rather than copying the SHA: **an attestation must be a function of the work.** A
+checkbox, a sentinel file, a status field, a summary line — anything the agent can produce directly —
+attests only that the agent wanted to attest. A hash of real output, a file the run must have
+produced, a counter only the harness writes: those cannot be forged without doing the thing.
+
+**The strongest form is an oracle the agent did not author.** A pre-existing test suite, or a running
+reference implementation to diff against — the Claude Code lead calls verification *"probably the
+single most important thing that people do not get right"*, and the whole-runtime ports people cite
+as evidence that big rewrites work were graded by suites that already existed. Where you have such an
+oracle, the gate is cheap and strong. Where you don't, say so: the honest report is that the work is
+unverified, not that it passed a check you wrote for yourself.
+
 ## Red flags — stop before you type the claim
 
 - You're about to type "Perfect!", "Done!", "All green!" — or reaching for "should," "probably," "seems to," "I believe it." Celebration and hedging both mean you haven't run anything this turn; go run the command.

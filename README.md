@@ -13,9 +13,17 @@ For a real feature the path is short: pin the design with `brainstorming`, turn 
 ## The workflow
 
 ```
-using-compound-v → brainstorming → writing-plans → batched-implementation ⇄ recheck → finishing
-  (route the tier)   (design gate)   (plan or PRD)    (1 impl / 2-3 tasks)    (read-only)  (merge/PR)
+using-compound-v → gathering-context → brainstorming → writing-plans → batched-implementation ⇄ recheck → finishing
+  (route the tier)    (the context pack)   (design gate)   (plan or PRD)    (1 impl / 2-3 tasks)    (read-only)  (merge/PR)
 ```
+
+`gathering-context` runs before the design gate and is the reason the rest is cheap: it assembles the
+constraints, the anti-patterns, the shape and its trap, what prior art lets you delete, and what
+"done" means — **for this task, then discards them.** The distinction is load-bearing rather than
+stylistic. Front-loading instructions a model cannot infer is measured to help; front-loading
+repository overviews was measured to cost over 20% and help nothing (arXiv 2602.11988). So the pack is assembled fresh
+per task and never becomes a standing document, and the heaviest slot is *how it must not be done* —
+past failure cases lift an agent where polished exemplars invite it to copy.
 
 Two pieces carry most of the weight:
 
@@ -29,6 +37,7 @@ Two pieces carry most of the weight:
 | Foundation | `using-compound-v`: the router. Tiering, the taste/distribution/primitive gate, the non-negotiables. |
 | Solve any goal (opt-in) | `frame-the-goal` (turn any goal into a testable success check) → `simplest-thing-that-works` (the simplest mechanism that provably passes it — zero-AI first, climb only when forced, as high as a hard goal needs) → `make-it-stable` (make it hold every time). The general front-door; caps the machinery, never the goal, and routes into the AI skills. |
 | Taste | `startup-taste` (whether and what to build), `product-taste` (how it feels) and `founder-distribution` (whether it will reach anyone — the leg that gets skipped, because it's the only one you can't make progress on by building) |
+| Context | `gathering-context` — the pack an implementer needs before any code: constraints the model cannot infer, **how it must not be done** (the heaviest slot), the shape and its trap, what prior art lets you delete, what "done" means, and what is still unknown. Assembled per task from the verified source registries via `scripts/alpha.sh`, then discarded. |
 | Plan | `brainstorming` (design before code), `writing-plans` (a per-build plan with real code, no placeholders), `writing-prd` (the product's stable source-of-truth doc, read first for context), and `extracting-specs` (recover the real contract of *existing* code — the backward complement of `writing-prd`) |
 | Thinking | `critical-thinking` (red-team your own reasoning before you commit — steelman it, hunt disconfirming evidence) and `council` (when solo skepticism isn't enough: fresh-context agents answer and cross-examine one unverifiable question, findings not votes, and you write the verdict) |
 | Build | `batched-implementation`, `recheck` (the in-pipeline review gate), `code-review` (the on-demand reviewer **and automatic pre-merge gate** — point it at a PR/branch/diff or let it run before any merge; scale the depth, gate findings by confidence, post to GitHub or apply the fixes), `finishing`, and `get-shit-done` (the **project spine**, aimed at the run that stops at 90% — every declared function becomes a ledger row that starts failing, a row goes green only on a check that was seen red first plus an end-to-end run driven as a user, and the run is not done while any row is neither passed nor explicitly dropped with a name attached; carve → recon → build one slice at a time → the MEP done-gate over the assembled product) |
@@ -62,7 +71,65 @@ For local development, point a directory marketplace at your clone and enable th
 
 A SessionStart hook injects the small router each session, a UserPromptSubmit hook re-asserts the routing directive each turn (one self-gating line, so skills keep firing as context grows instead of decaying after the opening turn), and everything else loads on demand — so the always-on cost is the router plus a one-line nudge.
 
-A third hook is the mechanical floor under `verification-before-completion`: a Stop hook refuses exactly one thing — a turn that edited files, ran **no command at all**, and then claimed the work was done. It's deliberately narrow. It blocks at most once per turn (it checks `stop_hook_active`, so a session always gets to end rather than hitting the harness's consecutive-block override), the trigger is anchored on completion claims at clause start and discards any clause carrying a negation or a progress marker (a bare `working` match would fire on "I'm still working on it" — that's a bug, not a stricter gate), it fails open on anything unexpected including a missing `jq`, and `COMPOUND_V_STOP_GATE=off` turns it off. It cannot tell whether the command you ran proved anything, so it's a floor, not the gate.
+A third hook is the mechanical floor under `verification-before-completion`: a Stop hook refuses exactly one thing — a turn that edited files, ran **no command at all**, and then claimed the work was done. It's deliberately narrow. It blocks at most once per turn (it checks `stop_hook_active`, so a session always gets to end rather than hitting the harness's consecutive-block override), the trigger is anchored on completion claims at clause start and discards any clause carrying a negation or a progress marker (a bare `working` match would fire on "I'm still working on it" — that's a bug, not a stricter gate), it fails open on anything unexpected including a missing `jq`, and `COMPOUND_V_STOP_GATE=off` turns it off. It also refuses a turn whose only commands were **contentless** — `echo`, `true`, `:` — because `echo ok` cleared this gate for its whole life, which is precisely the forgeable-attestation failure the kit warns others about, committed by the kit. The block list stops at those three on purpose: `ls` legitimately answers "was the file written", so widening it would start false-blocking real checks, and over-triggering is exactly as wrong as under-triggering.
+
+**The residual limit is real and worth stating plainly:** beyond those three it still cannot tell whether the command you ran proved anything. `npm test -- --testNamePattern=nothing` clears it. So it is a floor, not the gate — and the honest reading is that passing it means *a command ran*, never *the work is verified*. The contract stays with `verification-before-completion`, which is where the three-gates rule and the attestation-must-be-a-function-of-the-work rule live.
+
+## Grounding: what the kit reads before it writes
+
+Two skills do the looking-up, and both start at the cheapest rung rather than the web.
+
+`searching-patterns` runs before you write against any dependency. Its first rung is **not a search**:
+read the copy on disk — `node_modules/<lib>` and its `.d.ts`, `site-packages/<pkg>`, the vendored
+source — plus the shape the repo already uses. One `grep`, no network, survives a sandboxed run, and
+version-exact by construction. `bash scripts/stack.sh [dir]` automates it: it reads the manifest and
+the **installed** tree and prints each recognised dependency **at the version actually on disk** with
+its canonical source, then the read-order. Only its output costs context.
+
+That used to be a four-row table of "for stack X read Y", and the table is why it is now a script:
+it asserted a referenced skill carried "70 perf rules" when the installed copy has **64**. A
+hardcoded count in a shipped file decays silently. A lockfile read at call time cannot, because it
+is not a memory of the answer.
+
+The **external** lookup is scoped, and the scoping is the discipline. The reason is not that an
+agent cannot recover from a mistake — when an API *raises*, the error-driven loop usually works. What
+it cannot cover is the class that **never raises**: an optional parameter whose default moved, a
+semantic that changed between majors without a signature change, auth, money, retries, concurrency,
+idempotency. Those get the lookup; a loop or a standard-library call does not. And the output is the
+page **at your installed version** — where the docs render a different major than the lockfile holds,
+that mismatch *is* the finding.
+
+`references/public-sources.md` is the full channel map for anyone with nothing but the open web:
+the installed copy, the repo's own history, version-pinned docs, `gh` against the upstream tag, and
+`scripts/yt.sh` — a `yt-dlp` wrapper that turns a conference talk into ~5,000 words of clean text
+with no key and no login. It carries one measured warning worth repeating here: **YouTube captions
+are substance, never quotation.** A talk listed under YouTube's *manual* subtitle section still
+rendered "Claude Code" as "Cloud Code" throughout, because the manual track was itself ASR-derived.
+Caption provenance cannot be read off the metadata.
+
+## One kit, and an optional private overlay
+
+There is one edition and it is this one. Everything it needs is public: the source registries in
+`references/` name YouTube channels, engineering blogs, practitioners and open-source repos that
+anyone can reach, and `scripts/` reaches them with `yt-dlp`, `gh` and `git` — no key, no login, no
+private corpus.
+
+**There is no private-corpus path any more, and removing it was the point.** An earlier version
+read a local library of transcripts and essays. Those transcripts came from somewhere — YouTube
+channels, engineering blogs, papers, repos — so the kit now carries **the sources instead of the
+snapshots**: `references/channels.tsv` was built by resolving the actual video URLs the
+transcripts came from, not by guessing. A pointer is forty bytes, never goes stale, and yields the
+full text on demand; a stored transcript rots, needs re-syncing, and was summarised on the way in,
+so the detail you need later is exactly what got dropped.
+
+That is also why there is no separate "public build". An earlier design generated a stripped
+public edition from a private source; once the registries were public and the corpus reference was
+conditional, the generated kit was the same kit with a renamed namespace, so the generator was
+deleted rather than maintained. **The specific names of your private folders are deliberately absent
+from `.gitignore` and from the publish gate** — a denylist of them, committed to a public repo, is
+itself the leak it exists to prevent. Put them in `local/private-pattern.txt` (gitignored) and
+`scripts/check.sh` reads them from there, falling back to structural patterns (absolute home paths)
+when the file is absent.
 
 ## Checking the kit
 

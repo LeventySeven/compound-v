@@ -42,16 +42,37 @@ compound-v:using-compound-v owns the tier law; this is the same law applied to a
 
 ## Step 3 — the lenses (parallel fan-out at `high`+)
 
-At `high` and above, read the diff through several independent lenses **in parallel** and merge their findings. Reading and analysis parallelize cleanly; keep any *write* single-threaded — multi-agent earns its keep as added review intelligence, never as parallel editors (compound-v:ai-system-reliability). A clean-context reviewer that reasons backward from the diff catches what the author's own context rationalizes away — the same clean-context review mechanism (and its measured bugs-per-PR) that **compound-v:recheck** documents.
+At `high` and above, read the diff through several independent lenses **in parallel** and merge their findings. Reading and analysis parallelize cleanly; keep any *write* single-threaded — multi-agent earns its keep as added review intelligence, never as parallel editors (compound-v:designing-agents owns this rule; compound-v:dispatching-parallel-agents owns the fan-out mechanics). A clean-context reviewer that reasons backward from the diff catches what the author's own context rationalizes away — the same clean-context review mechanism (and its measured bugs-per-PR) that **compound-v:recheck** documents.
 
 1. **Conventions** — does the diff obey the relevant `CLAUDE.md` / `AGENTS.md` and the codebase's existing shape? (House rules are guidance for *writing* code, so not every line applies on review — judge intent.)
-2. **Bugs in and around the diff** — first a shallow scan of the changed lines: logic errors, unhandled edge cases, off-by-one, null/undefined, error paths that swallow, races, resource leaks. Then widen to the **contract**: trace the callers and callees of every modified symbol and pull just those directly-connected files into context, since a change often breaks a dependency it never touches and that cross-file break is invisible if you read only the diff. Load the contract, not the whole repo (compound-v:context-engineering). This is measured, not a hunch: the diff alone (~17k tokens) **missed** a planted cross-file bug, every connected file (~110k) found it, and *only* the direct callers and callees found it at ~18.3k — an ~8% token increase is the entire difference between catching that class of bug and shipping it, so budget roughly as many tokens of surrounding context as of diff. Only what's **introduced here** — pre-existing bugs are out of scope.
+2. **Bugs in and around the diff** — first a shallow scan of the changed lines: logic errors, unhandled edge cases, off-by-one, null/undefined, error paths that swallow, races, resource leaks. Then widen to the **contract**: trace the callers and callees of every modified symbol and pull just those directly-connected files into context, since a change often breaks a dependency it never touches and that cross-file break is invisible if you read only the diff. Load the contract, not the whole repo (compound-v:context-engineering). In one internal experiment, not a public result: the diff alone (~17k tokens) **missed** a planted cross-file bug, every connected file (~110k) found it, and *only* the direct callers and callees found it at ~18.3k — an ~8% token increase is the entire difference between catching that class of bug and shipping it, so budget roughly as many tokens of surrounding context as of diff. Only what's **introduced here** — pre-existing bugs are out of scope.
 3. **Historical context** — `git blame` / log on the touched code: does the change reintroduce a reverted fix or miss why the old code was the way it was?
 4. **Prior art and inline guidance** — earlier PRs on these files and the review comments they drew (the same note often applies again), plus code comments in the modified files that the change now violates.
 
 Security is a lens too, but its catalog lives in compound-v:agent-security (build-time defense) and the vulnerability pass in compound-v:recheck (detection) — don't restate it; when a lens trips a security concern, name the class and the triggering input and point the fix there.
 
 ## Step 4 — gate false positives by confidence
+
+**Raise the bar when the CONSUMER is an agent, not a person.** The threshold below is tuned for human
+noise; an agent-fed loop fails differently. A low-confidence comment handed to a fixer makes it *"fix
+something, go back, get another code review, and have to fix backwards because the quality of the
+comment was low"* — churn that costs turns and can end worse than silence. Two consequences: at
+`--fix`, and anywhere findings feed an implementer rather than a reader, gate harder than you would
+for a human; and note the inverse, which is free tuning — *"agents are more than happy to go through
+and fix 100 nits on a pull request where your engineers really get frustrated"*, so a nit that is
+correct but low-value is cheap for an agent and expensive for a person. This is the opposite edge of
+the warning already in this skill that a defensive anti-false-positive instruction makes the model
+withhold a true finding; both edges are real and the consumer decides which one binds.
+**And the threshold moves on what the consumer DOES with the finding, not on it being a machine.**
+A *fixer*-consumer (`--fix`, findings piped to an implementer) → gate harder. A *filter*-consumer
+(triage upstream of a person) → a false positive dies in the filter while a miss still ships, so
+recall is the better target there. The underlying mechanism is measured even though the comparative
+claim is not: an agent handed a false premise does not push back, at a 35-65% undesirable-change rate
+on tasks where the right answer was to do nothing.
+*(**CONTESTED register — and it stayed there.** Four lanes and ~40 sources opened produced ZERO second
+source for the comparative claim. One team's production report, unreplicated. Source's own caveat: their 60% cost / 70% accuracy figures are measured against their own naive
+first version, not a vendor, and the real weight of the system was feedback plumbing — trajectory
+observability, addressal rate, per-team rules — not the reviewer.)*
 
 This is the step that makes an on-demand reviewer trustworthy instead of noisy. Gate cheapest-first: before scoring anything, **check every cited location against the file** — a line that doesn't exist is a hallucination, and dropping it is free and deterministic. A location that is real but **outside the diff** is not a hallucination and must never be dropped: the highest-value bugs live in the contract *between* changed code and its surroundings, which is out of the diff by definition, so a naive anchor gate deletes exactly your best findings. Route those to a separate, clearly-labelled **Adjacent (out-of-diff)** bucket — not deleted, not mixed into the main list. Then score every surviving candidate finding 0–100 for how sure you are it's a *real, diff-introduced* issue, and **drop anything below ~80** — a confidence-scored filter is what keeps false positives off the PR. For a CLAUDE.md-derived finding, re-verify the rule actually says what you claim before it counts.
 
