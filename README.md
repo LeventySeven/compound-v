@@ -124,6 +124,22 @@ Every session starts at the router. `using-compound-v` loads up front and **size
 a typo just gets fixed and a real feature earns the full pipeline. A one-line change never spawns four
 agents. A five-task plan lands in about four dispatches.
 
+### The premise
+
+Prompt, context, harness and loop engineering are one **ladder of scope**, not four subjects: the
+unit of concern moves from one instruction, to one model call, to one agent run, to recurring runs.
+Anthropic calls context engineering *"the natural progression of prompt engineering"*; this kit is
+the harness rung. Most of what reads as "the agent got it wrong" is the agent not holding something
+it needed, so the first move is to go get it.
+
+The claim is narrower than it sounds, and the narrowing matters: it governs an agent's **output** at
+a **fixed model** on a **known task**. It says nothing about where capability comes from, and the
+sharpest counter-evidence runs the other way — too *much* context measurably degrades recall, and
+repository context files were measured as a null result at **20%+ added cost**. So the operating verb
+is **minimisation**: the smallest high-signal set, assembled per task and thrown away.
+**references/context-is-the-work.md** carries the full argument, the three things on that ladder that
+are *not* context, and an honest list of the parts that did not survive checking.
+
 **`gathering-context` runs before the design gate and is why the rest is cheap.** A CTO brings
 experience; an agent has none — it has read more code than any of us and been burned by none of it —
 so the corpus is its substitute. The pack carries both halves: what to do and **why**, the options,

@@ -53,6 +53,15 @@ The kit's bet is that adaptive effort is something the model is increasingly goo
 | **Standard** | a feature, ~2–8 tasks | (open "should we?" → `startup-taste` first) → **`gathering-context`** → `brainstorming` → `writing-plans` → `batched-implementation` → `recheck`. |
 | **Large** | multiple subsystems · a one-way door · schema or public API | `get-shit-done` runs the whole thing: it owns the **one confirmed decomposition** above the sub-projects — never a plan-of-plans — and each slice below it runs its own Standard cycle. Attended, the decomposition is approved before anything touches disk; unattended, it is written down and the run proceeds — what binds in *both* modes is the one-way door (schema, public API, spend, irreversible write), which stops the run either way. Fan out only across disjoint files, in worktrees. Its stage 4 closes over the assembled product, **once**, never per sub-project. |
 
+**Tier sizes the machinery; NOVELTY overrides it.** The table above measures how big the change is.
+It does not measure how much you actually know, and those come apart constantly: a one-line change
+against an API you have not read is Trivial by size and is precisely where an agent guesses and ships
+a plausible bug. So the rule sits above the table — **whenever the surface is new to you, or you
+notice you are reasoning from memory rather than from something you read, gather first, however small
+the change.** `compound-v:searching-patterns` already enforces this for dependencies; it generalises.
+The cheapest version is slot 1 and one lookup, and it is still the difference between knowing and
+guessing.
+
 **The pack scales with what you don't know — this is not "always research more."** Front-loading
 *constraints* is measured to help; front-loading *repository overviews* was measured (one study,
 arXiv 2602.11988) to cost over 20% and help nothing, and an extra preparation phase that cuts against how the model works degrades

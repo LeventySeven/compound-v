@@ -7,6 +7,12 @@ description: Assemble the context an implementer needs BEFORE any code is writte
 
 **Do not start typing until you hold the constraints and can see the end from the beginning.**
 
+Prompt, context, harness and loop engineering are one **ladder of scope**, not four subjects — the
+unit of concern moves from one instruction, to one model call, to one agent run, to recurring runs.
+This skill is the middle of that ladder, and it is the only rung that is mostly about *supplying*
+anything. **references/context-is-the-work.md** carries the argument, its measured limits, and the
+parts of it that did not survive checking — read it once, not per task.
+
 Not until you have gathered every pattern — that is a different thing and it measures worse. This
 skill assembles a **task-scoped pack**, fresh, for the thing you are about to build, and then gets
 out of the way.
