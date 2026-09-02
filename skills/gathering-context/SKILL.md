@@ -70,8 +70,9 @@ are the ones that get relitigated. **Enumerating is this slot's whole job; choos
 **compound-v:brainstorming** owns the pick, and doing it here duplicates it.
 
 The arrangement an experienced team would reach for, paired with the
-second-order cost invisible on day one. Check **references/shapes.md** first — a hit there *is* the
-whole of this slot. On a miss, read a codebase that ships it: `bash scripts/exemplar.sh grep <repo>
+second-order cost invisible on day one. Check **references/shapes.md** first. A hit is a strong default, **not the end of the slot** —
+check its `applies` conditions against your actual case before adopting it, because a cold run of
+this skill took the one matching row and would have built the wrong thing with it. On a miss, read a codebase that ships it: `bash scripts/exemplar.sh grep <repo>
 <subtree> "<pattern>"` at a pinned release. **A shape with no trap is a policy detached from the
 context that produced it**, and it will be misapplied — if you cannot name the trap, say so rather
 than inventing one. **And a shape harvested from a corpus is a MEAN, not a merit**: it tells you
@@ -99,12 +100,85 @@ implementation of the wrong thing.
 **6. What you still do not know.** Name the open questions and which are one-way doors. An unknown
 you can name is a risk; an unknown you cannot is a surprise.
 
+## The shape of a finding — this is the whole of the depth
+
+**Nothing enters the pack as prose.** A context pack is deep because its findings have a *form*,
+not because it is long. The named benchmark makes this concrete: `vercel-labs/agent-skills` @
+063bee9 ships a 948-word index over 70 rule files totalling 13,606 words — a 7% index — and the
+median rule is 177 words of which roughly half is code. Depth lives in the shape, and a finding
+that will not fit the shape is not ready to hand over.
+
+````
+<prefix>-<slug>                                 impact: Critical | Important | Minor
+why:     one or two sentences — the MECHANISM, never the rule restated
+applies: <stack>@<version> · <path glob> · the situation — and say where it does NOT hold
+
+**Wrong (<the cost, in ≤8 words>):**
+```<lang>
+the smallest code that shows it
+```
+**Right (<the condition, or the win>):**
+```<lang>
+the smallest code that fixes it
+```
+from:    <source> @ <pinned ref or version>
+````
+
+**The label parenthetical is mandatory and is the load-bearing part.** Measured over the benchmark's
+70 rules, 65 of 69 `**Incorrect …**` labels name the defect in the label — `(sequential execution, 3
+round trips)`, `(O(n) per check)` — while only 20% carry a cost comment inside the code. A bare
+`**Wrong:**` makes the reader infer the failure mode, which is the one thing this shape exists to stop.
+
+**`applies` is the abstain clause, and nothing else in this kit owns it.** A rule with no "does not
+hold when" produces confident wrong refactors on the wrong major. Write the version range and the
+situation where it stops being true; if you cannot name one, you have a slogan, not a finding.
+
+**`impact` uses the kit's existing closed set** — `Critical | Important | Minor`, the same vocabulary
+**compound-v:recheck** and **compound-v:code-review** score with — so a slot-2 finding becomes a review
+assertion without translation.
+
+**Where the code comes from, in order:** this repo (`path:line`), the vendor's own API/reference
+documentation for the exact version, a pinned exemplar (`scripts/exemplar.sh read|grep`), then the
+installed package. Compose it yourself only when none of those has it, and say so in `from:`. *(The
+vendor-docs rung is listed second because a cold run of this skill found every Critical "must not"
+finding came from the vendor's API docs and nowhere else.)*
+
+**No per-finding `check:` field.** Slot 5 already owns the runnable check for the whole pack, and a
+twelve-finding pack does not need thirteen of them.
+
+**How many findings?** Few. Hand over the ones that change what gets built and say which you dropped —
+this kit has a REFUTED ledger row against putting a number on it, and the two studies that look like
+they set one are counting whole skill modules and topic documents, not findings per decision.
+
 ## Assembling it
+
+**The pack is one file, written beside the plan and deleted with it.**
+
+```
+Context pack — <the thing being built>
+resolved: <stack>@<versions FROM THE LOCKFILE> · repo @ <commit> · <date>
+sweep:    alpha.sh "<topic>" — <n> pointers, <n> read. Lanes at (0): <name them>
+
+  1  Constraints      2  Must not (most of the EFFORT)   3  Shapes + the axis
+  4  Delete           4  Force — what you must now handle that the plan didn't name
+  4b Build out of     5  Done means                      6  Still unknown
+```
+
+`resolved:` is the first line because a pack whose versions are not stamped cannot be detected as
+stale later — it can only be believed. **No slot is ever silently empty:** write `NONE — <reason>`,
+because a blank reads as thoroughness and an absence is a finding. `Force` is the standing companion
+to `Delete` from **references/prior-art.md** — what prior art now obliges you to handle that the plan
+never named: a rate limit, an auth dance, a pagination shape, an ordering guarantee.
 
 ```
 bash scripts/preflight.sh                            # once per machine
 bash scripts/alpha.sh "<topic>" [tier] [language]    # every task
 ```
+
+**These paths are relative to the KIT ROOT, not your project.** You are almost never standing in
+it: use `${CLAUDE_PLUGIN_ROOT}` where it is set, or take the base directory the harness printed
+when it loaded this skill and go up two. A cold run of this skill lost its first attempt to
+exactly this, and `No such file or directory` reads like a broken kit rather than a wrong cwd.
 
 **Preflight first, and only once per machine.** The lanes shell out to `gh`, `yt-dlp` and
 `curl`; a missing or logged-out tool makes a lane return nothing, which reads as *"there is
@@ -127,36 +201,35 @@ is what makes the pack detectably stale later rather than silently wrong.
 
 ## Four rules that keep prior art from making the work derivative
 
-- **Look for what to REMOVE, not what to ADD.** A founder who threw away his own framework after
-  reverse-engineering two shipped agents puts it sharply: *"abstractions freeze assumptions about how
-  intelligence should work… your abstractions become constraints."* Studying an exemplar to subtract
-  is safe; studying it to accumulate is how you inherit its accidents.
-- **Look but don't paste.** A team rebuilding a system ~50 engineers had spent 18 months on could
-  read the old code and was forbidden to copy from it, *"because that is the natural tendency."*
+- **Look for what to REMOVE, not what to ADD.** Studying an exemplar to subtract is safe; studying
+  it to accumulate is how you inherit its accidents, including the ones it is still paying for.
+- **Look but don't paste.** Reading the old implementation and copying from it are different acts,
+  and the second is the default drift — name it before you start, not after.
 - **Copy the shape, re-derive the values.** A tuned artifact carries numbers earned against someone
   else's observed failures; taking it verbatim does not transfer its results.
 - **A codebase's patterns include its bad ones.** An agent mining a repo will find the wrong way to
-  do a thing and follow it — *"that's some engineer that doesn't work here anymore."* So this step
-  ends in a reviewed list with explicit REJECTS, never in a summary the agent then obeys.
+  do a thing and follow it, because nothing in the file says which engineer left. So this step ends
+  in a reviewed list with explicit REJECTS, never in a summary the agent then obeys.
 
-**How to tell whether the work is actually novel, rather than well-recalled.** This is the only
-mechanism in the evidence that answers it, and it is a design of the *check*, not of the work: a
-biology team established their result was first by choosing validation targets **whose solution could
-not be in the corpus** — antibody targets with no known binder, so any hit was provably novel rather
-than retrieved. The transferable form: **if it matters that the output is not derivative, evaluate it
-on a task whose answer is not in what you learned from.** Grading against corpus-derived exemplars
-cannot distinguish novelty from recall — that is a scope failure in the instrument, not a strictness
-failure, so tightening the gate never reaches it.
+*(These four carried quoted attributions for their whole life and none was ever registered in
+references/sources.md — three strings, zero ledger rows, invisible to gate #8 because it walks
+ledger→file and cannot see a quote that was never entered. Almost certainly transcript text, which
+this kit forbids quoting. The rules survive their removal intact, which is the usual tell that the
+quotation was decoration.)*
+
+**How to tell whether the work is actually novel, rather than well-recalled.** It is a design of
+the *check*, not of the work: a biology team established their result was first by choosing
+validation targets **whose solution could not be in the corpus**, so any hit was provably novel
+rather than retrieved. The transferable form — **if it matters that the output is not derivative,
+evaluate it on a task whose answer is not in what you learned from.** Grading against
+corpus-derived exemplars cannot distinguish novelty from recall; that is a scope failure in the
+instrument, so tightening the gate never reaches it.
 
 **Be honest about how weak the rest of the evidence here is.** The tidy claim — that an agent can
-build a v2 by being shown a v1 but cannot originate a v1 — rests on **one source who hedges it on
-record** and who concedes you could probably generate the v2 of his own example. Meanwhile the
-opposite is at least as well attested: the two most-cited novel products in the sweep came from a
-*felt defect in daily use* and from an *operational constraint someone had already hit* — not from a
-blank page. And one operator pulls the other way entirely, having killed a six-month project because
-the base model was weak in that domain, concluding you should pick a domain the model is already good
-at — which is also a recipe for building where everyone else is. Nobody in the evidence resolves
-that, so neither does this skill.
+build a v2 from a v1 but cannot originate a v1 — rests on **one source who hedges it on record**.
+The opposite is at least as well attested: the two most-cited novel products in the sweep came from
+a *felt defect in daily use* and from an *operational constraint someone had already hit*, not from
+a blank page. Nobody in the evidence resolves it, so neither does this skill.
 
 **And the expiry test, which nothing else in this kit applies:** would this line still earn its place
 on a *stronger* model? A rule that only lifts a weak one is scaffolding for a deficiency being
@@ -183,15 +256,11 @@ got a blank file with one shape in it. A pack that stays in the conversation die
 
 ## The loop this closes
 
-This skill spends the table; **compound-v:finishing** step 2.5 refills it. That is the whole
-difference between an agent that starts every session cold and an engineer whose judgement compounds
-across projects — the accumulated traps, held on disk, retrieved per task, never preloaded.
-
-Note the shape of the loop, because it is the same one **compound-v:systematic-debugging** runs on a
-bug: gather the context first, act second, and write down what you learned at the end. The reason
-that skill's four phases are in a fixed order is the reason these six slots are — acting before you
-understand produces a fix that moves the symptom, and building before you understand produces a
-workaround that has to be paid for later.
+This skill spends the table; **compound-v:finishing** step 2.5 refills it. That is the difference
+between an agent that starts every session cold and an engineer whose judgement compounds — the
+accumulated traps, held on disk, retrieved per task, never preloaded. It is the same order
+**compound-v:systematic-debugging** runs on a bug: gather first, act second, write down what you
+learned at the end.
 
 ## Red flags
 

@@ -168,16 +168,29 @@ case "${1:-}" in
     fixes="$(gh api "repos/$r/releases?per_page=10" --jq '[.[].body // ""]|join(" ")' 2>/dev/null | grep -ciE 'fix|bug|patch|regression' || true)"
     tags="$(gh api "repos/$r/tags?per_page=5" --jq 'length' 2>/dev/null || echo 0)"
     tests="$(gh api "repos/$r/contents" --jq '[.[].name]|map(select(test("test|spec|__tests__";"i")))|length' 2>/dev/null || echo 0)"
+    # RECENCY, not just "not archived". `archived != true` passes a repo that is dead but merely
+    # un-archived: measured, tj/commander.js had 0 commits in the trailing 90 days and still scored
+    # 5/5, and left-pad/left-pad — archived, deprecated, last pushed 2019 — scored 3/5, the same as
+    # torvalds/linux. A rubric that cannot separate a famous corpse from an operating project is
+    # not measuring what "has this been kept working" means.
+    recent="$(gh api "repos/$r/commits?per_page=1&since=$(date -u -v-90d +%Y-%m-%d 2>/dev/null || date -u -d '90 days ago' +%Y-%m-%d)" --jq 'length' 2>/dev/null || echo 0)"
     score=0
     [ "$lang" != "NONE" ] && score=$((score+1))
-    [ "$archived" != "true" ] && score=$((score+1))
-    [ "${rel:-0}" -gt 0 ] && score=$((score+1))
-    { [ "${fixes:-0}" -gt 0 ] || [ "${tags:-0}" -gt 0 ]; } && score=$((score+1))
+    { [ "$archived" != "true" ] && [ "${recent:-0}" -gt 0 ]; } && score=$((score+1))
+    # ONE point for release hygiene, from EITHER signal. Scoring `rel` and `fixes` separately paid
+    # a repo that cuts GitHub Releases twice out of one endpoint while a tags-only project got one,
+    # which is a publishing convention being scored as engineering quality.
+    { [ "${rel:-0}" -gt 0 ] || [ "${tags:-0}" -gt 0 ]; } && score=$((score+1))
+    [ "${fixes:-0}" -gt 0 ] && score=$((score+1))
     [ "${tests:-0}" -gt 0 ] && score=$((score+1))
     echo "$r  — $desc"
     printf '  language      %-14s %s\n' "$lang"      "$([ "$lang" != NONE ] && echo 'ok — it is a codebase' || echo 'FAIL — no language: a list, docs, or a collection')"
-    printf '  maintained    pushed %-7s %s\n' "$pushed" "$([ "$archived" != true ] && echo 'ok — not archived' || echo 'FAIL — archived')"
-    printf '  releases      %-14s %s\n' "${rel:-0}"  "$([ "${rel:-0}" -gt 0 ] && echo 'ok — someone ships versions' || echo 'FAIL — never released')"
+    # THE DISPLAY MUST EXPLAIN THE SCORE. These two lines described the old scoring and were never
+    # updated: left-pad printed two passing signals and scored 3/5, because the tags fallback and
+    # the recency term were computed but never shown. A rubric the reader cannot reconcile with its
+    # own number is worse than either half alone.
+    printf '  maintained    pushed %-7s %s\n' "$pushed" "$({ [ "$archived" != true ] && [ "${recent:-0}" -gt 0 ]; } && echo 'ok — not archived, and commits in the last 90d' || { [ "$archived" = true ] && echo 'FAIL — archived' || echo 'FAIL — no commits in the last 90d: un-archived is not the same as alive'; })"
+    printf '  versioned     rel=%-3s tags=%-4s %s\n' "${rel:-0}" "${tags:-0}" "$({ [ "${rel:-0}" -gt 0 ] || [ "${tags:-0}" -gt 0 ]; } && echo 'ok — someone ships versions (releases OR tags)' || echo 'FAIL — never versioned')"
     printf '  fix-notes     %-14s %s\n' "${fixes:-0}" "$([ "${fixes:-0}" -gt 0 ] && echo 'ok — changelogs carry BUG FIXES, not just features' || echo 'FAIL — features only: nobody has lived with it')"
     printf '  tests         %-14s %s\n' "${tests:-0}" "$([ "${tests:-0}" -gt 0 ] && echo 'ok — top-level test dir' || echo 'weak — none at top level (may be nested)')"
     printf '  stars         %-14s NOT SCORED — reach is what marketing buys\n' "$stars"
@@ -187,9 +200,12 @@ case "${1:-}" in
     echo "  A score is a floor, never a reason. The real test is whether a team had to KEEP THIS"
     echo "  WORKING for someone — read the issues strangers filed and whether anyone answered."
     echo
-    echo "  SCOPE: this rubric is for CODE exemplars and MIS-SCORES knowledge repos. Measured —"
-    echo "  vercel-labs/agent-skills and anthropics/skills both score 3/5 and are rejected, because a"
-    echo "  markdown skills collection has no bug-fix changelog and no tests by nature. Automated"
+    echo "  SCOPE: this rubric is for CODE exemplars and MIS-SCORES knowledge repos — a skill pack,"
+    echo "  a guide or a rules collection has no bug-fix changelog and no tests by nature, so it"
+    echo "  loses points for being what it is. Never read a low score here as a verdict on one."
+    echo "  (No score is quoted in this help text on purpose: one was, naming a repo at 3/5, and"
+    echo "  the repo shipped and moved to 4/5 while the text stayed put. Scores drift; rules do not.)"
+    echo "  Automated"
     echo "  signals do not separate a curated link-list from a real knowledge base either:"
     echo "  ComposioHQ/awesome-claude-skills has 28 contributors and an Organization owner, same as"
     echo "  the real ones. For a docs/skills repo, open two files and look: a rule carries a correct"
