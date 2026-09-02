@@ -252,9 +252,9 @@ order — each lane answers a question the one above it cannot:
 |---|---|---|---|
 | 1 | **This repo** | `grep`, `git log -S`, `stack.sh` | what is actually true here, at the version on disk |
 | 2 | **The vendor's own docs, at your installed version** | `curl`, the package's own site | what the API contractually does — a cold run found every Critical "must not" came from here and nowhere else |
-| 3 | **A real codebase at a pinned ref** | `exemplar.sh grep\|read` | what *shape* people who shipped it used; docs never answer this |
+| 3 | **A real codebase at a pinned ref** | `exemplar.sh grep\|read` over `exemplars.tsv` | what *shape* people who shipped it used; docs never answer this |
 | 4 | **Talks** | `yt.sh sweep\|mine\|transcript` over `channels.tsv` | what practitioners hit in anger, months before it reaches documentation |
-| 5 | **Papers** | `alpha.sh`, arXiv | whether anyone put a number on it |
+| 5 | **Papers and engineering blogs** | `alpha.sh`, arXiv, `publications.tsv` | whether anyone put a number on it |
 | 6 | **Practitioners** | `practitioners.tsv` | the judgment call — writing preferred over posts, because an essay is quotable and a post usually is not |
 
 **Every lane must report an explicit `(0)` when it returns nothing.** A lane that FAILED and a lane
