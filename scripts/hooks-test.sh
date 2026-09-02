@@ -62,6 +62,24 @@ run "stop_hook_active on a blocking turn"   ALLOW "$fx/block-claim-no-command.js
 
 # Everything the gate must NOT block.
 run "a command actually ran"                ALLOW "$fx/allow-command-ran.jsonl"
+# A prose-only turn has no command that could observe the change, so demanding one is a false
+# block on the commonest Trivial-tier task. The mixed case is the guard on that guard: one code
+# file among the docs and the gate must still fire, or "touch a README too" becomes the bypass.
+run "docs-only edit + claim"                ALLOW "$fx/allow-docs-only.jsonl"
+run "docs AND code edited + claim"          BLOCK "$fx/block-mixed-docs-and-code.jsonl"
+# `echo ok` cleared this gate for its whole life — the forgeable-attestation class, committed by
+# the gate itself. The two ALLOW rows are the guard on the fix: a real suite must still pass, and
+# `ls` is a LEGITIMATE check for "was the file written", so the block list stays at the three
+# commands that can never observe anything.
+run "contentless command (echo ok)"        BLOCK "$fx/block-contentless-command.jsonl"
+# Four forms that ALL satisfied this gate until the filter was fixed: `\b` after `:` requires an
+# adjacent word character that never exists, and a trailing separator defeated the `[^&|;]*$` tail.
+run "contentless bare colon"              BLOCK "$fx/block-contentless-colon.jsonl"
+run "contentless echo, trailing ;"        BLOCK "$fx/block-contentless-trailing-semicolon.jsonl"
+run "contentless true, trailing ;"        BLOCK "$fx/block-contentless-true-semicolon.jsonl"
+run "contentless echo, backgrounded"      BLOCK "$fx/block-contentless-background.jsonl"
+run "a real test command"                  ALLOW "$fx/allow-real-command.jsonl"
+run "ls as a genuine existence check"      ALLOW "$fx/allow-ls-is-a-real-check.jsonl"
 run "\"still working on it\""               ALLOW "$fx/allow-still-working.jsonl"
 run "russian \"not working yet\""            ALLOW "$fx/allow-ru-negation.jsonl"
 run "suite, then a trailing edit"           ALLOW "$fx/allow-suite-then-trailing-edit.jsonl"

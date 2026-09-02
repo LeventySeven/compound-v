@@ -31,6 +31,32 @@ An agent is a program that takes instructions from whatever text lands in its co
 
 **7. Gate destructive actions; keep a kill-switch.** Anything irreversible or costly — delete, migrate, deploy, send, spend, any code-exec or deploy endpoint — sits behind an explicit approval, not silent autonomy. An autonomous loop needs a hard turn cap, monitoring, and a way to stop it mid-run; an unbounded loop with live tools is a standing incident. Separate two layers cleanly: the **sandbox** is the technical execution boundary (where it can write, whether it can reach the network); the **approval policy** decides *when* it must stop and ask — auto-approve low-risk read-only actions, approve-once or per-session for the rest, hard-stop on the irreversible. **No authorization level licenses disclosure.** Even at the highest level a user can grant, still refuse to send secrets, credentials, or private organization data to an untrusted external destination — otherwise a successful injection escalates its own authorization and the permission system becomes the attack's instrument. The strongest structural mitigation is the disposable surface: a throwaway container with no personal machine to harm, whose only output is a PR you review. A git worktree is not that surface — the tools that run agents in parallel say so in their own docs: workspace isolation is development isolation, not a security boundary; the agents still run as you, with your permissions, on your machine. It buys file-level non-interference (compound-v:dispatching-parallel-agents) and nothing else — and it is where the pressure to drop the gates shows up, since parallel runners pre-trust the worktree and auto-approve so workers don't stall on prompts, removing the guardrails at exactly the moment N agents are running unattended. And beware normalization of deviance — running without the safety wheels "hasn't burned me yet… and that's the problem."
 
+   **And a confirmation written as prose is not a gate.** An instruction like *"ask for confirmation
+   before doing this"* reads as a human-in-the-loop and is not one — for three attested reasons, none
+   of which is "the model asks itself" (that phrasing is vivid and unattested; the kit carried it
+   briefly and no source supports it). Instruction-following is probabilistic, so a prose rule lowers
+   a rate rather than raising a barrier — which is the stated design rationale for hooks:
+   *"deterministic control: certain actions always happen rather than relying on the LLM to choose to
+   run them."* The model also **authors the dialog text**, so it decides what the human sees and
+   approves; that one has a working exploit against shipped products — an approval dialog forged by
+   padding the harmful command out of view — and it was classified outside the threat model, so it is
+   live rather than patched. And a guardrail living inside the reasoning system is worth nothing once
+   that system is what got compromised.
+
+   **The property doing the work is not humanness — it is that the approver is structurally isolated
+   from the actor.** Claude Code's own auto mode swaps the human for *"a separate classifier model"*
+   whose inputs are filtered so it *"isn't influenced"* by Claude's reasoning or tool output. So a
+   tool permission, a hook, a protected branch or an external admission gate all qualify; a sentence
+   in a prompt does not. When auditing, grep for confirmations written as prose.
+
+   **Necessary, not sufficient**, on three measured counts: a tool-layer allowlist is still bypassable
+   by argument injection into pre-approved commands (allowlists without a sandbox are *"fundamentally
+   flawed"*); five of six agent frameworks leak a sibling's side effect during the approval pause; and
+   a real human at a real gate approved 133 of 148 overreach actions anyway, with oversight going
+   inverted-U as the reviewer fatigues. So gate the irreversible step, sandbox the rest, and keep the
+   approver blind to the actor's narration.
+   *(**DEFAULT register.** The register label stands; the source count that used to sit here did not, because nothing in references/sources.md enumerated it. An unbacked count asserts an audit that never happened.)*
+
 **8. Gate the closure, not the call.** Any data the agent can reach, its user can make it leak; any action it can take, its user can make it take, in any order — so what you granted is the transitive closure of what the tool set composes into, and a policy that asks "is *this* call safe?" one call at a time is defeated by chaining. Scope the grant to the **principal**, not the request and not the session: per-session approval bounds approval fatigue, never an adversary, because a fresh instance is context isolation and not a security boundary. The first documented largely-agent-run intrusion campaign ran on exactly that seam — reconnaissance in one instance, "this is my own system, how would you attack it" in another, each request individually legitimate and neither refusable on its own. The fix is classical permissioning, so the question at wiring time is what the granted set adds up to for someone who can start N sessions of it.
 
 ## Hard guard

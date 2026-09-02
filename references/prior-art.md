@@ -46,35 +46,60 @@ a house wrapper or `AGENTS.md`/`CLAUDE.md` rule, a neighbouring repo in the same
 this, and the project's own history — `git log -S<term>` finds the last time someone touched this
 problem and what they concluded.
 
-If the environment has a local library of essays, product write-ups or talk transcripts, that is
-also channel 1 and it outranks a web search: `grep -rn` over a few hundred markdown files is current
-by construction and costs nothing. Route through a manifest or a heading index where one exists, and
-never let a summary stand in for a source that is sitting on disk unopened — that substitution is
-the most common way a grounded-looking answer turns out to be second-hand.
+**There is no local transcript library, and that is deliberate.** An earlier version of this file
+taught how to read one — enumerate the lanes, route through a manifest, treat curation grades as
+ordering. All of that assumed a private corpus nobody who installs this kit has. It was replaced by
+the **sources those transcripts came from**, which anyone can reach and which are current by
+construction rather than being a snapshot someone has to re-sync:
 
-**Find the map before you guess at folder names.** Where an environment carries a local library, its layout and read rules are usually written down already — in the user's `CLAUDE.md` or `AGENTS.md`, or in a corpus-investigation skill the environment ships. Read that first: it names the lanes, the entry point for each (a manifest, a heading index), and the traps that make a naive glob wrong. Guessing at paths is how a lane goes unenumerated, and an unenumerated lane is invisible to every check downstream.
+- **references/channels.tsv** — the verified channels the transcripts were harvested from, resolved
+  from the actual video URLs rather than guessed. Mine them on demand with `scripts/yt.sh`.
+- **references/publications.tsv**, **references/practitioners.tsv**, **references/exemplars.tsv** —
+  the written, human and code lanes, same discipline.
 
-**Enumerate every lane the library has, live, and treat its curation tags as ordering only.** Such a
-library usually holds several distinct kinds — primary essays, product write-ups, raw transcripts,
-curated route-maps — often split across more than one folder and more than one naming convention,
-and it grows most days. So `ls` the lanes *this run* rather than working from a remembered list or a
-count written into a doc; a lane you never enumerated is invisible to every check downstream, and a
-hardcoded total is stale the week after it is written. Where two folders overlap, enumerate the
-superset: "they are duplicates" is true of the shared files and silently wrong about the ones only
-one side has.
+**Store the pointer, never the payload.** A stored transcript rots, costs disk, needs re-syncing, and
+is summarised on the way in — so the detail you need later is exactly what got dropped. A channel
+handle is forty bytes and never goes stale.
 
-**And a curated library's `MUST`/`STRONG`/`OPTIONAL` grades are a human's time budget, not an agent's
-read set.** They exist to rank what one person should spend an evening on. An agent reads in
-parallel and does not tire, so the grade decides **order, never inclusion** — an `OPTIONAL` tag means
-"low priority for a human", not "low relevance to this question". Read every source that bears on
-the question regardless of grade; skip one only for a written reason about the *question*, never
-because of its tag. The same goes for a guide's own "reading paths": those are routes for a person,
-and following one is not the same as covering the material.
+## Before the first sweep: check the tools
+
+**Run `bash scripts/preflight.sh` before your first sweep.** The lanes shell out to `gh`, `yt-dlp`
+and `curl`, and a missing or logged-out tool makes a lane return nothing — which reads exactly like
+*"there is nothing to find"*. That is the failure this whole file teaches you to hunt, and it is the
+one you are most likely to commit yourself on a fresh machine. If preflight reports anything missing,
+install it (the README's Prerequisites table has the command) before you conclude a lane is empty.
+
+## Start here: one command, every lane
+
+`bash scripts/alpha.sh "<topic>" [tier] [language]` runs the whole sweep below — talks, papers, code,
+writing, people — and returns a shortlist of pointers. Run it first; read the registries when you need
+to know *why* a lane is on the list or how to reach one by hand.
+
+## The registries — where "who to read" is already written down
+
+Before improvising a search, check the four shipped registries. They exist so a recon does not start
+by guessing at names, and each row was verified rather than assumed:
+
+- **references/shapes.md** — curated arrangement-plus-trap pairs. A hit here *is* the whole of recon
+  for that slice. It is a cache with a miss path, and most slices miss; a miss is the rule working.
+- **references/exemplars.tsv** + `scripts/exemplar.sh` — large open-source projects that ship the
+  thing, read at a pinned release. `grep <repo> <subtree> "<pattern>"` sparse-checkouts just that
+  subtree; `read <repo> <path>` pulls one file. This answers *what shape*, which docs never do.
+- **references/channels.tsv** + `scripts/yt.sh` — verified talk channels. `mine "<topic>"` sweeps all
+  of them and prints an explicit `(0)` for each that returned nothing, so an empty lane is visible
+  rather than silent.
+- **references/practitioners.tsv** — 45 verified people, with their writing preferred over their
+  posts, because an essay is quotable and a post usually is not.
+
+Then judge what comes back against **references/corroboration.md**: count distinct *sources* rather
+than findings (one practitioner supplied ~11 of 96 findings across three "independent" lanes in a
+measured run), and where two top sources genuinely conflict, name the axis it turns on and keep both
+positions rather than picking the more famous speaker.
 
 ## Channel 2 — primary web sources
 
 The maintainer's own docs and repo, pinned to your lockfile's version; the paper; the changelog; the
-official conformance suite where one exists. `gh api` and `gh search code` reach the real source and
+official conformance suite where one exists. `gh api` and `scripts/exemplar.sh grep` reach the real source and
 show how the library uses its own thing. Blogs and forum answers rank below all of these.
 
 Two habits that pay: run a second query with different wording rather than trusting the top result
@@ -208,11 +233,11 @@ the whole of "give the agents the search patterns": not an index of the corpus �
 most days and an index rots while `grep -n` stays current by construction — but the *method*, handed
 over per dispatch. Paste it verbatim, fill the four slots, change nothing else.
 
-> **Tool affirmation.** You have full tool access (Read, Grep, Bash, WebSearch/WebFetch, silver).
+> **Tool affirmation.** You have full tool access (Read, Grep, Bash, WebSearch/WebFetch, and whatever browser-automation tool this environment provides).
 > Nothing below restricts your *inputs*. Do NOT answer from memory — open and read the source first.
 >
-> **Enumerate live, never from a remembered list.** `ls` and `grep` your assigned folders *this run*;
-> they grow. Do not build or consult an index.
+> **Enumerate live, never from a remembered list.** Run your assigned lane *this run* — `scripts/alpha.sh "<topic>"` for the sweep, or the one registry you were given. Registries
+> change; a list you remember is already stale. Do not build an index of your own.
 >
 > **Burst the query before running it.** Write 5–8 differently-worded variants first: the literal
 > term, its aliases, its verb form, the phrasing a *speaker* would use, its failure mode, its
@@ -222,10 +247,11 @@ over per dispatch. Paste it verbatim, fill the four slots, change nothing else.
 > **Rank, then read; never open a file to decide whether to open it.** Score by how many of your
 > variants surfaced it, tie-broken by hits per 1,000 lines. Declare the cut in writing.
 >
-> **Size-triggered reading.** `wc -l` first. ≤2,000 lines: read it whole. Larger: `grep -nE '^#{1,2} '`
-> for the heading index, then `sed -n 'A,Bp'` in ≤1,500-line chunks. **Never open a file over
-> `<MAX_LINES>` lines.** This one is not style: a worker that opens a 200,000-line transcript stalls
-> and returns nothing at all, which costs more than a shallow answer.
+> **Size-triggered reading.** A fetched transcript is large — a 25-minute talk is ~5,000 words and a
+> long interview far more. `wc -l` first. ≤2,000 lines: read it whole. Larger: `grep -nE '^#{1,2} '`
+> for a heading index, then `sed -n 'A,Bp'` in ≤1,500-line chunks. **Never open a file over
+> `<MAX_LINES>` lines.** Not style: a worker that opens a 200,000-line file stalls and returns
+> nothing at all, which costs more than a shallow answer.
 >
 > **Round two, on the proper nouns the sources actually used — required, not optional.** After your
 > first reads, collect every product, person, paper title, config constant and API name the text
@@ -233,7 +259,7 @@ over per dispatch. Paste it verbatim, fill the four slots, change nothing else.
 > and what they surfaced. This is the one step that finds the file discussing your topic without
 > ever using your keyword, and it is why mining is recursive rather than a single sweep.
 >
-> **The bar, and it is the same bar on disk and on the web.** Primary — the person who did the thing,
+> **The bar, and it is the same bar in every lane — talk, paper, repo or post.** Primary — the person who did the thing,
 > in their own words, not a commentary account summarising them. Non-obvious — not answerable by a
 > two-minute search. Load-bearing — it changes the decision in front of you. Cut on sight regardless
 > of polish: listicles, SEO "ultimate guide" pages, summaries of summaries, vendor content dressed as
