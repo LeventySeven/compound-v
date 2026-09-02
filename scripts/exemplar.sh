@@ -17,22 +17,54 @@
 # references/prior-art.md names as the most expensive thing to be wrong about. Everything below
 # uses the contents API and git, which either work or fail loudly.
 set -uo pipefail
+
+# Dependency check. Sourced, not duplicated: five scripts need the same answer, and a missing
+# tool must become a NAMED failure rather than an empty result that reads like "nothing found".
+_pf="$(dirname "${BASH_SOURCE[0]}")/preflight.sh"; [ -r "$_pf" ] && . "$_pf"
+
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REG="${COMPOUND_EXEMPLARS:-$here/references/exemplars.tsv}"
 
 command -v gh >/dev/null 2>&1 || { echo "exemplar.sh: gh not found. Install the GitHub CLI." >&2; exit 127; }
 
 resolve_ref() {
+
   # ORDER MATTERS AND IS MEASURED. `tags[0]` is NOT the latest release: on vercel/next.js it returns
   # a monorepo package tag (@vercel/devlow-bench@0.3.4) and on openai/codex an alpha winget tag,
   # so pinning to it reads code from the wrong project or the wrong year. releases/latest first.
+  # TEST THE EXIT STATUS, NOT OUTPUT EMPTINESS — the same defect already fixed in `vet`, still live
+  # here. `gh api` writes the 404 JSON BODY to stdout, so on a repo that tags without cutting GitHub
+  # Releases (python/peps, postgres/postgres, torvalds/linux) `ref` was assigned
+  # {"message":"Not Found",...,"status":"404"} — non-empty and not "null", so it passed both guards
+  # and was printed AS THE REF. Measured live: `exemplar.sh ref python/peps` emitted that JSON, and
+  # `grep`/`read` would then pin a checkout to it.
   local r="$1" ref
-  ref="$(gh api "repos/$r/releases/latest" --jq '.tag_name' 2>/dev/null)"
-  [ -n "$ref" ] && [ "$ref" != "null" ] && { printf '%s' "$ref"; return; }
-  ref="$(gh api "repos/$r/tags" --jq '.[0].name' 2>/dev/null)"
-  [ -n "$ref" ] && [ "$ref" != "null" ] && { printf '%s' "$ref"; return; }
-  gh api "repos/$r" --jq '.default_branch' 2>/dev/null
+  if ref="$(gh api "repos/$r/releases/latest" --jq '.tag_name' 2>/dev/null)" \
+     && [ -n "$ref" ] && [ "$ref" != "null" ]; then printf '%s' "$ref"; return 0; fi
+  # NO tags[0] RUNG. The tags endpoint is not chronological, so `tags[0]` is arbitrary — measured
+  # on the two registry-adjacent repos that tag without cutting Releases, it returned
+  # `release-6-3` for postgres/postgres (a 1997 tag) and `lastpy2pep8` for python/peps. Pinning the
+  # "read the best implementation" lane to decades-old code is worse than admitting we have no
+  # release to pin to, because the reader cannot tell from the output that anything is wrong.
+  # Fall through to the default branch instead, which the caller labels as unpinned.
+  if ref="$(gh api "repos/$r" --jq '.default_branch' 2>/dev/null)" \
+     && [ -n "$ref" ] && [ "$ref" != "null" ]; then printf '%s' "$ref"; return 0; fi
+  # All three failed. Return nothing and say so — a ref nobody could resolve must stop the run,
+  # not become a checkout target.
+  echo "exemplar.sh: could not resolve a ref for $r (typo, private, or the API refused)." >&2
+  return 1
 }
+
+# Every subcommand below except `list` calls the GitHub API, and `gh` makes NO anonymous requests:
+# logged out, it refuses everything. Check ONCE here, in the main shell. It cannot go inside
+# resolve_ref — that runs in a command substitution, where `exit` kills only the subshell: measured,
+# the warning printed while rc stayed 0 and the caller carried on with an EMPTY ref, so `grep` and
+# `read` ran against nothing and `read` blamed the path for what was really a logged-out gh.
+# `list` is exempt: it reads the local TSV and must keep working with no network and no account.
+case "${1:-}" in
+  ref|read|grep|vet|find)
+    declare -F gh_ready >/dev/null && { gh_ready || exit 3; } ;;
+esac
 
 case "${1:-}" in
   list)
@@ -45,20 +77,26 @@ case "${1:-}" in
     # to `aws-sdk-v0.6.6` while the package is 0.122.0. The checkout is correct either way — the
     # CITATION is what goes wrong, because the tag alone names the wrong thing. The commit does not
     # have that ambiguity, so quote both.
-    r="${2:?owner/repo}"; ref="$(resolve_ref "$r")"
+    r="${2:?owner/repo}"; # resolve_ref now returns non-zero when every lookup failed. Without checking it, the caller
+    # carried on with an empty ref and printed a broken line with the raw 404 JSON in it.
+    ref="$(resolve_ref "$r")" || exit 4
     sha="$(gh api "repos/$r/commits/$ref" --jq '.sha[0:7]' 2>/dev/null)"
     if [ -n "$sha" ]; then echo "$ref ($sha)"; else echo "$ref"; fi ;;
 
   read)
     r="${2:?owner/repo}"; path="${3:?path}"
-    ref="$(resolve_ref "$r")"
+    # resolve_ref now returns non-zero when every lookup failed. Without checking it, the caller
+    # carried on with an empty ref and printed a broken line with the raw 404 JSON in it.
+    ref="$(resolve_ref "$r")" || exit 4
     echo "# $r @ $ref :: $path"
     gh api "repos/$r/contents/$path?ref=$ref" --jq '.content' 2>/dev/null | base64 -d 2>/dev/null \
       || { echo "exemplar.sh: could not read $path at $ref (wrong path, or a directory — try 'grep')" >&2; exit 1; } ;;
 
   grep)
     r="${2:?owner/repo}"; sub="${3:?subtree}"; pat="${4:-}"
-    ref="$(resolve_ref "$r")"
+    # resolve_ref now returns non-zero when every lookup failed. Without checking it, the caller
+    # carried on with an empty ref and printed a broken line with the raw 404 JSON in it.
+    ref="$(resolve_ref "$r")" || exit 4
     # Cache the checkout per repo+ref. Without this, a lane reading twenty files across three
     # monorepos paid twenty full sparse clones — minutes instead of seconds, and unstable line
     # numbers between calls. Set COMPOUND_EXEMPLAR_CACHE=off to force a fresh clone.

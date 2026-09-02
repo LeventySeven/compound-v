@@ -61,6 +61,14 @@ construction rather than being a snapshot someone has to re-sync:
 is summarised on the way in — so the detail you need later is exactly what got dropped. A channel
 handle is forty bytes and never goes stale.
 
+## Before the first sweep: check the tools
+
+**Run `bash scripts/preflight.sh` before your first sweep.** The lanes shell out to `gh`, `yt-dlp`
+and `curl`, and a missing or logged-out tool makes a lane return nothing — which reads exactly like
+*"there is nothing to find"*. That is the failure this whole file teaches you to hunt, and it is the
+one you are most likely to commit yourself on a fresh machine. If preflight reports anything missing,
+install it (the README's Prerequisites table has the command) before you conclude a lane is empty.
+
 ## Start here: one command, every lane
 
 `bash scripts/alpha.sh "<topic>" [tier] [language]` runs the whole sweep below — talks, papers, code,

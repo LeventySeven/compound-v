@@ -16,6 +16,11 @@
 # negative costs a source you never knew existed and cannot later discover, because nothing will
 # tell you it was missing.
 set -uo pipefail
+
+# Dependency check. Sourced, not duplicated: five scripts need the same answer, and a missing
+# tool must become a NAMED failure rather than an empty result that reads like "nothing found".
+_pf="$(dirname "${BASH_SOURCE[0]}")/preflight.sh"; [ -r "$_pf" ] && . "$_pf"
+
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 topic="${1:?usage: alpha.sh \"<topic>\" [tier] [language]}"
 tier="${2:-core}"
@@ -30,7 +35,15 @@ hr(){ printf '\n══ %s ══════════════════
 
 hr "1. TALKS — verified channels (references/channels.tsv)"
 if [ -x "$here/scripts/yt.sh" ]; then
-  bash "$here/scripts/yt.sh" sweep "$topic" 200 "$tier" 2>/dev/null 
+  # NOT 2>/dev/null. That redirect discarded the one channel of information that separates a lane
+  # with nothing in it from a lane that never ran: yt.sh writes its tool-failure notice to stderr
+  # and exits 3. Measured before this fix — alpha.sh printed a complete 5,786-byte report at exit 0
+  # with (0) beside all 32 channels and no hint that yt-dlp had failed on every one of them.
+  bash "$here/scripts/yt.sh" sweep "$topic" 200 "$tier"
+  if [ "$?" = "3" ]; then
+    echo "#   ^^ THE TALKS LANE IS DEAD, NOT EMPTY — yt-dlp failed on every channel." >&2
+    echo "#   Treat every (0) above as UNMEASURED. Diagnose with: bash scripts/preflight.sh" >&2
+  fi 
 else
   echo "  yt.sh missing"
 fi

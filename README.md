@@ -22,8 +22,10 @@ constraints, the anti-patterns, the shape and its trap, what prior art lets you 
 "done" means — **for this task, then discards them.** The distinction is load-bearing rather than
 stylistic. Front-loading instructions a model cannot infer is measured to help; front-loading
 repository overviews was measured to cost over 20% and help nothing (arXiv 2602.11988). So the pack is assembled fresh
-per task and never becomes a standing document, and the heaviest slot is *how it must not be done* —
-past failure cases lift an agent where polished exemplars invite it to copy.
+per task and never becomes a standing document, and the heaviest EFFORT goes to *how it must not
+be done* — not because the positive half matters less, but because a negative result is almost never
+written up, so it is the half you cannot reconstruct. The pack carries both, and slot 3 carries the
+alternatives with the reason each lost.
 
 Two pieces carry most of the weight:
 
@@ -66,6 +68,37 @@ Three rules sit above the skills:
 /plugin marketplace add LeventySeven/compound-v
 /plugin install compound-v@compound-v-dev
 ```
+
+### Prerequisites — install these first, or the source lanes go dark
+
+The skills are markdown and need nothing. The **source lanes** shell out, and a missing tool makes a
+lane return nothing, which reads exactly like *"there is nothing to find"* — the failure this kit
+teaches you to hunt. Run the check first; it names what is missing, what it disables, and how to get it:
+
+```bash
+bash scripts/preflight.sh
+```
+
+| Tool | Needed for | Install |
+|---|---|---|
+| `git` | the code lane's sparse checkouts | preinstalled nearly everywhere |
+| `curl` | papers (arXiv) and engineering blogs | preinstalled on macOS and most Linux |
+| `jq` | the Stop hook and the ledger checks | `brew install jq` · `apt install jq` |
+| `gh` **+ `gh auth login`** | the code lane — reading real repos at a pinned release | `brew install gh` · [cli.github.com](https://cli.github.com) |
+| `yt-dlp` | the talk lane — the verified channels in `references/channels.tsv` | `brew install yt-dlp` · `pipx install yt-dlp` |
+| `python3`, `node` | optional; only `stack.sh`'s Python and Node lanes | your existing toolchain |
+
+**`gh auth login` is not optional.** `gh` makes **no** anonymous requests — logged out it refuses
+every API call, so before this was guarded, `exemplar.sh ref` printed one newline and exited **0**,
+and `grep` and `read` then ran against an empty ref while `read` blamed the path. Every one of those
+subcommands now exits **3** with a named error instead. `exemplar.sh list` still works with no
+account and no network, because it only reads a local file.
+
+**If you are an agent reading this:** run `bash scripts/preflight.sh` before your first source sweep.
+If it reports anything missing, install it with the command in the table above (ask the user first if
+installing software needs their approval), then re-run the check until it is clean. Do not proceed to
+`alpha.sh`, `yt.sh` or `exemplar.sh` on a failing preflight and report the result as "nothing found" —
+that is a tool failure wearing the costume of an empty search.
 
 For local development, point a directory marketplace at your clone and enable the plugin — **don't also copy or symlink the skills into `~/.claude/skills/`.** A personal-level copy takes precedence over the plugin, so you end up running a snapshot while editing the repo, and every skill appears twice in the listing: two entries competing for one shared, truncated description budget. The failure is silent in both directions — your edits don't take effect, and the extra entries shorten everyone else's triggers.
 
@@ -111,8 +144,10 @@ Caption provenance cannot be read off the metadata.
 
 There is one edition and it is this one. Everything it needs is public: the source registries in
 `references/` name YouTube channels, engineering blogs, practitioners and open-source repos that
-anyone can reach, and `scripts/` reaches them with `yt-dlp`, `gh` and `git` — no key, no login, no
-private corpus.
+anyone can reach, and `scripts/` reaches them with `yt-dlp`, `gh` and `git` — no paid key and no
+private corpus. It does need a free `gh auth login` for the code lane (see Prerequisites); an earlier
+version of this line claimed "no login", which was simply wrong and cost every logged-out user that
+lane in silence.
 
 **There is no private-corpus path any more, and removing it was the point.** An earlier version
 read a local library of transcripts and essays. Those transcripts came from somewhere — YouTube
@@ -135,7 +170,7 @@ when the file is absent.
 
 The kit checks itself, structurally and behaviourally.
 
-`bash scripts/check.sh` reads every skill and fails if one breaks a rule: a body over its budget, a frontmatter name that doesn't match its directory, an unknown frontmatter key, a description over the 1024-char cap the harness truncates at, a cross-reference to a skill that doesn't exist, an `@path` link, or any mention of the private research notes that must never ship. The size budget counts **words, not lines** — a body can double while the line count stays flat just by merging paragraphs, and the warning fires past ~3,750 words, the point where compaction stops re-attaching the rest of the file. It also prints the kit's always-on cost, since descriptions load in every session whether or not a skill fires. No dependencies; it drops straight into CI or a pre-commit hook.
+`bash scripts/check.sh` reads every skill and fails if one breaks a rule: a body over its budget, a frontmatter name that doesn't match its directory, an unknown frontmatter key, a description over the harness's 1,536-char listing cap (`description` + `when_to_use` combined), a cross-reference to a skill that doesn't exist, an `@path` link, or any mention of the private research notes that must never ship. The size budget counts **words, not lines** — a body can double while the line count stays flat just by merging paragraphs, and the warning fires past ~3,750 words, the point where compaction stops re-attaching the rest of the file. It also prints the kit's always-on cost, since descriptions load in every session whether or not a skill fires. No dependencies; it drops straight into CI or a pre-commit hook.
 
 `bash scripts/trigger-eval.sh` answers the harder question: **do these skills actually fire?** A skill that never gets invoked changes nothing, and it fails silently — a description the harness truncated looks exactly like one that simply didn't match. The script drives the real CLI on your existing session auth, feeds it realistic user phrasings from `scripts/trigger-fixtures.tsv`, and reports which skill each prompt actually invoked. Everything that could write, spend or spawn is denied by settings, and each case is bounded by a timeout. Negative fixtures are included: over-triggering on "fix the typo in the readme" is exactly as wrong as under-triggering on a real one, and a run that fails outright is reported as an error rather than scored as a pass.
 

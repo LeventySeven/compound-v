@@ -81,8 +81,9 @@ row.
 
 **A caution on the related finding, stated so it is not over-applied here — as it was once already.**
 There is a measured result that giving an agent past *failure* cases improves its work while past
-*successes* can invite it to copy the answer back rather than reason. That is about **examples handed
-to a model at inference time**, and it does not transfer to a registry row: a shape-plus-trap pair is
+*successes* can invite it to copy the answer back rather than reason. Its real scope is narrower than either
+reading: the source is describing an agent re-reading **its own prior trajectories** in a long
+context window, and its author disclaims the area on record. It does not transfer to a registry row: a shape-plus-trap pair is
 a decision aid, not a template to mimic. Reading it as "record only failures" produces rows with no
 shape, which is how this section was first written and why it is worth naming.
 

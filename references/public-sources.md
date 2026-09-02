@@ -3,6 +3,12 @@
 The recon ladder in **references/prior-art.md** says *what* to look for. This file says *where*, using
 only channels anyone has: no private corpus, no API key, no paid seat.
 
+**Run `bash scripts/preflight.sh` before your first sweep.** The lanes shell out to `gh`, `yt-dlp`
+and `curl`, and a missing or logged-out tool makes a lane return nothing — which reads exactly like
+*"there is nothing to find"*. That is the failure this whole file teaches you to hunt, and it is the
+one you are most likely to commit yourself on a fresh machine. If preflight reports anything missing,
+install it (the README's Prerequisites table has the command) before you conclude a lane is empty.
+
 Read it when a slice's unknown is real, when **compound-v:searching-patterns** sends you outward past
 the installed copy, or any time you are about to answer from memory on something expensive.
 
@@ -29,9 +35,19 @@ mechanical and therefore free: listing candidates costs seconds and zero tokens,
 *reading* the shortlist rather than on *finding* it. That is the split worth keeping — an agent sent
 to find things burns the context it needed for judging them.
 
-It reports a failure as a failure: a rate-limited arXiv says so instead of printing "no papers",
-and a channel that returned nothing prints an explicit `(0)`. An empty lane and a broken lane look
-identical otherwise, and they mean opposite things.
+It reports a failure as a failure: a rate-limited arXiv says so instead of printing "no papers"; a
+channel that returned nothing prints an explicit `(0)`; a channel whose fetch FAILED is counted
+separately and, if every channel failed, the sweep refuses its own summary and exits non-zero rather
+than reporting a clean zero. An empty lane and a broken lane look identical otherwise, and they mean
+opposite things.
+
+**That last clause was a promise this file made and the scripts did not keep.** Audited against a
+clean clone on a machine without the tools, `yt.sh sweep` printed `(0)` beside all 32 channels, "0
+titles matched", exit 0, and advice to widen the regex — when in fact yt-dlp had failed on every one
+of them; `alpha.sh` discarded yt.sh's own missing-tool message with `2>/dev/null`; and `exemplar.sh`
+returned an empty ref against a logged-out `gh`. The rule was stated here and implemented at about
+half the call sites. Read this paragraph as the specification it always was, and `bash
+scripts/preflight.sh` as the thing that tells you whether the lanes can run at all.
 
 **Recall first, then filter — `sweep`, not `mine`.** YouTube's own in-channel search is fuzzy and
 matches titles only, so it silently under-collects, and a talk you never listed cannot be judged. A

@@ -10,6 +10,11 @@
 # ASR-derived. So caption provenance CANNOT be read off the metadata, and the only
 # safe rule is the unconditional one: captions are SUBSTANCE, never QUOTATION.
 set -uo pipefail
+
+# Dependency check. Sourced, not duplicated: five scripts need the same answer, and a missing
+# tool must become a NAMED failure rather than an empty result that reads like "nothing found".
+_pf="$(dirname "${BASH_SOURCE[0]}")/preflight.sh"; [ -r "$_pf" ] && . "$_pf"
+
 YTDLP="${YTDLP:-$HOME/.local/bin/yt-dlp}"
 command -v "$YTDLP" >/dev/null 2>&1 || YTDLP=yt-dlp
 REG="${COMPOUND_CHANNELS:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/references/channels.tsv}"
@@ -119,16 +124,38 @@ case "${1:-}" in
     # which lane holds the answer — you ask all of them and let the titles rank themselves.
     q="$2"; per="${3:-4}"
     [ -n "$q" ] || { echo "usage: yt.sh mine \"<query>\" [per-channel]" >&2; exit 2; }
-    echo "# mining ${q} across $(awk -F'\t' '!/^#/ && NF>=3' "$REG" | wc -l | tr -d ' ') verified channels"
-    empties=""
+    nch="$(awk -F'\t' '!/^#/ && NF>=3' "$REG" | wc -l | tr -d ' ')"
+    echo "# mining ${q} across $nch verified channels"
+    # COUNT THE FAILURES, not just the empties. The (0) marker exists to separate "this channel has
+    # nothing on your question" from "this channel vanished" — but the loop discarded yt-dlp's exit
+    # status, so a yt-dlp that is installed and BROKEN (an outdated build, a bot-walled IP, no
+    # network) printed (0) for all 32 channels at exit 0. Measured: a complete-looking sweep that
+    # found nothing, with no hint that the tool never ran. YouTube bot-walls fresh IPs routinely, so
+    # this is the common case for a new user, not an exotic one. The pipeline runs the loop in a
+    # subshell, so the tally goes through a file rather than a variable.
+    errf="$(mktemp)"; trap 'rm -f "$errf"' EXIT
     awk -F'\t' '!/^#/ && NF>=3 {print $1"\t"$2}' "$REG" | while IFS="$(printf '\t')" read -r h name; do
       hits="$("$YTDLP" --flat-playlist --skip-download -I "1:$per" \
         --print "$name || %(title)s || %(duration_string)s || %(webpage_url)s" \
         "https://www.youtube.com/@$h/search?query=$(printf '%s' "$q" | sed 's/ /%20/g')" 2>/dev/null)"
+      [ "$?" -ne 0 ] && printf 'x' >> "$errf"
       if [ -n "$hits" ]; then printf '%s\n' "$hits"
       else printf '#   (0) %s\n' "$name"
       fi
     done
+    errs="$(wc -c < "$errf" 2>/dev/null | tr -d ' ')"; errs="${errs:-0}"
+    if [ "$errs" -gt 0 ] && [ "$errs" -ge "$nch" ]; then
+      echo "" >&2
+      echo "TOOL FAILURE, NOT AN EMPTY RESULT: yt-dlp failed on ALL $nch channels." >&2
+      echo "  Every (0) above is a FAILED CALL, not a channel without matches. Do NOT record this" >&2
+      echo "  sweep as 'no talks found' — nothing was actually searched." >&2
+      echo "  Likely causes: yt-dlp out of date (run: yt-dlp -U), no network, or YouTube serving a" >&2
+      echo "  bot-wall to this IP. Check with: $YTDLP --version && $YTDLP --flat-playlist -I 1:1 \\" >&2
+      echo "    --print '%(title)s' https://www.youtube.com/@LennysPodcast/videos" >&2
+      exit 3
+    elif [ "$errs" -gt 0 ]; then
+      echo "# NOTE: $errs of $nch channels FAILED (not empty). Their (0) lines are unmeasured." >&2
+    fi
     # A channel that returned nothing prints a (0) line rather than vanishing. Silence and
     # "this lane has nothing on your question" look identical otherwise, and one of them is a
     # broken query while the other is a finding.
@@ -148,17 +175,33 @@ case "${1:-}" in
     # here, with your own regex, instead of trusting YouTube's matcher. Be generous with the regex —
     # a false positive costs one transcript, a false negative costs a source you never knew existed.
     pat="${2:?usage: yt.sh sweep \"<extended-regex>\" [per-channel-limit] [tier]}"; lim="${3:-400}"
-    total=0
+    total=0; errs=0; nch=0
     echo "# sweeping /$pat/i over the newest $lim titles of each ${4:-all}-tier channel"
     while IFS="$(printf '\t')" read -r h name; do
       [ -n "$h" ] || continue
-      hits="$("$YTDLP" --flat-playlist --skip-download -I "1:$lim" \
+      nch=$((nch + 1))
+      # Capture yt-dlp's status BEFORE piping to grep. Written as one pipeline, `$?` was grep's
+      # status and yt-dlp's failure was unobservable — so a broken or bot-walled yt-dlp printed
+      # (0) for every channel at exit 0. This is the lane alpha.sh actually calls, so that silent
+      # lie was the default experience for anyone whose yt-dlp was stale or whose IP was walled.
+      raw="$("$YTDLP" --flat-playlist --skip-download -I "1:$lim" \
         --print "$name || %(title)s || %(webpage_url)s" \
-        "https://www.youtube.com/@$h/videos" 2>/dev/null | grep -iE "$pat")"
+        "https://www.youtube.com/@$h/videos" 2>/dev/null)" || errs=$((errs + 1))
+      hits="$(printf '%s' "$raw" | grep -iE "$pat")"
       n=$(printf '%s' "$hits" | grep -c . )
       total=$((total + n))
       if [ "$n" -gt 0 ]; then printf '%s\n' "$hits"; else printf '#   (0) %s\n' "$name"; fi
     done < <(awk -F'\t' -v t="${4:-all}" '!/^#/ && NF>=3 && (t=="all" || $3==t) {print $1"\t"$2}' "$REG")
+    if [ "$errs" -gt 0 ] && [ "$errs" -ge "$nch" ]; then
+      echo "" >&2
+      echo "TOOL FAILURE, NOT AN EMPTY RESULT: yt-dlp failed on ALL $nch channels." >&2
+      echo "  Every (0) above is a FAILED CALL, not a channel without matches. Nothing was searched," >&2
+      echo "  so do NOT record this sweep as 'no talks found'." >&2
+      echo "  Likely: yt-dlp out of date (yt-dlp -U), no network, or a YouTube bot-wall on this IP." >&2
+      exit 3
+    elif [ "$errs" -gt 0 ]; then
+      echo "# NOTE: $errs of $nch channels FAILED (not empty). Their (0) lines are unmeasured." >&2
+    fi
     echo "# $total titles matched. Widen the regex if that feels thin — under-collecting is the"
     echo "# expensive error here. Then: bash scripts/yt.sh transcript <url>"
     echo "# Captions are SUBSTANCE, not QUOTATION (references/public-sources.md)." ;;

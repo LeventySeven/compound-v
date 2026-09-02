@@ -81,7 +81,9 @@ Stage 1's output is `slices.json`, and it exists before any code. Per slice, fou
 **The output is a decision, not a report — and it lands in `slices.json` or it did not happen.** Name the **shape** (the architecture someone experienced would reach for), its **trap** (the second-order cost invisible on day one), and what the shape lets you **delete** — these land as slice fields in **references/completion-ledger.md** (which carries a fourth, `force`, for what the plan did not name), and a shape left in the conversation dies with the session. Shape-and-trap is the whole reason the corpus exists: an agent has read more code than any of us and has none of the scar tissue. The mechanism climb and the Simple/effective/scalable test are **compound-v:simplest-thing-that-works**; the API-level pattern is **compound-v:searching-patterns**.
 
 This stage is **compound-v:gathering-context** applied to one slice — its slots 3 and 4, the
-shape-and-trap and the DELETE list. Invoke that skill when the slice needs the other four
+candidate-shapes-and-trap and the DELETE list. A slice usually has one arrangement worth taking, which
+is why this stage is written in the singular; where it genuinely has two, carry the one you rejected
+and the reason it lost, so the next session cannot reopen a question this one already closed. Invoke that skill when the slice needs the other four
 slots too (constraints you cannot infer, how it must NOT be done, what "done" means, what is
 still unknown); stay here when the shape is the whole question.
 
