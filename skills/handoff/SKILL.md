@@ -61,6 +61,27 @@ session inherits a stale ledger and trusts it.
 
 Sweep before you delete, though — this section calls git the record, and **Do not** is the one part you already wrote down as what git cannot recover. So read it and the evidence lines once more and sort each entry: a dead end that only makes sense against this goal dies with the file, but the command that finally reproduced the bug, the env quirk that cost an hour, and the approach that will look attractive again in a later session are facts about the repo. Their home is `CLAUDE.md`/`AGENTS.md` — the file every session already reads, so a line there takes you out of the loop entirely (**compound-v:context-engineering** owns what qualifies and how to keep it small). Promote in the same commit that deletes; a fact you meant to move afterwards is a fact you lost.
 
+## What an unattended run owes you — five bounds
+
+Work that outlives a session is work nobody is watching, and the discipline for that has a name and
+a definition. Loop engineering — coined by Addy Osmani, *"replacing yourself as the person who
+prompts the agent"* — bounds each run with five things. State them in `.claude/STATE.md` before a
+run goes unattended, because every one of them is unrecoverable after the fact:
+
+1. **A machine-checkable stop condition.** Not "when it's done" — a predicate something can evaluate.
+   `get-shit-done`'s ledger rows are this kit's version.
+2. **A cost ceiling.** Inference spend, wall clock, or both.
+3. **A permission boundary** — what the run may change without asking. One-way doors (schema, public
+   API, spend, irreversible writes) sit outside it by default.
+4. **An escalation policy** — the named condition on which it stops and asks, decided in advance
+   rather than in the moment.
+5. **Independence between the verifier and the implementer.** Whatever checks the work must not be
+   the thing that produced it; that is why `recheck` is read-only.
+
+Note what these are: a termination predicate, a budget, a permission model, an escalation rule. **None
+of them is information you could put in a context window** — this is the one part of working with
+agents that gathering more context cannot help with, which is exactly why it needs writing down.
+
 ## Budget
 
 Keep it under 30 lines — the same argument `writing-plans` makes at its 200-line cap. A state file

@@ -45,6 +45,14 @@ call cannot reach.** Guidance the agent would have found by opening the file is 
 for twice — once in tokens, once in the attention it displaces. Ask of every line in the pack: could
 the implementer have got this with one `grep`? If yes, cut it and let them.
 
+**Why this is worth doing at all, stated as the cost hierarchy:** a bad line of code costs a line.
+A bad line of *plan* costs the lines built on it. A bad line of *research* — a wrong belief about how
+the system works — costs everything downstream, because every later artifact is built on top of it.
+Will Larson, a repeat CTO, puts the mechanism first-person: *"once any reasoning layer is poisoned,
+it's impossible to reason effectively on top of it"* — describing a case where accepting an initial
+analysis would have led him to push a team onto a project solving an illusionary problem. So spend
+the most effort VERIFYING the research layer, less on the plan, least on code-level detail.
+
 So the failure mode is not gathering context. It is **baking a standing document into every session**
 whether or not it bears on the task. Everything below is assembled *for this task*, used, and
 discarded. If a section of your pack would be identical for every task in the repo, it belongs in the
@@ -165,6 +173,13 @@ situation where it stops being true; if you cannot name one, you have a slogan, 
 **compound-v:recheck** and **compound-v:code-review** score with — so a slot-2 finding becomes a review
 assertion without translation.
 
+**Prefer giving the ability to fetch over pasting the content.** An Anthropic interpretability
+researcher puts the diagnostic as two questions in sequence: *"are you giving the model enough
+context? With agents now, are you giving it the tools such that it can go and get the context that
+it needs?"* The second is the stronger lever, and it is cheaper: a pointer plus a working command
+survives a stale pack, costs a fraction of the tokens, and lets the implementer pull the version
+that is true when they read it. Paste only what a command cannot return.
+
 **Where the code comes from, in order:** this repo (`path:line`), the vendor's own API/reference
 documentation for the exact version, a pinned exemplar (`scripts/exemplar.sh read|grep`), then the
 installed package. Compose it yourself only when none of those has it, and say so in `from:`. *(The
@@ -227,6 +242,65 @@ evaluate collapses into premature design and returns a plan wearing the costume 
 hallucinated architecture reads exactly like a real one. Pin the commit or release you read at — that
 is what makes the pack detectably stale later rather than silently wrong.
 
+## The lanes — what to run, and what each one is for
+
+`alpha.sh` sweeps everything and returns **pointers, not content**. Breadth is mechanical and
+therefore cheap; spend your reading on the shortlist, not on finding it. Then go by hand, in this
+order — each lane answers a question the one above it cannot:
+
+| # | Lane | Reach it with | The question only it answers |
+|---|---|---|---|
+| 1 | **This repo** | `grep`, `git log -S`, `stack.sh` | what is actually true here, at the version on disk |
+| 2 | **The vendor's own docs, at your installed version** | `curl`, the package's own site | what the API contractually does — a cold run found every Critical "must not" came from here and nowhere else |
+| 3 | **A real codebase at a pinned ref** | `exemplar.sh grep\|read` | what *shape* people who shipped it used; docs never answer this |
+| 4 | **Talks** | `yt.sh sweep\|mine\|transcript` over `channels.tsv` | what practitioners hit in anger, months before it reaches documentation |
+| 5 | **Papers** | `alpha.sh`, arXiv | whether anyone put a number on it |
+| 6 | **Practitioners** | `practitioners.tsv` | the judgment call — writing preferred over posts, because an essay is quotable and a post usually is not |
+
+**Every lane must report an explicit `(0)` when it returns nothing.** A lane that FAILED and a lane
+that is genuinely EMPTY mean opposite things, and rendering them the same is the single most
+expensive mistake in this whole process: it converts "the tool is broken" into "there is nothing to
+find", which is a licence to proceed on a guess. If a sweep comes back all zeros, check the tools
+before you believe it.
+
+## Judging what comes back
+
+Retrieval is the easy half. This is the half that decides whether the pack is worth having.
+
+**Count distinct SOURCES, not findings.** The failure is not people lying — it is one claim wearing
+several costumes, which reads as convergence and is the most persuasive thing a research pass can
+hand you. Measured on this kit's own runs: one practitioner supplied ~11 of 96 findings across three
+"independent" lanes, and a pool of 70 keepers collapsed to ~26 claims from ~22 primaries.
+
+**Collapse by person, by company, AND by commercial orbit.** An exhaustive pass over 369 episodes
+produced 59 findings from ~40 people — which looks like breadth until you pool it and find one
+commercial orbit supplying ~31%. No individual slice could see it; only the chair over the pooled
+set can. Ask not just "different company?" but **"different interest?"**
+
+**Label every finding with its register, and never let one imply agreement it does not have:**
+
+- **DEFAULT** — 3+ independent sources across 2+ lanes. Build on it.
+- **CONDITIONAL** — top sources genuinely disagree. Keep **both** and name the **axis** the
+  disagreement turns on. Never resolve it by picking the more famous speaker.
+- **CONTESTED** — one source, verified, load-bearing. Cite it as one, attach its speaker's
+  constraints, give its falsifier.
+- **REFUTED** — it did not survive. Write it down anyway; see below.
+
+**Separate marketing from technical signal — they look identical to a retrieval tool.** Reach is
+what marketing buys: a curated link list with half a million stars scores 1/5 on `exemplar.sh vet`,
+which scores what cannot be bought — recency, release hygiene, whether changelogs carry bug fixes,
+whether anyone has had to keep it working. And "safe to depend on" and "worth learning a pattern
+from" are different judgements that most advice conflates.
+
+**Captions are SUBSTANCE, never QUOTATION.** YouTube's "manual" track is frequently ASR-derived; one
+rendered "Claude Code" as "Cloud Code" throughout. Paraphrase a talk and say it came from a talk.
+This kit shipped a fabricated quotation assembled from captions, and had to cut the sentence.
+
+**Verify a finding before you act on it — including one you were handed.** A retrieval tool's
+digest is the tool's words, not the page's. Re-check any quote against the raw bytes. In the run
+that produced this section, three separate agent-reported findings did not survive being checked,
+and one of them nearly caused a working script to be "fixed".
+
 ## Four rules that keep prior art from making the work derivative
 
 - **Look for what to REMOVE, not what to ADD.** Studying an exemplar to subtract is safe; studying
@@ -238,24 +312,6 @@ is what makes the pack detectably stale later rather than silently wrong.
 - **A codebase's patterns include its bad ones.** An agent mining a repo will find the wrong way to
   do a thing and follow it, because nothing in the file says which engineer left. So this step ends
   in a reviewed list with explicit REJECTS, never in a summary the agent then obeys.
-
-**How to tell whether the work is actually novel, rather than well-recalled.** It is a design of
-the *check*, not of the work: a biology team established their result was first by choosing
-validation targets **whose solution could not be in the corpus**, so any hit was provably novel
-rather than retrieved. The transferable form — **if it matters that the output is not derivative,
-evaluate it on a task whose answer is not in what you learned from.** Grading against
-corpus-derived exemplars cannot distinguish novelty from recall; that is a scope failure in the
-instrument, so tightening the gate never reaches it.
-
-**Be honest about how weak the rest of the evidence here is.** The tidy claim — that an agent can
-build a v2 from a v1 but cannot originate a v1 — rests on **one source who hedges it on record**.
-The opposite is at least as well attested: the two most-cited novel products in the sweep came from
-a *felt defect in daily use* and from an *operational constraint someone had already hit*, not from
-a blank page. Nobody in the evidence resolves it, so neither does this skill.
-
-**And the expiry test, which nothing else in this kit applies:** would this line still earn its place
-on a *stronger* model? A rule that only lifts a weak one is scaffolding for a deficiency being
-deleted week by week — mark it with an expiry rather than carrying it as doctrine.
 
 ## Stop
 
@@ -269,6 +325,15 @@ the pack: *could a competent stranger holding only this, and nothing else, produ
 the honest answer needs something not in the pack, name that thing — it is either the next lookup or
 slot 6.
 
+**And know where the pack stops working.** The sharpest critic of this whole approach concedes the
+premise and then names its limit: the reason people become useful on a job is that they encounter
+their own particular part of the world, and *"it can't have been anticipated and can't all have been
+put in in advance. The world is so huge that you can't."* (Richard Sutton.) So a pack is a
+substitute for the part of experience that someone wrote down, and there is a part nobody wrote
+down. When the slots are full and the thing still feels underdetermined, that is not a failure to
+gather harder — it is the boundary. Ship the smallest version that gets you real feedback, and let
+the encounter supply what no corpus could.
+
 Budget it by how much you actually don't know. A surface you have shipped before earns slot 1 and
 nothing else. A one-way door — a schema, a public name, money, an irreversible write — earns the
 full pack. Running the whole apparatus on a familiar CRUD endpoint is this skill over-building on
@@ -281,6 +346,22 @@ plan's verification step. **Naming brainstorming here is not decoration** — th
 this skill straight into it, but this line used to skip it, so a reader following these instructions
 routed a fully-researched pack past the only step that generates alternatives, and the implementer
 got a blank file with one shape in it. A pack that stays in the conversation dies with the session.
+
+## Write down what did NOT survive
+
+A pack that lists only what you found is half a pack. Record, with the same care:
+
+- **What you checked and refuted**, so the next session does not re-derive it and arrive at the
+  same dead end believing it is new.
+- **The honest empties** — "I looked in these lanes for this and found nothing" is a finding, and a
+  strictly better one than a confident citation to something nobody opened. It also tells the next
+  run where not to look.
+- **What you could not ground.** A number whose source you cannot land goes; the mechanism stays.
+
+This is not bookkeeping. In the run that produced this skill, the refuted rows outnumbered the
+adopted ones and were the more valuable half: they killed a fabricated quotation, a misattributed
+claim, a number counting the wrong object, and a term that turned out to be a joke. None of that
+would have been visible from the keep-list alone.
 
 ## The loop this closes
 

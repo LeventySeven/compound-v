@@ -69,6 +69,25 @@ before green means the work is done, and each fails independently:
    verify code correctness, not feature correctness."* It also licenses the honest negative: if you
    cannot test it, **say so explicitly rather than claiming success.**
 
+## Why a green suite is not proof — stated by someone who ships
+
+The sharpest version of this skill's premise is not ours. Simon Willison:
+
+> "Just because code looks good and runs without errors doesn't mean it's actually doing the right
+> thing. **No amount of meticulous code review—or even comprehensive automated tests—will
+> demonstrably prove that code actually does the right thing. You have to run it yourself!** Proving
+> to yourself that the code works is your job."
+
+And the operational consequence he draws, which is the part most teams skip: *"you need to actively
+exercise that code. **You need to have great manual QA skills.** A general rule for programming is
+that you should never trust any piece of code until you've seen it work with your own eye—or, even
+better, seen it fail and then fixed it."*
+
+Two things follow. **A passing suite clears the first gate only** — it says the assertions you wrote
+hold, never that they were the right assertions. And **the user-visible path has to actually be
+driven**, by a person or by something acting as one; nothing else answers "does the feature work".
+([Hallucinations in code are the least dangerous form of LLM mistakes](https://simonwillison.net/2025/Mar/2/hallucinations-in-code/), 2 Mar 2025.)
+
 ## The gate must be one the author cannot edit
 
 A check the writer can rewrite is a check the writer can satisfy, and inside one session the writer

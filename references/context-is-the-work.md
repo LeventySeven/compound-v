@@ -199,3 +199,30 @@ framework vendors, course platforms. **Zero came from a research-lab channel.** 
 tools to fill context windows talk about filling context windows. That does not make the idea wrong,
 and this file argues it is substantially right — but it is a reason to hold the frame loosely, and to
 notice that the research lane locates capability somewhere else entirely.
+
+---
+
+## Three read-once notes, moved here from the skill
+
+**How to tell whether the work is actually novel, rather than well-recalled.** It is a design of
+the *check*, not of the work: a biology team established their result was first by choosing
+validation targets **whose solution could not be in the corpus**, so any hit was provably novel
+rather than retrieved. The transferable form — **if it matters that the output is not derivative,
+evaluate it on a task whose answer is not in what you learned from.** Grading against
+corpus-derived exemplars cannot distinguish novelty from recall; that is a scope failure in the
+instrument, so tightening the gate never reaches it.
+
+**Be honest about how weak the rest of the evidence here is.** The tidy claim — that an agent can
+build a v2 from a v1 but cannot originate a v1 — rests on **one source who hedges it on record**.
+The opposite is at least as well attested: the two most-cited novel products in the sweep came from
+a *felt defect in daily use* and from an *operational constraint someone had already hit*, not from
+a blank page. Nobody in the evidence resolves it, so neither does this skill.
+
+**And the expiry test, which nothing else in this kit applies:** would this line still earn its place
+on a *stronger* model? A rule that only lifts a weak one is scaffolding for a deficiency being
+deleted week by week — mark it with an expiry rather than carrying it as doctrine.
+
+*(These three live here rather than in `skills/gathering-context/SKILL.md` because they are read
+once, not per task — and an always-loaded file only has room for what changes what you do today.
+That is the same structure the depth benchmark uses: a short index over deep files.)*
+

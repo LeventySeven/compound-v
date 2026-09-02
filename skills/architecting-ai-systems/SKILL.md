@@ -23,6 +23,24 @@ The reflex split is wrong on both ends. A **thin wrapper** (paste context, call 
 
 How thick is the live tension, and it has one resolver: **build where the model barely works today — the 10–30% success band.** Below that band you're writing science fiction; above it, the surface is already commoditized and you're late to it. What is measured here is METR's task horizon — the length of task a model finishes autonomously at >50% — doubling roughly every seven months. The band itself, and the ~18-month read on it, are this skill's inference from that figure and sit on a different axis: a doubling in task *length* is not the same as a rise in success *rate* on the task you already have. Treat the band as a bet to re-derive in your own domain, not a constant to look up. So the workflow that's *almost* working today is exactly the one to architect around now, because the infra, evals, and domain context can't be built overnight; waiting until it works means a competitor already built them. The corollary tells you what to make *thin*: any layer the next model will simply absorb is a layer you shouldn't pour concrete into. Build the durable scaffolding (verifiable environments, retrieval, state, conventions); skip the elaborate cognitive scaffolds and role-play planners scale will wash away.
 
+## What the app layer is for, and why the lab will not do it for you
+
+The division of labour worth designing against, from Andrej Karpathy:
+
+> "Personally I suspect that LLM labs will trend to graduate the generally capable college student,
+> but LLM apps will organize, finetune and actually animate teams of them into deployed
+> professionals in specific verticals **by supplying private data, sensors and actuators and feedback
+> loops**."
+
+Read that list as the spec for what you are building. The lab ships general capability; the four
+things it cannot ship are the ones only you have — **private data** nobody else holds, **sensors**
+that observe your domain, **actuators** that act in it, and **feedback loops** that close over real
+outcomes. A system that adds none of those is a wrapper, and the next model release deletes it.
+
+Note also which word sits inside that list: *finetune*. Even here, the argument is not that context
+alone does it. Where a behaviour must hold across every session and cannot be re-supplied each time,
+weights are the mechanism and context is a workaround for not having them.
+
 ## Build the one hard primitive; the product is its consequence
 
 Don't build "a product." Build the **one hard primitive** and let the product fall out of it — Linear built a sync engine, Perplexity a retrieval+synthesis pipeline, Cursor speculative editing, each before any UI. The disqualifying test: **if you can't state the primitive in one sentence, you don't have one yet** ("the search result, from links to a cited answer").
