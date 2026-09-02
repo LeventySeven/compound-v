@@ -10,9 +10,10 @@ go get it.
 
 **And the scope, stated up front, because the claim is weaker than it first looks.** This is a theory
 of what limits an agent's **output**, at a **fixed model**, on a **task someone already knows how to
-do**. It is *not* a theory of where capability comes from, and it is not a theory of how anything
-new gets invented. Those two overreaches are the ones that did not survive checking — see the last
-section, which lists them by name.
+do**. It is *not* a theory of where capability comes from — that overreach did not survive checking,
+and the research lane is the most opposed to it. Whether it extends to how genuinely new things get
+built is a separate and still-open question, carried below at the register one account earns. The
+closing section lists, by name, everything that failed.
 
 ---
 
@@ -124,6 +125,43 @@ defensible one. Which is why the pack this kit assembles is task-scoped and then
 
 ---
 
+## Synthesis across projects — one account, and why the silence proves little
+
+**The claim.** A system that is genuinely new is usually not one insight. It is an assembly: the
+indexing approach from one project, the orchestration shape from a second, the memory model from a
+third, each adapted rather than copied. Building that way requires having read all three, which
+makes originality partly a context problem.
+
+**Register: CONTESTED — one first-person practitioner account, from this kit's author, who reports
+working exactly this way across his own projects.** That is one source, and per
+`references/corroboration.md` a single source is carried labelled, never in a sentence implying
+agreement. It should also carry its speaker's position, which is this: the person reporting it is
+the person whose kit is built on it. That does not make it false — most durable engineering claims
+start as one practitioner's account — but it is why it sits here rather than in the ladder above.
+
+**What a sweep found: nothing, in either direction.** Across ~2,900 enumerated titles and 16 full
+transcripts, no published first-person account of working this way, and no measurement for or
+against.
+
+**Why that silence is weak evidence.** This kit already carries the asymmetry that explains it: *the
+wrong half of a pattern is almost never written up as an essay.* The same applies here, and harder.
+People publish the **result** — the architecture, the launch, the postmortem — not the assembly
+method that produced it. "I took the indexing idea from A, the orchestration from B, and the memory
+model from C" reads as derivative when you write it down and as judgment when you do it, so the
+incentive is to describe the outcome and omit the seams. An absence produced by what people choose
+to publish is not an absence in practice. Treat the zero as *unmeasured*, not as *refuted* — those
+are different findings and only one of them licenses ignoring the claim.
+
+**Its falsifier, so it is not unkillable.** If teams that deliberately survey prior art before
+designing produce work that is measurably *more* derivative — closer to the mean of what they read —
+than teams that do not, the claim is wrong in the direction that matters. Nothing in the sweep tests
+this. It is a real open question, not a rhetorical one.
+
+**What would move it to DEFAULT:** two or three more first-person accounts from unrelated people who
+shipped something hard, each naming the specific patterns they lifted and from where. Named
+instances — this pattern, that project, this adaptation — are worth more than a dozen restatements
+of the principle, and they are the thing this kit's registries are built to make cheap.
+
 ## Context quality is the binding constraint
 
 The best-supported part of the whole thesis, carried by independent interests across academia, labs
@@ -140,10 +178,6 @@ look identical to a retrieval tool and are not the same input.
 
 An honest ledger of the overreaches, each checked and each failing.
 
-- **"Synthesis of patterns from several projects is how revolutionary systems get built."** No
-  first-person practitioner account of working this way was found across ~2,900 enumerated titles and
-  16 full transcripts, and there is no measurement of it in either direction. Two lanes returned
-  explicit zeros. It may well be true; it is not evidenced, and it must not ship as a finding.
 - **"The corpus substitutes for a CTO's accumulated experience."** The *premise* survives and is
   conceded even by the thesis's sharpest critics — experiential context is the binding thing and
   cannot be written down in advance. The *remedy* does not. This kit's own earlier pass over eight

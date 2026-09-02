@@ -7,6 +7,8 @@ description: Curate the smallest high-signal token set for an agent or long task
 
 Context is a finite resource with diminishing returns. The goal is **the smallest set of high-signal tokens that maximizes the desired outcome** — not the shortest context, the *highest-signal* one.
 
+This is **one rung of a ladder** — prompt, context, harness, loop — and it is the *during-the-session* rung: what is in the window right now. **compound-v:gathering-context** is the *before-you-build* one: what to go and find. Same discipline, different moment; `references/context-is-the-work.md` has the map.
+
 **Spend tokens first — "lean" is not "always fewest tokens."** Token spend *alone* explained ~80% of agent-performance variance on a measured multi-agent research system's eval (token count + tool-call count + model choice together ~95%); its multi-agent win came from spending ~3.75× the tokens of the single *agent* it beat — about 15× those of a single chat — not from the architecture. Read these as a directional lever, not universal constants: when a result is poor, the first thing to try is usually *more* tokens on the right context — not a cleverer prompt and not more agents. So lean is two moves, not one: cut the tokens that don't change the answer, *and* deliberately spend where compute is the lever.
 
 ## When to use

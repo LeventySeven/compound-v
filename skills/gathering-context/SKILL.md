@@ -17,6 +17,19 @@ Not until you have gathered every pattern — that is a different thing and it m
 skill assembles a **task-scoped pack**, fresh, for the thing you are about to build, and then gets
 out of the way.
 
+**First, the gate — is this even a context problem?** Name what you are missing, then sort it:
+
+- **Retrievable evidence** — a version, a contract, a failure mode, how someone else solved it.
+  Gathering dominates the outcome here. This skill is for exactly this.
+- **The inferential or executional step over evidence already in front of you** — the design call,
+  the trade-off, the thing no document contains because nobody has faced your case. **More context
+  does nothing for this**, and reaching for it is procrastination wearing a research costume. Route
+  it: **compound-v:brainstorming** to decide, **compound-v:council** when it is unscoreable,
+  **compound-v:critical-thinking** when the risk is your own confidence.
+
+Getting this wrong in the second direction is the expensive one, because a research pass always
+*feels* like progress.
+
 ## The distinction that makes this work rather than cost 20%
 
 A controlled study across multiple LLMs, agents, and both model-generated and developer-committed
@@ -24,8 +37,13 @@ context files found the two halves of "give the agent context" point in opposite
 **instructions in the context files "are well followed" by agents**, while **repository overviews
 "although popular and recommended by model providers, are not helpful"** — and providing the files
 raised inference cost by **over 20% on average** without generally improving task success.
-Source: Gloaguen, Mündler, Müller, Raychev et al. (ETH Zurich SRI Lab), *"Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?"* — https://arxiv.org/abs/2602.11988 (arXiv 2602.11988, Feb 2026; quotes checked against the paper, not a search
-digest). One study, so treat the mechanism as the durable half and the figure as one measurement.
+(arXiv 2602.11988, ETH Zurich; full citation in `references/sources.md`. One study — treat the
+mechanism as the durable half and the figure as one measurement.)
+
+**The narrowing axis, and it is the operational form of that result: front-load only what a tool
+call cannot reach.** Guidance the agent would have found by opening the file is redundancy you pay
+for twice — once in tokens, once in the attention it displaces. Ask of every line in the pack: could
+the implementer have got this with one `grep`? If yes, cut it and let them.
 
 So the failure mode is not gathering context. It is **baking a standing document into every session**
 whether or not it bears on the task. Everything below is assembled *for this task*, used, and
@@ -51,9 +69,8 @@ approaches practitioners tried and abandoned, the failure cases. The asymmetry i
 never about inclusion: the right half of a pattern is usually reconstructable and the wrong half is
 not, because a negative result is almost never written up as an essay. So a pack that splits its
 *time* evenly under-spends on the scarcer side — which is why `references/channels.tsv` and the
-practitioner lane exist. **Gathering less of the positive half is not what this says.** A trap with
-no shape attached is unusable, and an implementer holding only anti-patterns knows what to avoid and
-still faces a blank file.
+practitioner lane exist. **Gathering less of the positive half is not what this says.** An
+implementer holding only anti-patterns knows what to avoid and still faces a blank file.
 
 *(An earlier version of this slot argued the stronger claim — that past successes actively hurt —
 on one talk. Verification killed it three ways: the quotation was ASR caption text reproduced
@@ -104,7 +121,12 @@ show the goal UNMET. **compound-v:frame-the-goal** owns this. A pack without it 
 implementation of the wrong thing.
 
 **6. What you still do not know.** Name the open questions and which are one-way doors. An unknown
-you can name is a risk; an unknown you cannot is a surprise.
+you can name is a risk; an unknown you cannot is a surprise. **Filling this slot honestly is the
+whole defence against the measured failure**: given insufficient context, models hallucinate rather
+than abstain **15.4–40.4%** of the time. And the context genuinely may not exist — a hand
+classification of all 300 SWE-bench Lite problems found **10.0%** unsolvable from what the repository
+contained. "This is not knowable from here" is a real finding; a confident guess in its place is the
+defect this slot exists to catch.
 
 ## The shape of a finding — this is the whole of the depth
 
@@ -217,12 +239,6 @@ is what makes the pack detectably stale later rather than silently wrong.
   do a thing and follow it, because nothing in the file says which engineer left. So this step ends
   in a reviewed list with explicit REJECTS, never in a summary the agent then obeys.
 
-*(These four carried quoted attributions for their whole life and none was ever registered in
-references/sources.md — three strings, zero ledger rows, invisible to gate #8 because it walks
-ledger→file and cannot see a quote that was never entered. Almost certainly transcript text, which
-this kit forbids quoting. The rules survive their removal intact, which is the usual tell that the
-quotation was decoration.)*
-
 **How to tell whether the work is actually novel, rather than well-recalled.** It is a design of
 the *check*, not of the work: a biology team established their result was first by choosing
 validation targets **whose solution could not be in the corpus**, so any hit was provably novel
@@ -246,6 +262,12 @@ deleted week by week — mark it with an expiry rather than carrying it as doctr
 Stop when the six slots are filled well enough to start — **not** when the sources are exhausted.
 The stop condition is: *you can state the shape and its trap, and you can see the end from the
 beginning.* Two independent primary sources converging is enough; a third is restatement.
+
+**The checkable version, borrowed from how sufficiency is actually measured:** sufficiency is a
+property of the CONTEXT, not of the answer — it can be judged without knowing the answer. So ask of
+the pack: *could a competent stranger holding only this, and nothing else, produce the thing?* If
+the honest answer needs something not in the pack, name that thing — it is either the next lookup or
+slot 6.
 
 Budget it by how much you actually don't know. A surface you have shipped before earns slot 1 and
 nothing else. A one-way door — a schema, a public name, money, an irreversible write — earns the
