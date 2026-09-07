@@ -38,6 +38,23 @@ same defect as never having found it.
 the queries were shaped as *how do I build X* rather than *who already has X*. It can be honestly
 empty on novel work — say that explicitly, because silence reads as diligence and isn't.
 
+**Run the platform's own generator before you generate anything it would have scaffolded.** The
+DELETE list above already names *the platform already does it*; what it does not name is the
+operation that finds it, and "does this platform scaffold my artifact type?" is a question the *how do
+I build X* framing never asks. So make it executable rather than aspirational: for the artifact class
+you are about to create — a plugin, an extension, an app, an integration, a project — find the
+vendor's own `create-*` / `init` / template path in its own docs and run it into a scratch directory
+*before* you write a line. The finding is the diff between what it emits and what you were about to
+write, and it takes one command to produce.
+
+**Skipping it is paid at the worst moment, because the discovery arrives mid-build by construction.**
+One practitioner generated an entire editor plugin, learned partway through that the platform ships
+an official project template, and rewrote the finished functionality onto it — you read the
+platform's docs closely at the moment you hit friction, which is after the first implementation
+exists. And a generator is a **FORCE** finding as much as a DELETE one: it dictates the layout, the
+manifest and the build step you now inherit, so both halves go in the ledger.
+
+
 ## Channel 1 — what is already on disk
 
 Cheapest, version-exact, works with no network, and survives a sandboxed run. In order: the

@@ -325,7 +325,8 @@ never *the work is verified*. The contract stays with `verification-before-compl
 
 ## Checking the kit
 
-The kit checks itself, structurally and behaviourally. All of it runs offline except `trigger-eval.sh`.
+The kit checks itself, structurally and behaviourally. All of it runs offline except `trigger-eval.sh`
+and `arm.sh --probe`.
 
 **`bash scripts/check.sh`** — 11 gates. Frontmatter and naming; the publish boundary (content scan over
 every shipped file **plus** a path-level pass over what `git add -A` would stage); cross-reference
@@ -335,6 +336,23 @@ anchors still greppable in the files they point at**; trigger-fixture coverage; 
 shipped file names must exist *and be tracked by git*. The size budget counts **words, not lines** — a
 body can double while the line count stays flat just by merging paragraphs. No dependencies; drops
 straight into CI.
+
+**`bash scripts/selftest.sh`** — the gate on the gates: **has any of this been watched fail?** Every
+check above is itself unchecked, ships whatever default branch its author wrote, and reports a pass on
+its first run and every run after. This one puts a known-good and a known-bad reference in front of
+each instrument and requires it to discriminate — the bad reference being the lazy-but-plausible
+version, never a strawman. It caught the description-cap check certifying a constant that had drifted,
+and the routing check scoring `0/0 fired correctly` as a hit. Keyless and offline; the routing tier
+replays canned CLI output through a shim, so it exercises the real `trigger-eval.sh` at zero API cost.
+Run it beside `check.sh` before publishing. A tier whose tool is missing is reported UNRUNNABLE and the
+rest still run — a tool failure must never render as a clean result.
+
+**`bash scripts/arm.sh`** — before any measurement spends anything: **is the control arm actually a
+control?** It enumerates what reaches an unisolated run (the ambient skills, agents, plugins, hooks and
+instruction files competing with the kit's own), builds an arm that excludes what it can, and with
+`--probe` refuses to let a paid run start until it has *seen* the treatment activate — because a plugin
+directory that loads nothing produces a well-formed, entirely fake data point. `trigger-eval.sh` sources
+it and prints which room a run happened in.
 
 **`bash scripts/hooks-test.sh`** — 89 synthetic cases proving both Stop gates. No CLI, no network. The
 ALLOW cases are the important half: on a Stop hook a false block costs a wasted turn, and

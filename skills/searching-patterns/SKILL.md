@@ -63,6 +63,37 @@ The default tools need zero setup. Reach for the heaviest one that fits, lightes
 
 Prefer the library's own repo and docs over blog posts and forum answers — primary sources outrank secondary ones. **Pin the version**: default docs often render an older major than you're on, so read the docs for the version in your lockfile and note which version the pattern applies to. And don't stop at the first hit — the top search result is often a stale major or an SEO blog, so run a second query with different wording and prefer the result that matches your lockfile version. (Look past the first seemingly relevant result; run multiple searches with different wording, and include version numbers in technical queries.)
 
+**Before you quote a vendor page, check whether the vendor has retracted it in place.** Frontier-lab
+documentation is revised under its original URL, so the link still resolves, the page still reads as
+current, and the recommendation you are about to repeat may already carry a banner deprecating it.
+Anthropic's think-tool page now opens under the heading **Extended thinking update, Dec 15, 2025**
+with *"Extended thinking capabilities have improved since its initial release, such that we recommend
+using that feature instead of a dedicated think tool in most cases"*; *Building effective agents*
+opens with *"Much of the tooling landscape described in this post has changed since December 2024"*.
+Both were fetched live on 2026-09-07 and both still answer at the URLs everyone cites. So make it an
+operation rather than a habit: fetch the page **this session**, read its head for a revision or
+deprecation block before you extract anything, and record the banner's date beside the quote. A
+cached read, a search digest or a remembered page cannot see a banner that appeared after you last
+looked — which is the version-pinning rule one level up, because the version you are on is right and
+the advice has still expired.
+
+**The retraction is usually partial, and that is why nobody catches it.** That agents page still
+carries the workflow taxonomy this kit cites it for, while the tooling half the banner names has been
+rewritten under it — the live framework list is Claude Agent SDK, AWS Strands, Rivet and Vellum. A
+reader who spot-checks the half they remember confirms the page and carries the expired half out with
+it. Count your own exposure the same way — every citation you hold of a
+partially-retracted page, checked against the half the banner names — and expect most to survive:
+that is the check working, not an exemption from running it.
+
+**And where a vendor publishes guidance about its own model, the artifact it SHIPS outranks the
+guide.** The prompt in its own cookbook, plugin manifest or client bundle is what the vendor's
+engineers actually run; the guide is what they recommend, and the two drift. Diff them and *the
+divergence is the finding* — the same move as reading the installed copy over the docs, one rung up.
+The trap: a shipped prompt is scaffolding scoped to one model generation and expires without saying
+so, so carry the divergence rather than the artifact, and give any shipped-prompt finding an
+`applies:` that names a model version and keeps it short.
+
+
 When the thing you're implementing ships an **official conformance suite** — a protocol, a wire format, a standard's test vectors — that suite *is* the primary source: precise, executable, and it doesn't drift the way prose docs do. Point the implementer at it and write code until those tests pass (e.g. WebAssembly's spec test suite).
 
 ### Resolve the exemplar for the stack in front of you — by running it, not by reading a table

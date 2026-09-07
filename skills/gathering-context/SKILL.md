@@ -182,9 +182,7 @@ that is true when they read it. Paste only what a command cannot return.
 
 **Where the code comes from, in order:** this repo (`path:line`), the vendor's own API/reference
 documentation for the exact version, a pinned exemplar (`scripts/exemplar.sh read|grep`), then the
-installed package. Compose it yourself only when none of those has it, and say so in `from:`. *(The
-vendor-docs rung is listed second because a cold run of this skill found every Critical "must not"
-finding came from the vendor's API docs and nowhere else.)*
+installed package. Compose it yourself only when none of those has it, and say so in `from:`.
 
 **No per-finding `check:` field.** Slot 5 already owns the runnable check for the whole pack, and a
 twelve-finding pack does not need thirteen of them.
@@ -251,7 +249,7 @@ order — each lane answers a question the one above it cannot:
 | # | Lane | Reach it with | The question only it answers |
 |---|---|---|---|
 | 1 | **This repo** | `grep`, `git log -S`, `stack.sh` | what is actually true here, at the version on disk |
-| 2 | **The vendor's own docs, at your installed version** | `curl`, the package's own site | what the API contractually does — a cold run found every Critical "must not" came from here and nowhere else |
+| 2 | **The vendor's own docs, at your installed version** | `curl`, the package's own site | what the API contractually does — a cold run found every Critical "must not" came from here and nowhere else. Read the page's head for a revision banner before you extract: vendors retract in place, at the same URL |
 | 3 | **A real codebase at a pinned ref** | `exemplar.sh grep\|read` over `exemplars.tsv` | what *shape* people who shipped it used; docs never answer this |
 | 4 | **Talks** | `yt.sh sweep\|mine\|transcript` over `channels.tsv` | what practitioners hit in anger, months before it reaches documentation |
 | 5 | **Papers and engineering blogs** | `alpha.sh`, arXiv, `publications.tsv` | whether anyone put a number on it |

@@ -12,6 +12,7 @@
 #   bash scripts/trigger-eval.sh                 # every fixture
 #   bash scripts/trigger-eval.sh recheck         # only rows expecting recheck
 #   REPS=3 bash scripts/trigger-eval.sh          # 3 reps/row; variance IS the signal
+#   ARM=ambient bash scripts/trigger-eval.sh     # the contaminated room, on purpose (see scripts/arm.sh)
 #
 # Exit 0 = every case hit. Exit 1 = at least one miss.
 #
@@ -21,6 +22,12 @@
 #     real and separate failure mode.
 #   - Fixtures are hand-written, so they measure the kit against our guess at how users
 #     talk. Rewrite a row the moment a real user phrases it differently.
+#   - It measures ROUTER + DESCRIPTION, never the description alone. The kit's own SessionStart
+#     hook injects the whole router — which names every skill and its triggers — into every arm,
+#     including the isolated one. That is deliberate (the hook is how the discipline is delivered),
+#     but it means a passing row does not prove the description would have fired on its own. The
+#     mechanism that makes the kit reliable is the same mechanism that contaminates its own
+#     measurement, and there is no arrangement of flags that gets you both.
 
 set -uo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -42,6 +49,19 @@ DENY='{"permissions":{"deny":["Bash","Edit","Write","NotebookEdit","Task","Agent
 
 command -v timeout >/dev/null || { echo "GNU 'timeout' not found (brew install coreutils)"; exit 2; }
 
+# The arm. A fixture that misses in a crowded listing is a budget problem scored as a wording
+# problem; scripts/arm.sh builds the isolated room and prints which one this run used. ARM=ambient
+# runs the contaminated room deliberately — a legitimate but DIFFERENT question.
+. scripts/arm.sh
+arm_banner
+# Activation is observed, never assumed: a --plugin-dir that resolves to nothing yields an arm with
+# no kit in it, and every row then reports a well-formed miss. Gate the spend on seeing the plugin.
+if ! arm_probe >/dev/null; then
+  echo "arm not proven — refusing to spend a session quota on an unmeasurable run" >&2
+  exit 2
+fi
+printf '\n'
+
 printf '%-52s %-26s %s\n' "PROMPT" "EXPECTED" "FIRED"
 printf '%.0s-' {1..110}; printf '\n'
 
@@ -55,8 +75,13 @@ while IFS=$'\t' read -r prompt expected; do
     # what actually stops a fixture mutating the repo or firing something consequential.
     # `timeout` bounds the case — the CLI has no turn cap, so a confused run is otherwise
     # unbounded.
+    # `${arr[@]+"${arr[@]}"}` rather than a bare `"${arr[@]}"`: macOS ships bash 3.2, where an empty
+    # array under `set -u` aborts the script ("a[@]: unbound variable"), and the ambient arm passes
+    # no flags. The whole suite would die on the first row, on the default shell, for every user
+    # who is not on brew bash.
     raw="$(timeout "$CASE_TIMEOUT" claude -p "$prompt" \
             --output-format stream-json --verbose \
+            ${arm_flags[@]+"${arm_flags[@]}"} \
             --settings "$DENY" \
             --disallowed-tools 'Bash Edit Write Read Grep Glob Agent Task WebFetch WebSearch NotebookEdit' \
             2>/dev/null)"; rc=$?

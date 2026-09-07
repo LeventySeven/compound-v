@@ -266,6 +266,23 @@ done
 [ -n "$missing" ]   && err "shipped files name a resource that does not exist:$missing"
 [ -n "$untracked" ] && err "shipped files name a resource that is NOT TRACKED by git (it will be absent for anyone who installs this):$untracked"
 
+# ---------------------------------------------------------------------------------------------
+# 11. Deliberate corner-cuts, harvested rather than remembered.
+#     references/completion-ledger.md prescribes a `ceiling:` marker on the line where a shortcut
+#     was taken. A prose convention is enforced on the days someone remembers, so the harvest runs
+#     here. Two scalars, never a health score: total markers, and markers naming no condition after
+#     the comma — those are the ones that rot, because nothing will ever bring anyone back to them.
+#     Reported, never failed: a deliberate ceiling is a legitimate engineering choice and this gate
+#     has no standing to block one. Vendored trees and build output are skipped.
+ceil_hits="$(grep -rInE '(#|//|--) ?ceiling:' \
+               --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=build \
+               . 2>/dev/null || true)"
+ceil_n="$(printf '%s' "$ceil_hits" | grep -c . || true)"
+if [ "${ceil_n:-0}" -gt 0 ]; then
+  ceil_no_trigger="$(printf '%s\n' "$ceil_hits" | grep -vE 'ceiling:[^,]+,' | grep -c . || true)"
+  note "ceilings: $ceil_n deliberate corner-cut(s) marked, ${ceil_no_trigger:-0} naming no upgrade condition"
+fi
+
 skills_n="$(find skills -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')"
 printf '\n%s skills checked — %s failure(s), %s warning(s)\n' "$skills_n" "$fail" "$warn"
 [ "$fail" -eq 0 ]

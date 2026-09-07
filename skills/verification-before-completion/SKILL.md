@@ -127,6 +127,42 @@ as evidence that big rewrites work were graded by suites that already existed. W
 oracle, the gate is cheap and strong. Where you don't, say so: the honest report is that the work is
 unverified, not that it passed a check you wrote for yourself.
 
+## The check that grades the work is itself unchecked
+
+**A gate you have never watched fail is a rubber stamp with a green light on it.** The suite proves
+the code; nothing proves the scorer, the validator, the lint rule or the judge — each ships with
+whatever default branch its author happened to write, reports a pass on its first run, and keeps
+reporting one. Three failures, independent of each other, each producing a clean number:
+
+1. **It cannot fail on an input it does not recognise.** One public benchmark's correctness gate
+   returns `{ pass: true, score: 1, reason: 'Unknown task, skipped correctness check' }` for any
+   task its matcher misses, so a renamed task scores every arm perfect and the aggregate stays
+   healthy. **An unknown branch in a check fails closed or raises** — a default-allow is
+   indistinguishable from a real pass at the moment you read the number, which is the only moment
+   anyone looks at it.
+2. **It was never run against a known-bad input.** Ship each check with two references: a good one
+   it must pass, and a bad one it must catch *on the axis the check claims to measure*. The bad one
+   is the lazy-but-plausible version — that repo's own is *"correct on the happy path, unsafe on the
+   adversarial input. That is exactly the code a binary correctness gate passes"* — never a strawman,
+   which is caught by instruments that catch nothing else. Then put the proof in front of the spend
+   instead of in a README: its runner opens with `if selftest(): sys.exit("instruments broken;
+   refusing to spend on the API")`, so a broken instrument costs nothing rather than producing a
+   number.
+3. **Its coverage stops short of the claim.** Audit the self-check per tier, not per repo. That same
+   `selftest()` begins `if task.get("open"): continue`, and all twelve tasks behind the repo's
+   headline result are `open` — so "every instrument is verified before any API call" is true of the
+   file and false exactly where the number came from. Name the cells your check actually ran on, and
+   compare that list against the cells your claim rests on.
+
+**A convention held in a README is enforced only on the days someone remembers.** In that same
+repo the runner gates on the self-test unconditionally, while its sibling audit script makes the
+identical check an opt-in `--selftest` flag and otherwise goes straight into its full paid matrix —
+16 tasks × 2 arms × n=20, 640 model calls. Same author, same idea, two forms: one of them is code and
+the other is a habit. Wire the check into the path that cannot be skipped. *(All four examples come
+from one public repo whose author also wrote the skill it benchmarks — first-party, cited for how the
+instrument is built, not for anything it found.)*
+
+
 ## Red flags — stop before you type the claim
 
 - You're about to type "Perfect!", "Done!", "All green!" — or reaching for "should," "probably," "seems to," "I believe it." Celebration and hedging both mean you haven't run anything this turn; go run the command.

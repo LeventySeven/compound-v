@@ -47,6 +47,25 @@ independent.)*
 groups place it between context and loop, and `references/sources.md` already cites it. A ladder
 that skips it is missing the rung the reader is standing on.
 
+**And the harness rung carries a cost the other three do not: what makes context PERSIST is ambient,
+and an ambient mechanism contaminates every measurement of itself.** A discipline is not active
+because it was loaded once — a spawned subagent, a compaction and a resumed session each drop
+whatever the host does not carry across, so anything that reliably survives them is delivered by
+something that fires automatically: a session hook, a globally-enabled plugin, user-level config.
+That same automatic firing reaches the *control* cell of any A/B you run over the discipline, and a
+published benchmark of one always-on ruleset was superseded for exactly that reason — its
+`SessionStart` hook fired on every arm, so the baseline was secretly running the treatment.
+
+**So persistence and measurability trade against each other directly, and nothing warns you.** The
+better your delivery mechanism, the more certainly it is present in the cell that was supposed to be
+without it; the leak is native to this ladder's third rung, so the more seriously a project takes
+harness engineering, the less able it is to measure it. That is a limit on the premise rather than a
+reason to abandon it, and the three pieces that make it workable live elsewhere: the procedure for
+building an arm that survives it is in **compound-v:evals**, this kit's own contaminated instrument
+is worked through in `references/skill-listing-budget.md`, and `bash scripts/arm.sh --probe` prints
+what each arm actually loaded instead of what you assumed it loaded.
+
+
 **"Graph engineering" is deliberately absent.** It spread from a small number of posts that a close
 observer of that moment describes as jokes about how quickly the field renames things. It has an
 academic paper and effectively no practitioner usage — a sweep of every verified channel in

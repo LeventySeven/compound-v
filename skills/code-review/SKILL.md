@@ -78,6 +78,21 @@ This is the step that makes an on-demand reviewer trustworthy instead of noisy. 
 
 The confidence gate filters hallucinated findings *after* they're generated; the sharper fix is upstream. A free-text "review this diff" prompt defaults to *manufacturing* nits, because silence reads as failure — so make "nothing to report" an explicit, equally-valid outcome (a `finish_review(comments: 0)` action), not an absence of output. One production reviewer's switch from free text to a forced per-finding action with an explicit no-finding branch cut its hallucination ratio from ~9:1 to ~1:1. Gates cut both ways, and this is measured too: a defensive instruction aimed at false positives overshoots and makes the model **withhold a true finding it already has**. Re-read every gate here for what it might be silencing, not only for what it filters.
 
+**Anchor the number outside the reviewer.** A confidence score the same model assigns to its own
+finding is self-agreement, not calibration: it moves with the model's certainty, which is the thing
+under suspicion. The shadow run this skill already asks for is the strong anchor and it costs a
+stretch of real PRs; the cheap one you can run today is a **planted pair** — one diff carrying a
+defect you planted, one diff that is clean but looks suspicious, both put through this exact prompt,
+and the gate must flag the first and pass the second. Make the planted defect the lazy-but-plausible
+kind, correct on the happy path and wrong only on the axis you claim to measure, never an obvious
+strawman: a strawman is caught by a reviewer that catches nothing else, so flagging it measures
+nothing (**compound-v:verification-before-completion** owns the general form of this). The rubric
+that survives is the one that discriminates, not the one that agrees with itself — the benchmark this
+is taken from refuses to score a matrix at all until its judge has ranked a deliberately over-built
+reference strictly above a minimal one for the same task. Until your pair separates, the ~80 is not a
+threshold but a number the model prints, and a gate resting on it is decoration.
+
+
 Default to *not* a finding. These are not findings:
 
 - Pre-existing issues, and issues on untouched lines that stand independent of this change — nothing here blocks the diff (where they are still *reported* is the Adjacent bucket above). An issue the diff *causes* is not in this category at all, however far from the changed lines it sits; the revert test sorts them.

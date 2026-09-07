@@ -66,6 +66,58 @@ skill whose description was dropped is still reachable through the router. **The
 kit's redundancy against its own delivery layer**, which is the strongest argument for keeping it
 exhaustive rather than short.
 
+**But the hook route is not free and not universal.** It is outside the listing budget because it is
+its own budget: the router is re-sent in full at every injection — 14,231 characters today, which you
+measure (`wc -c skills/using-compound-v/SKILL.md`) rather than assume — and `hooks/user-prompt-submit`
+adds a 349-character reminder on **every turn**. Cost therefore scales with turn count while the
+benefit scales with how often routing was about to go wrong, and that trade flips sign by model
+class: the same always-on ruleset that was tens of percent cheaper on several models came out *"39%
+more expensive"* on a terse reasoning model, because *"the ruleset is re-sent as input every call and
+the baseline output is already terse, so the input and reasoning-token overhead outweighs the lines
+saved"* (DietrichGebert/ponytail, `benchmarks/results/2026-06-17-cost-verification.md`; first-party,
+and disclosed against that author's own pitch). Never carry a cost claim across a model class you did
+not measure on.
+
+**And the route stops at three boundaries the host does not cross for you.** `bash scripts/selftest.sh
+boundaries` reports each one every run:
+
+| Boundary | What ships today | Why it matters |
+|---|---|---|
+| `SessionStart` matcher | `hooks/hooks.json` matches `startup\|clear\|compact`; the documented sources are `startup, resume, clear, compact, fork` | A resumed or forked session starts with no router, and is indistinguishable from one that has it |
+| subagent spawn | nothing registered on `SubagentStart` | Every worker `dispatching-parallel-agents` fans out runs router-unaware — the redundancy stops precisely where the kit does its heaviest work |
+| the tail of a long session | `UserPromptSubmit` re-asserts a one-liner, not the router | Deliberate and correct: the full router every turn would cost more than the drop it prevents |
+
+Closing the first two is a decision, not a chore. Re-injecting the router at `SubagentStart` costs
+14,231 characters **per worker**, against delegation economics this kit has already measured as
+expensive per handoff ("every token crossing the boundary is billed twice",
+`compound-v:dispatching-parallel-agents`). Make the call on that number; the number belongs here.
+
+## The redundancy is also the contamination
+
+The router is why a dropped description still fires. It is also why you cannot measure whether the
+description would have fired on its own: it names every skill and its triggers, the hook injects it
+into every arm, and no flag separates them — so `scripts/trigger-eval.sh` reports *router +
+description*, always. The same property in both directions. **The mechanism that makes the delivery
+reliable is the mechanism that makes it unmeasurable**, and nothing warns you, because the
+contaminated number is not obviously wrong.
+
+What you *can* isolate is everything that is not the kit. `bash scripts/arm.sh --probe` builds each
+arm and prints what it actually loaded, read out of the CLI's own init event rather than inferred.
+Measured on one machine, same repo, same prompt, minutes apart:
+
+|          | skills | slash commands | agents | plugins | MCP servers |
+|---|---|---|---|---|---|
+| isolated |     51 |             85 |      7 |       1 |           0 |
+| ambient  |    166 |            204 |     27 |       3 |           2 |
+
+166 skills competing for the listing budget instead of 51 — and the documented response to an
+overflowing listing is the drop this file exists to explain. So a fixture that misses in the ambient
+arm gets written up as a wording problem when it may be a budget problem, and it lands first on the
+skills that were already least-invoked. Both arms are legitimate; they answer different questions.
+Ask the ambient one when the question is "does this fire on a real machine", the isolated one when
+the question is about the description itself, and never pool them — `trigger-eval.sh` prints which
+arm produced the number at the top of every run for exactly that reason.
+
 **Suspect this first when a skill stops firing.** Before rewriting a description that was working,
 check whether it is still in the listing at all. The rewrite cannot fix a drop, and a description
 edited to chase a phantom trigger failure is strictly worse than the one it replaced.

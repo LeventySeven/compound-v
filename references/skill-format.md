@@ -121,6 +121,37 @@ diagnosis was wrong. So when a skill silently stops working after an upgrade, ch
 3. **Whether compaction dropped it.**
 4. Then **re-run the eval on the new model** rather than reasoning about what it must now weight.
 
+## Every gate in this kit rewards deletion — so pair each one with its opposite
+
+`scripts/check.sh` measures lines, words, and description characters. Every one of those is a
+*less-is-better* metric, and a less-is-better metric is always won by degrading whatever it does not
+measure: the cheapest route to a green line count is deleting the paragraph that was doing the work.
+No size gate can distinguish a tightened skill from a gutted one, and none of them reports that it
+cannot.
+
+The failure is measured, not theoretical. Across four minimality arms on the same tasks, the arm that
+wrote the least was the only one that broke: *"yagni-oneliner wrote the fewest lines (6) and went
+unsafe **once in four**"* — 19/20 against 20/20 for the other three — and the post-mortem names what
+the missing lines were: *"The ~3 lines ponytail kept **were the path-traversal check**"*
+(DietrichGebert/ponytail, `benchmarks/results/2026-06-18-agentic.md`; first-party). A three-line
+difference, and the three lines were the guard.
+
+So each size gate is read against an opposing signal that can only be satisfied by content existing:
+
+| Less-is-better gate | The opposite it must be read beside |
+|---|---|
+| words / lines per `SKILL.md` | trigger fixtures per skill — `check.sh` **fails** a skill with none, so a skill cannot be trimmed into unroutability unnoticed |
+| `always-on description cost` | the routing result for the skills whose descriptions you just trimmed |
+| deleting a skill to free listing budget | `references/skill-listing-budget.md` — the drop is a property of the *budget*, so the next-least-invoked skill simply inherits the trap |
+
+Two second-order costs. **Publishing that an opposing instrument exists is not publishing its
+result** — an unrun counter-check and one that was run and disliked look identical from outside, so
+grep the results for its output, not the method for its description. And **exempting your own
+prescribed behaviour from a metric is correct and is a degree of freedom that favours you**: if the
+constitution asks for a worked example and worked examples are then exempt from the word count,
+somebody outside that decision has to confirm the exemption doesn't disproportionately fit one
+author's habits.
+
 ## Authoring checklist (the rules the kit follows but rarely states)
 - **Description = WHAT + WHEN, never the steps** — Ruling A above is the single most load-bearing
   authoring rule; encoding the flow makes the model follow the description and skip the body.
@@ -147,6 +178,27 @@ diagnosis was wrong. So when a skill silently stops working after an upgrade, ch
   consequences worth holding: prompting style is per-model rather than per-project, so re-measure
   rather than inherit; and when a sequence of steps collectively underperforms even though each step
   performs well, *the decomposition is the bug* — stop hunting for the weak stage.
+- **Name the operation and the object it runs on; a sentiment computes nothing.** The rule above
+  governs *what* a line describes. This governs how a line that survived it must be **worded**: the
+  operation, the thing the operation runs on, and what stops it — "grep every caller of the function
+  you touch and fix the shared function once", never "trace the flow end to end". A three-arm run on
+  one task separates the two: *"pre-fix ponytail and a plain-prose version (\"trace the flow end to
+  end\") both scored 0/3 on Opus; only the grep-the-callers directive moved it to 6/6"*
+  (DietrichGebert/ponytail, `benchmarks/results/2026-06-22-issue-245-217-comprehension.md` —
+  first-party, the author measuring his own skill). The prose arm **tying** the no-rule arm is the
+  proof that the wording, not the idea, was the treatment, so a two-arm test cannot tell you this —
+  and prose is the arm that reads better in review and survives an editing pass. Two costs travel
+  with the rule. It needs a model with the headroom to execute a multi-step instruction: on a
+  smaller one *"the baseline also fails it (0/6)"* (same file), which is a floor, not a regression,
+  and only reading the control cell tells the two apart. And an operational line is a
+  change-detector — "grep every caller" fires as a false requirement the day the code has no callers
+  to grep, where "understand the flow" would have degraded quietly instead.
+- **Immunise a skill against the skill that would strip it.** Where one skill adds what another
+  removes, the pair needs an explicit exemption or the removing skill wins by default and nobody can
+  see which rule lost: `simplest-thing-that-works` must not cut what `test-driven-development`
+  requires, `recheck` must not flag as over-engineering the guard `agent-security` mandates. Write
+  the clause in the **removing** skill, where the decision actually happens — a permission stated
+  only in the adding skill is not in the room at the moment something gets deleted.
 - **Match the *form* to the failure, not just the rigidity.** Specificity is one axis; the *shape* of
   the guidance is another, and it's failure-type-specific. A **discipline** failure (the model knows
   the rule but skips it under pressure) wants a prohibition / red-flag row; a **wrong-output-shape**
@@ -197,3 +249,13 @@ links — they force-load the file and burn context before it's needed.
   maps each load-bearing numeric/factual claim to its public primary URL and marks the recipe-knob
   judgment calls that need none. If a number isn't in that map, add a row citing its primary source
   (a real URL) or cut it; if you can't ground it, mark it clearly as a judgment call.
+- **A set that agrees with itself is not verified — anchor it outside the set.** Three files state
+  the description cap. For this kit's entire life all three said **1024**, agreed perfectly with each
+  other, and the harness uses that number nowhere: every description was trimmed against a cap 33%
+  tighter than the real one, paid for in deleted trigger phrases. Mutual consistency makes *drift*
+  visible and says nothing about *correctness*, so any constant repeated across files carries one
+  external anchor named beside it — for the listing constants that is the harness's own docs page,
+  cited in `references/skill-listing-budget.md`. `bash scripts/selftest.sh constants` fails when the
+  copies disagree and fails when the external anchor stops being named; what it cannot do is tell
+  you the anchor is still true, which is why the rule is to re-read the page rather than trust the
+  green. The trap is that the green looks the same either way.
