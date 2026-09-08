@@ -42,11 +42,36 @@ case "${1:-}" in
     "$YTDLP" "ytsearch${3:-10}:${2}" --skip-download --flat-playlist \
       --print "%(title)s || %(duration_string)s || %(channel)s || %(webpage_url)s" 2>/dev/null ;;
   tracks)
-    "$YTDLP" --list-subs --skip-download "$2" 2>/dev/null \
-      | awk '/Available subtitles/{s=1;a=0;print "-- listed as MANUAL:";next}
+    # A caption-free video must not look like a broken tool. Measured 2026-09-09 on
+    # 4i0W9qAf8K8: this command returned exit 0, ZERO stdout lines and ZERO stderr
+    # bytes -- indistinguishable from a failure -- while the raw listing printed two
+    # explicit positive signals, "has no automatic captions" and "has no subtitles".
+    # The old awk only printed inside the manual-section state, and an empty table
+    # prints no section header at all, so the absence lines were filtered out. That
+    # is the same defect as passing --quiet, which yt-dlp's own source confirms:
+    # YoutubeDL.py:667 sends screen output to stderr under quiet and :1007 returns
+    # early, deleting the only assertion of absence there is.
+    out="$("$YTDLP" --list-subs --skip-download "$2" 2>/dev/null)"; rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "BROKEN: the caption LISTING itself failed (exit $rc) — deleted, private," >&2
+      echo "  members-only, or age/region-gated. This says NOTHING about captions." >&2
+      exit 3
+    fi
+    if printf '%s' "$out" | grep -q "has no subtitles\|has no automatic captions"; then
+      printf '%s\n' "$out" | grep "has no subtitles\|has no automatic captions" \
+        | sed 's/^/-- ASSERTED ABSENCE: /'
+    fi
+    printf '%s' "$out" | awk '/Available subtitles/{s=1;a=0;print "-- listed as MANUAL:";next}
              /Available automatic/{a=1;s=0;next}
              s&&/^[a-z]/{print "   "$1}
-             END{if(a)print "-- automatic (ASR) tracks also present"}' ;;
+             END{if(a)print "-- automatic (ASR) tracks also present"}'
+    # Exit 1 only when BOTH sections asserted absence: that is a real EMPTY, stated
+    # by the tool rather than inferred from silence.
+    if printf '%s' "$out" | grep -q "has no subtitles" \
+       && printf '%s' "$out" | grep -q "has no automatic captions"; then
+      echo "EMPTY: both sections asserted absence — this video genuinely has no captions." >&2
+      exit 1
+    fi ;;
   transcript)
     d="$(mktemp -d)"; url="$2"
     "$YTDLP" --skip-download --write-subs --write-auto-subs --sub-langs 'en.*' \
