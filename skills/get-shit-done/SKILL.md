@@ -117,6 +117,14 @@ Build it however you build things; **compound-v:writing-plans**, **compound-v:ba
 - **You scanned the slice's diff for what you left behind** — `TODO`, `FIXME`, `stub`, `placeholder`, `mock`, `hardcoded`, `for now`, a skipped or `.only` test, a swallowed error. Each hit is a row or a named waiver. A missing declared function is a `todo` row; a stub the implementer *left* was declared by nobody, and that is the hole the denominator cannot see.
 - **What you gave up under pressure was elements, not quality.** Shipping all of it worse is how those stubs get written. Delete instead: drop each element whose removal still leaves the slice useful, down to the `is_check` row and not through it. Every cut is a `dropped` row, `moved` where it returns.
 - **Nothing that grades the work moved.** Never edit a check to make it pass — *"It is unacceptable to remove or edit tests because this could lead to missing or buggy functionality"*. A threshold quietly widened at hour six is indistinguishable from success.
+- **It still answers the ask, and nothing rode in that nobody asked for.** Put the slice beside the
+  `ask` field verbatim — not the plan, which absorbed the drift — and answer both directions: what
+  the goal asked for that this does not do, and what exists here that no row declared. A slice can
+  pass every row it declared and have declared the wrong ones. **compound-v:recheck** runs this per
+  batch as its first two gates; this pass is over the assembled slice, where no batch reviewer stood.
+- **The landing went through the pre-merge gate, not just the batch gate.** `recheck` closes a
+  *batch*, **compound-v:code-review** closes the *branch*, and both run. A slice merged on batch
+  verdicts alone has never had its assembled diff read.
 - **One slice, one commit, and the commit moves the ledger.**
 
 **The walk is the one rigid condition, because it is the documented failure.** Claude would make the change, run unit tests, curl the dev server — and still not notice that *"the feature didn’t work end-to-end"*. Lint and type-check are the verification that was already automated; the question is **can the agent run the thing**, and it is the first thing dropped when nobody is watching.
@@ -134,6 +142,22 @@ name which cost you are paying, and the rows move with it — plus what each one
 Read it before you mark anything `blocked`.
 
 **Dispatch the check, not the build.** The measured payoff for a fresh context is in *judging* work, not producing it — a clean-context reviewer finds around two real bugs per pull request on code the same system wrote, most severe, precisely because it shares no context with the author. Every measured result on dispatching the *build* runs the other way, and **the skimping is the ledger's job, not dispatch's**: an agent identified **20 call sites**, changed **5**, and stopped, and what fixed it was an in-context checklist. **Do not dispatch because there are many tasks.**
+
+**But DO fan out for coverage, and take the cap off when you do.** The rule above is about
+throughput — splitting a build to go faster, which measures worse. Completeness is the opposite
+case, it is embarrassingly parallel, and it is worth spending freely on: sweep the ask for functions
+no row declared, verify closed rows independently of the worker that closed them, check every call
+site rather than the five that were easy, read the source nobody opened.
+**compound-v:dispatching-parallel-agents** owns the mechanics — cut the seam at a stable interface,
+not an arbitrary file boundary, or "disjoint" files still couple through a shifting API. Nothing here
+is capped: if ten agents are what it takes to prove the denominator complete, run ten.
+
+**The hard rule that makes that safe: agents launched and tokens burned are evidence of nothing.**
+Not effort, not progress, not thoroughness. The only currency is closed rows and a working thing, so
+never report a fan-out as an accomplishment and never widen one to look rigorous. A run that
+dispatched thirty agents and closed no rows did nothing, expensively. A large fan-out *feels* like
+diligence and reads like it in a summary — which is why the ledger grades the run and the agent
+count grades nothing.
 
 **The check is dispatchable; the build is not — and the condition that decides it is this: dispatch a slice only where you can re-run its check yourself, without the worker's trace** — otherwise the split bought context isolation at the price of an unauditable ledger. **The worker returns evidence; the orchestrator flips the row.** Workers never write `slices.json` — the single-writer rule **compound-v:handoff** applies to `STATE.md`, plus one this ledger adds: a worker that can flip its own row is a worker grading its own homework. Its brief carries the slice's rows, check, shape and trap: dispatch makes the ledger the only path from one slice's lesson to the next slice's worker, so a run whose `shape` and `trap` sit empty has no carrier at all.
 
