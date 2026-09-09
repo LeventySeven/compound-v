@@ -118,6 +118,12 @@ Ask the ambient one when the question is "does this fire on a real machine", the
 the question is about the description itself, and never pool them — `trigger-eval.sh` prints which
 arm produced the number at the top of every run for exactly that reason.
 
+## The instruments, and the second harness
+
+**`/skill-doctor`** (Claude Code v2.1.252+) reports per-skill context cost *and* invocation count together and flags never-invoked skills — which is exactly what the case below needed to separate "never invoked because redundant" from "never invoked because its description was dropped", a causal direction this file once got backwards. It is unavailable over Remote Control and in sessions that skip feature-flag fetching, so a blank result is not evidence of a clean listing.
+
+**A second harness budgets the same listing differently, and that it fails the same way is the finding.** Codex allots 2% of the model's context window, or 8,000 characters when the window is unknown; it includes each skill's *file path* alongside name and description, shortens descriptions first, and may omit skills entirely with a warning. Two vendors, different constants, same failure mode — which is why the rule below is about the mechanism and not about anyone's number. The standing rule governs both: **report what the command prints, never a stored number.**
+
 **Suspect this first when a skill stops firing.** Before rewriting a description that was working,
 check whether it is still in the listing at all. The rewrite cannot fix a drop, and a description
 edited to chase a phantom trigger failure is strictly worse than the one it replaced.

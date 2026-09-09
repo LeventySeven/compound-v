@@ -228,6 +228,12 @@ sources.
 
 ---
 
+## gathering-context — retired claims
+
+| Claim (short) | Anchor | Category | Source / note |
+|---|---|---|---|
+| Past successes actively HURT an agent, so slot 2 should gather only anti-patterns | `gathering-context` → slot 2, removed | **REFUTED — do not re-cite** | Killed three ways: the quotation was ASR caption text reproduced inaccurately (`scripts/yt.sh` forbids that twice); the source's scope is an agent re-reading its OWN prior trajectories, not prior art a person gathers before building; and its author disclaims the area on record. It was never in the ledger against the skill, and slot 2's effort argument never depended on it. Moved here from the skill body so the always-loaded text carries guidance rather than provenance. |
+
 ## systematic-debugging
 
 | Claim (short) | Anchor | Category | Source / note |
@@ -666,7 +672,7 @@ worst failure mode, because it reads as evidence.*
 | 3 | `evals` → "a naive baseline slide deck nobody would defend" | "a naive baseline slide deck nobody would defend scored **2.8–4 on a 0–5 scale**" | RESOLVED-IN-PART: the figure is real and public (an Anthropic conference talk on hill-climbing a slide agent). Two over-reads were corrected in the skill on 2026-07-25 — the deck was a naive baseline, not "deliberately ugly", and the scale is 0–5 not 1–5. A second example (an image judge returning 5/5 for a deck with no image) was **cut**, not softened: that judge's own rubric said not to penalise a slide with no image, so it was obeying its prompt rather than miscalibrated. Still needs a row; the talk does not itself argue for binary judges. |
 | 4 | `evals` → "One model jumped from 42% to 95%" | "One model jumped from **42% to 95%** on a benchmark purely by fixing the grading." | Named-shaped result ("one model", "a benchmark") with no benchmark, model, or source. |
 | 5 | `evals` → "moved a PR success rate from ~20–30% to ~80%" | "One production LLM judge that had moved a PR success rate from **~20–30% to ~80%** was deleted outright once the models got good enough" | Reads as a specific production anecdote; carries the "scaffolding expires" rule. |
-| 6 | `context-engineering` → "measured at **6,000–14,000 tokens each**" | "individual tool definitions have been measured at **6,000–14,000 tokens each**, so a dozen loosely-curated tools can outweigh the entire conversation" | The word "measured" makes this a claim about the world, not a knob. |
+| 6 | `context-engineering` → "run `/context` on an empty session" | RESOLVED — the 6,000–14,000-tokens-per-definition claim is out. A dated first-party `/context` readout puts one official MCP server at **46.2k tokens, 23.1% of a 200k window** on an empty session, with per-tool line items of 436–731 — so the old figure was an order of magnitude high, and the per-*server* aggregate is the decision-relevant number. The skill now ships the instrument rather than a stored number, because that reading is one vendor, one server, one window size and stale by construction. | **PRIMARY (first-party readout, dated, screenshotted)** | Replaces the OPEN row; the kit's own note that "the word 'measured' makes this a claim about the world, not a knob" is what retired it. |
 | 7 | `context-engineering` → "Treat cache hit rate as a first-class metric" | "Well-built coding agents measure in the 80s; the best measured sits around 92%" | RESOLVED-IN-PART: "major agent products run 90%+" was **overstated** and was corrected on 2026-07-25 — measured production data puts one coding agent at 92% and most in the 80s. The "alert on it like uptime" framing is Anthropic's own and is sound; no primary source prescribes a target hit rate, so no bar is asserted. |
 | 8 | `designing-agents` → "roughly 72% to 90%" | "in one measurement it took a tool's correct-use rate from roughly **72% to 90%**" | "In one measurement" with no measurement cited. (The adjacent ~40% task-completion figure in the same section *is* grounded — Anthropic's multi-agent post — which makes the ungrounded neighbour easy to mistake for grounded.) |
 | 9 | `context-engineering` → "roughly half an hour of deliberation" | "a single conflicting piece of context has sent a model into roughly **half an hour** of deliberation" | A specific observed duration, used to justify "contradiction is more expensive than vagueness." |

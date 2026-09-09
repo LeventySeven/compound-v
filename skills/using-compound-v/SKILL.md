@@ -48,9 +48,9 @@ The kit's bet is that adaptive effort is something the model is increasingly goo
 
 | Tier | Trigger | Workflow |
 |---|---|---|
-| **Trivial** | typo, rename, one-liner, config flip | Just do it → `verification-before-completion`. No plan, no agents, no skill. |
-| **Small** | one function/file, clear spec | `gathering-context` (slot 1 only — the installed versions and the repo's own shape) → plan mode for explore-and-plan → inline `test-driven-development` → verify. Skip the plan doc. |
-| **Standard** | a feature, ~2–8 tasks | (open "should we?" → `startup-taste` first) → **`gathering-context`** → `brainstorming` → `writing-plans` → `batched-implementation` → `recheck`. |
+| **Trivial** | typo, rename, one-liner, config flip | Just do it → `verification-before-completion`. No plan, no agents, no skill. On a branch, `finishing` still lands it; a typo fixed in place has nothing to land, and turning every one-liner into a merge ceremony is the overkill this table prevents. |
+| **Small** | one function/file, clear spec | `gathering-context` (slot 1 only — the installed versions and the repo's own shape) → plan mode for explore-and-plan → inline `test-driven-development` → verify. Skip the plan doc. **On a branch, land it through `finishing`** — the tier sizes the build, never the landing. |
+| **Standard** | a feature, ~2–8 tasks | (open "should we?" → `startup-taste` first) → **`gathering-context`** → `brainstorming` → `writing-plans` → `batched-implementation` → `recheck` → `code-review` → `finishing`. |
 | **Large** | multiple subsystems · a one-way door · schema or public API | `get-shit-done` runs the whole thing: it owns the **one confirmed decomposition** above the sub-projects — never a plan-of-plans — and each slice below it runs its own Standard cycle. Attended, the decomposition is approved before anything touches disk; unattended, it is written down and the run proceeds — what binds in *both* modes is the one-way door (schema, public API, spend, irreversible write), which stops the run either way. Fan out only across disjoint files, in worktrees. Its stage 4 closes over the assembled product, **once**, never per sub-project. |
 
 **Tier sizes the machinery; NOVELTY overrides it.** The table above measures how big the change is.

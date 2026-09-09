@@ -53,6 +53,24 @@ the failure above; two files that *cannot* overlap is not.
 Rewrite **Next** as one concrete action for a reader with zero context: the file, the function,
 the command. Commit. Then say in one line how to resume.
 
+## Harness friction goes in a log, not in your head
+
+**When the agent hits friction in the environment — a wrong flag set, a stale documented path, a
+cwd trap, a missing helper — it appends one line and keeps working**, instead of silently routing
+around it so the information evaporates. One tracked file at the repo root, one entry per hit:
+timestamp, model, and one sentence saying what you were doing, the exact action, the exact failure,
+and the change that would have avoided it. Give the file `merge=union` in `.gitattributes` so
+parallel worktrees do not conflict on it.
+
+This is **not** the always-loaded instruction file — **compound-v:context-engineering**'s write-gate
+correctly bans transient failures from that, and this has a different reader: whoever repairs the
+environment, reading in batches, never per turn. **The trap is that a log with no resolution path is
+a graveyard.** It earns its place only if something periodically reads it and changes the
+environment, and an entry closes when that change lands, not when someone reads it. Nobody has
+published a yield for this; it ships as a cheap bet, not a measured practice. And the repair has to
+be made by the team using the kit rather than handed down, or it becomes an artifact people use
+where it works and quietly abandon where it does not.
+
 ## When the work is done
 
 Delete `.claude/STATE.md` in the final commit — and `.claude/slices.json` with it, if the run opened

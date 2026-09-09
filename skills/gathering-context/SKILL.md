@@ -80,13 +80,6 @@ not, because a negative result is almost never written up as an essay. So a pack
 practitioner lane exist. **Gathering less of the positive half is not what this says.** An
 implementer holding only anti-patterns knows what to avoid and still faces a blank file.
 
-*(An earlier version of this slot argued the stronger claim — that past successes actively hurt —
-on one talk. Verification killed it three ways: the quotation was ASR caption text reproduced
-inaccurately, which this kit's own `scripts/yt.sh` forbids twice; the source's scope is an agent
-re-reading its OWN prior trajectories, not what prior art a person gathers before building; and its
-author disclaims the area on record. It was never in the ledger against this skill. The effort
-argument above never depended on it.)*
-
 **3. The candidate shapes, the axis between them, and the trap on the one you would reach for.**
 More than one arrangement is usually viable, and naming only the winner hides the trade-off you made
 silently. So carry the alternative you did *not* take **and the reason it lost** — three independent
@@ -125,8 +118,11 @@ this tells you what to build *out of*. *(One of the three flags his own version 
 experimental, so treat the scale claim as unproven and the practice as sound.)*
 
 **5. What "done" means.** The check a person or a command can actually run, written from what would
-show the goal UNMET. **compound-v:frame-the-goal** owns this. A pack without it produces a confident
-implementation of the wrong thing.
+show the goal UNMET. **compound-v:frame-the-goal** owns this — but it is opt-in and will not fire on
+its own, so invoke it by name, or write the check yourself and record in the slot that it was not
+framed. Do not fix this by flipping its opt-in flag: that reopens a deliberate decision and spends
+listing budget the kit does not have. A pack without this slot produces a confident implementation of
+the wrong thing.
 
 **6. What you still do not know.** Name the open questions and which are one-way doors. An unknown
 you can name is a risk; an unknown you cannot is a surprise. **Filling this slot honestly is the
