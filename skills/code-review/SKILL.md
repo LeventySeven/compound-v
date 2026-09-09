@@ -117,6 +117,23 @@ Then one verdict: **APPROVED** (no Critical/Important — a clean diff gets a on
 
 APPROVED means "nothing survived the gate," never "no bugs here" — that gap is the price of the ~80 confidence bar and the four excluded categories. So carry the ceiling with the verdict: name what you checked and found clean, name what this diff left unassessable, and on a one-way-door change say plainly that a gated pass is not a substitute for a human read. And say what that read should be. A model-written diff often arrives larger than a person will line-read, and the lines are mostly right — which is why one team building its own coding agent with that agent replaced line-by-line PR review with a second agent's review plus human **acceptance testing**. So escalate as an acceptance check, not a reading assignment: name the two or three behaviours a person should exercise and what each should do. "Someone should look at this" is not an escalation.
 
+**The licence to not read every line is bought upstream, and it is void if you did not pay.** The
+second failure mode of AI coding is not slop — it is a careful team that reviews every generated line
+by hand, ships correct code, and finds the whole speed-up eaten by review, then concludes the agent
+was pointless. The dissolution is not to read faster. It is that **what/why/acceptance-criteria/how-
+we-will-check were settled before any code was written**, so the diff is a rendering of a document a
+person already approved: the architecture was chosen at plan time, the tests were named at plan time,
+and re-reading the diff re-decides nothing. That is what makes the region ranking below a budget
+rather than a shortcut.
+
+**Two conditions, and both are load-bearing.** The licence exists only where a plan with
+machine-checkable criteria was actually approved — **compound-v:writing-plans** owns that artifact,
+and where it is absent or was written after the code, you have no licence and the full read is the
+honest cost. And it is licensed by a model capability that is dated rather than permanent: it holds
+for models good enough to implement a supplied spec faithfully, so a weaker or older one does not
+earn it. The trap is that this reads like permission to skim. It is the opposite — it moves the
+reading earlier, where a defect costs one paragraph instead of one branch.
+
 **Allocate that read by what an error costs, not by diff order.** Rank the regions the change touches using the one-way-door list **compound-v:get-shit-done** already carries — schema and data model, migrations, public API, spend and billing, irreversible writes — and group findings landing in them under their own heading, so the person reads that section rather than the diff. This is a *read-budget allocator, not a severity scale*: a Critical outside a costly region is still Critical, and a costly region that came back clean must still be named as checked-and-clean, because an absent finding must never imply a pass. The trap is that "cost of error" is a heuristic nobody has measured a threshold for — it ranks attention, it never licenses skipping a region.
 
 ## Posting and fixing — the review stays read-only

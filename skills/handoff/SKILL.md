@@ -100,6 +100,15 @@ Note what these are: a termination predicate, a budget, a permission model, an e
 of them is information you could put in a context window** — this is the one part of working with
 agents that gathering more context cannot help with, which is exactly why it needs writing down.
 
+**Bounds 3 and 4 both end in "stop and ask" — name who they ask, and how.** An unattended run is
+unattended because nobody is reading the transcript, so a permission boundary or an escalation that
+resolves to a message in the log is a run that has quietly stopped, not one that has escalated. Name
+one out-of-band channel before the run starts and write it in the state file beside the escalation
+condition. **The trap is that a channel used for progress stops being read** — a stream that admits
+non-actionable items degrades response to the whole stream — so fire it only on the escalation
+conditions and on terminal state, never per step or per landed batch.
+
+
 ## Budget
 
 Keep it under 30 lines — the same argument `writing-plans` makes at its 200-line cap. A state file

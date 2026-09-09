@@ -47,6 +47,9 @@ Claude Code does this literally, splitting its system prompt on a `__SYSTEM_PROM
 
 ## The compaction ladder (climb only as far as you need)
 
+**Every rung here is an in-window lever; the cause often sits outside it.** A task that compacts, re-gathers and compacts again is short of *locality*, not of window: understanding one change means assembling modules from three directories, which is what interfaces exist to prevent. **The trap: indirection is not locality** — an interface you chase through four files costs the gather it saved.
+
+
 **Attribute before you cut.** When the working window climbs past ~40%, break it down by consumer first — system prompt, tool schemas, message history, retrieved content, memory files — and pull the lever for whichever one is actually fat. Summarizing the transcript does nothing about a bloated tool block; that is fixed by carrying fewer tools. Never estimate that block — **run `/context` on an empty session** and read it per *server*: one official MCP server read 46.2k tokens of a 200k window before any work.
 
 1. **Observation masking — do this first.** Keep the full history of *actions and reasoning*, but replace older *observations* (tool outputs) with placeholders, retaining only the most recent ~10 turns of full observations. Measured result: **52% cheaper with a +2.6% solve-rate improvement** — as good as full summarization at a fraction of the cost. Old tool outputs are rarely re-read, but old reasoning still informs current decisions. **Never tidy failures out of context — this is the counter-intuitive one.** When the model sees a failed action *and* the error it produced, it updates away from similar actions; delete the failure and you delete the update, so it cheerfully repeats the failure. Mask resolved noise, not the live failure it's still working — and the rule holds at every boundary: observation masking, the compaction summary, and what a sub-agent reports to its parent all have to preserve what was tried and why it was abandoned. More broadly — **keep failures, distrust successes:** giving an agent its *past failure cases* measurably improves performance (it breaks out of local minima), while feeding it *past successes* often backfires — the agent pattern-matches the prior answer, gets lazy, and slips back into a local minimum.
@@ -78,12 +81,11 @@ Gate the write — persist only a fact that is (a) durable (still true in future
 
 Agent traffic runs roughly **100:1 input-to-output tokens**, so the input cache matters ~100× more than output length. To keep the cache warm:
 
-- **Static prefix** — no timestamps or dynamic content in the cached region (see volatility ordering above).
 - **Append-only in the steady state** — don't edit or reorder a previous turn; any change downstream of a cached span invalidates it. The exception is repair: if the history contains a tool call with no matching result, re-pair them before resuming, because a provider will reject that history outright.
 - **Deterministic serialization** — sorted JSON keys, stable formatting, so prefixes are byte-identical request to request.
 - **Mask a tool's logits to steer a *trusted* agent off it; remove the tool outright when the input is untrusted.** Masking keeps the prefix byte-identical, which is why it's the cheap move — removing a tool changes the prefix and busts the cache for everything after it. But masking is a *cache* optimisation, not a trust boundary: a masked tool is still sitting in the context, so an injection can still reach for it and a runtime permission gate still has to be the thing that says no. On untrusted input, drop the privileged tools entirely and accept the cache miss — a tool the agent doesn't have cannot be talked into being used (compound-v:agent-security).
 
-At scale the discipline gets concrete. **On a fork (a sub-agent or a retried turn), copy the parent prefix byte-for-byte** — one differing whitespace or reordered field means a cache miss on the entire shared span, so the fork pays full price for context it could have inherited. And **derive the cache key deterministically** from the stable inputs (prefix hash) so the same prefix maps to the same cached entry every time — nondeterministic serialization upstream (unsorted keys, a stray timestamp) silently fragments one logical prefix into many cache entries, none of which hit.
+At scale the discipline gets concrete. **On a fork (a sub-agent or a retried turn), copy the parent prefix byte-for-byte** — one differing whitespace or reordered field means a cache miss on the entire shared span, so the fork pays full price for context it could have inherited.
 
 ## Sub-agents are context firewalls
 

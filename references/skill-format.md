@@ -12,8 +12,29 @@ description: <Imperative WHAT it does, one clause>. Use when <concrete triggers 
 ---
 ```
 
-- `name` and `description` are the only required keys. Optional and occasionally worth it:
-  `disable-model-invocation` (see below), `license`, `metadata`.
+- `name` and `description` are the only required keys. The harness documents more —
+  `when_to_use`, `argument-hint`, `allowed-tools`, `disallowed-tools`, `disable-model-invocation`,
+  `user-invocable`, `context`, `agent`, `background`, `license`, `metadata` — and `scripts/check.sh`
+  gates that set. **A gate that copies someone else's table goes stale silently:** when the harness
+  ships a field, the gate reports it as *unknown*, which reads exactly like a typo, so read the
+  harness's frontmatter reference before adding a key rather than trusting this list.
+- **`disallowed-tools` is the capability lock; `allowed-tools` is its opposite, and the names invite
+  the mistake.** `allowed-tools` *grants* — the tools the model may use without asking permission
+  during the turn that invokes the skill — so reaching for it to constrain an agent widens it
+  instead, skipping the prompt on exactly the tools you were nervous about. `disallowed-tools`
+  removes tools from the pool while the skill is active, and it is the enforcement
+  **compound-v:brainstorming** asks for when it calls its design gate *"a capability lock, not a
+  politeness rule"*. **The trap: the scoping is a turn, the instructions are a session.** Both keys
+  clear when the user sends the next message while the body stays resident — so the skill goes on
+  telling the agent it is locked long after the lock is gone, and nothing reports the gap.
+- **`context: fork` is the only lever that buys a large body without paying for it every turn.** The
+  body is pay-per-use, but the unit is not the invocation: once loaded it stays in the window and is
+  re-sent on every later turn, so a long skill invoked early in a long session is billed for the rest
+  of it. A forked skill runs in its own thread and returns only its answer, so its body never enters
+  the main window. **The trap: fork defaults to background** — the invoking turn gets a handle, not
+  the answer, unless the skill sets `background: false`, so forking a link in a workflow chain hands
+  the next step nothing, and an empty result is indistinguishable from a missing one. Fork a terminal
+  skill; wait on a chained one.
 - **`disable-model-invocation: true` — right for a dead end, wrong for a link in a chain.** The flag
   enforces what a prose plea ("opt-in, do not auto-trigger") only asks for, so prefer it *when no
   other skill hands off to this one*. If a skill sits mid-workflow, the flag silently breaks every
@@ -208,8 +229,10 @@ author's habits.
   and trended worse than no guidance at all; and "don't X unless it matters" only reopens the
   negotiation (superpowers, "writing-skills"). So reach for a table when the model knows-but-skips,
   never to shape an output.
-- **Mind validation.** `name`/`description` are the only required keys; any other top-level key fails
-  validation. `name` must match `^[a-z0-9-]+$`, ≤64 chars, and equal the directory name.
+- **Mind validation.** `name`/`description` are the only required keys; a key outside the documented
+  set fails validation — check that set against the harness's reference, not against the frontmatter
+  list above, which is the copy that goes stale. `name` must match `^[a-z0-9-]+$`, ≤64 chars, and
+  equal the directory name.
 
 ## Ruling B — tier-routing is the anti-overkill law
 Match effort to the task. A trivial change never triggers the full pipeline. The router
