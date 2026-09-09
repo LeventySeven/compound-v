@@ -152,6 +152,12 @@ site rather than the five that were easy, read the source nobody opened.
 not an arbitrary file boundary, or "disjoint" files still couple through a shifting API. Nothing here
 is capped: if ten agents are what it takes to prove the denominator complete, run ten.
 
+**The condition that separates this from theatre: every lane must be verifiable without reading its
+trace** — which coverage work has and build work does not. Past that line you have not parallelised
+the work, you have turned one review queue into N. **references/fan-out.md** carries the evidence,
+the three stacked boundaries and why the binding one is the supervisor's head rather than the file
+graph.
+
 **The hard rule that makes that safe: agents launched and tokens burned are evidence of nothing.**
 Not effort, not progress, not thoroughness. The only currency is closed rows and a working thing, so
 never report a fan-out as an accomplishment and never widen one to look rigorous. A run that
