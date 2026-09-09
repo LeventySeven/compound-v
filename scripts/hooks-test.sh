@@ -59,6 +59,12 @@ run "bash in a PREVIOUS turn only"          BLOCK "$fx/block-bash-in-previous-tu
 # Convergence. The same blocking transcript must pass once the harness says it already
 # blocked — this is what caps the gate at one block per turn so a session can always end.
 run "stop_hook_active on a blocking turn"   ALLOW "$fx/block-claim-no-command.jsonl" --argjson active true
+# The gate reads only `tail -n 500`, and fails OPEN when the turn boundary falls outside that
+# window — a documented choice, not a bug ("if the turn boundary isn't inside the window we fail
+# open instead of guessing at a narrower turn"). Every other fixture here is 4-8 lines, so nothing
+# exercised the edge. This pins it: the same blocking turn, buried under 519 lines of chatter, is
+# allowed. If a future edit changes the window or the fail direction, this case moves and says so.
+run "turn start outside the 500-line window"  ALLOW "$fx/allow-turn-start-outside-tail-window.jsonl"
 
 # Everything the gate must NOT block.
 run "a command actually ran"                ALLOW "$fx/allow-command-ran.jsonl"

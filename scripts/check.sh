@@ -285,6 +285,22 @@ if [ "${ceil_n:-0}" -gt 0 ]; then
   note "ceilings: $ceil_n deliberate corner-cut(s) marked, ${ceil_no_trigger:-0} naming no upgrade condition"
 fi
 
+# ---------------------------------------------------------------------------------------------
+# 12. The description the HARNESS receives, not the bytes on disk.
+#     Frontmatter is YAML. In an unquoted plain scalar ` #` opens a comment, so everything after it
+#     is silently dropped before the model ever sees it — the skill still looks correct in the file,
+#     the char budget above still counts the full line, and the trigger phrases past the marker
+#     simply never load. That is how a skill stops firing for a reason no reader can see. Caught
+#     once, in the one description that cited an issue number: 53% delivered, and the half that
+#     vanished was its entire automatic pre-merge trigger. Quote the scalar and the problem is gone.
+for f in skills/*/SKILL.md; do
+  line="$(awk -F': ' '/^description:/{sub(/^description: */,""); print; exit}' "$f")"
+  case "$line" in
+    \'*|\"*) ;;                                                   # quoted: YAML comments cannot open
+    *" #"*) err "$f: description is an unquoted YAML scalar containing ' #' — everything after it is dropped before the model sees it. Wrap the value in single quotes." ;;
+  esac
+done
+
 skills_n="$(find skills -maxdepth 1 -mindepth 1 -type d | wc -l | tr -d ' ')"
 printf '\n%s skills checked — %s failure(s), %s warning(s)\n' "$skills_n" "$fail" "$warn"
 [ "$fail" -eq 0 ]
