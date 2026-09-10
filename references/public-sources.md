@@ -23,7 +23,7 @@ dropped. Mine on demand.
 | Registry | What it holds | Reach it with |
 |---|---|---|
 | `references/channels.tsv` | **the verified YouTube channels in `references/channels.tsv`**, tiered — core / platform / research / podcast | `yt.sh sweep "<regex>" [limit] [tier]` dumps every title and greps them **locally**; `titles <handle>` dumps one channel (~1,100 titles in ~13s); `transcript <url>` pulls ~5,000 words |
-| `references/publications.tsv` | **24 engineering blogs, conference sites and practitioner sites**, each marked `fetch` or `browser` | `WebFetch` a known page, `WebSearch` to find one. Prefer these when a claim must survive as a **quote** |
+| `references/publications.tsv` | **25 engineering blogs, conference sites, practitioner sites and one written-transcript lane**, each marked `fetch` or `browser` | `WebFetch` a known page, `WebSearch` to find one. Prefer these when a claim must survive as a **quote** |
 | `references/practitioners.tsv` | **45 verified practitioners** — writing, talks, code, posts, in that order | `WebSearch` their name and topic; many speak on the channels and maintain the repos above |
 | `references/exemplars.tsv` | **the large open-source repos in `references/exemplars.tsv`** + the subtree each is exemplar *for* | `exemplar.sh grep <repo> <subtree> "<pattern>"`, then `read <repo> <path>` — at a pinned release |
 | `references/corroboration.md` | How to decide what to believe when two of them disagree | Read it before acting on anything mined |
