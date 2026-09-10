@@ -234,6 +234,14 @@ sources.
 |---|---|---|---|
 | Past successes actively HURT an agent, so slot 2 should gather only anti-patterns | `gathering-context` → slot 2, removed | **REFUTED — do not re-cite** | Killed three ways: the quotation was ASR caption text reproduced inaccurately (`scripts/yt.sh` forbids that twice); the source's scope is an agent re-reading its OWN prior trajectories, not prior art a person gathers before building; and its author disclaims the area on record. It was never in the ledger against the skill, and slot 2's effort argument never depended on it. Moved here from the skill body so the always-loaded text carries guidance rather than provenance. |
 
+## The seven-stage agentic SDLC — the reference shape this kit is measured against
+
+| Claim (short) | Anchor | Category | Source / note |
+|---|---|---|---|
+| The written design gets an INDEPENDENT gap-and-contradiction check before the human signs it — "независимые агенты проверяют его на пропуски и противоречия, человек принимает ключевые инженерные решения" | `brainstorming` → "have a stranger check it" | **PRIMARY (first-person, practitioner)** | Тимур Хахалев, "Как должен выглядеть Agentic SDLC", https://t.me/the_ai_architect (the follow-up to post #424), 2026-09. Stage 2 of a seven-stage model — Analysis & Research · Solution Design · Implementation Planning · Implementation · Verification & Integration · Release & Deployment · Maintenance & Evolution — each stated as classic-vs-agentic with the human's residual role named. The kit owns six of the seven; stage 7 (alerts → monitoring → periodic audit → human prioritises → confirmed tasks open a NEW cycle) is deliberately unowned, see the REFUSED rows. |
+| After landing, the agent helps the person check readiness, the deploy result, and that the ORIGINAL scenario works — "агент помогает человеку проверять готовность, результаты деплоя и работу исходного сценария" | `finishing` → "See the original scenario work where it shipped" | **PRIMARY (first-person, practitioner)** | Same post, stage 6. Before this, nothing in the kit owned the moment after merge; `get-shit-done` walks the scenario pre-landing and stopped there. |
+| Speeding up only code generation crushes every other stage — "если мы просто ускорим генерацию кода и оставим остальные этапы неизменными, то от нагрузки офигеют все" | `code-review` → "The licence to not read every line" | PRIMARY | Same post; the second independent statement of the review-bottleneck thesis the HighLoad talk measured at +1%. He also notes the whole-QA-as-prompt-forwarder job is now "одним .md блоком из 10-15 строчек" — which is `recheck` step 2, plan alignment, already. |
+
 ## systematic-debugging
 
 | Claim (short) | Anchor | Category | Source / note |

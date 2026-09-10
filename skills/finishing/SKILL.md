@@ -72,3 +72,15 @@ curated table becomes an index.
 **Retire the per-change scaffolding in the landing commit.** `using-compound-v` requires that the durable part — the decision and what was rejected — folds into the living doc or an ADR when the work lands, and that the scaffolding then goes. This is the step that executes it: the per-build plan and its design spec have no readers once the work is merged, and left behind they become the "repo full of specs nobody reads" the document rule exists to prevent — the same reason `compound-v:handoff` deletes its run scaffolding in the final commit. Fold, delete, and say in one line what you folded and where. **Whatever you delete, drop or repoint the links that named it** — the PRD links to the plan and the design spec by rule (`compound-v:writing-prd`), so a silent delete leaves the product's stable source of truth pointing at nothing, and a stale durable doc an agent trusts as fact is worse than no doc. Keep a plan only when something still open points at it, and say what.
 
 **Worktree cleanup order** (the footgun): merge → **`cd` out of the worktree** → remove the worktree → then delete the branch. Both ends bite, but only one is loud: deleting the branch first errors out (`cannot delete branch 'feat' used by worktree at …`, exit 1) and self-corrects. Removing the worktree from inside it *succeeds* — exit 0, directory gone — and strands your shell in a deleted cwd, where `pwd` still prints the old path while every later command dies with an unrelated-looking `fatal: Unable to read current working directory`. The dangerous case is the one that returns success, which is why the `cd` comes first. Only remove worktrees you created (under a gitignored `.worktrees/` or similar) — never one the harness owns.
+
+## Step 4 — See the original scenario work where it shipped
+
+**A merge is not a release, and a green suite on the branch says nothing about the deployed thing.**
+Once the change is live wherever it lands — a preview URL, staging, production — drive the scenario
+the ask was about, on that surface, and read the result: the deploy's own output, the migration's
+outcome, the first real request through the new path. This is the moment the whole cycle was for,
+and it is the one nobody owns once the PR is closed. Help the person check readiness and the deploy
+result, then exercise the original scenario end to end; where the environment does not give you a
+way to reach it, say so rather than inferring from the branch. The trap: "it deployed" is a status
+line, not evidence — a rollout that reports success with the old code still serving is the common
+shape, so confirm the scenario, not the pipeline's mood.
