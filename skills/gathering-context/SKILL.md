@@ -130,7 +130,9 @@ whole defence against the measured failure**: given insufficient context, models
 than abstain **15.4–40.4%** of the time. And the context genuinely may not exist — a hand
 classification of all 300 SWE-bench Lite problems found **10.0%** unsolvable from what the repository
 contained. "This is not knowable from here" is a real finding; a confident guess in its place is the
-defect this slot exists to catch.
+defect this slot exists to catch. The other face of the same failure is silent: an agent short of
+the context the clean path needs does not stop, it reaches for the workaround that fits what it
+holds — so a thin slot 6 surfaces downstream as a special case nobody asked for, never as an error.
 
 ## The shape of a finding — this is the whole of the depth
 
