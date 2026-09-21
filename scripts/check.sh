@@ -61,7 +61,7 @@ PRIV="${PRIV:-^$}"
 # file then pointed at. Match any LOCAL research/ path instead — anchored so a URL that merely
 # contains /research/ (anthropic.com/research/…, a vendor's research index) is not a hit, because a
 # gate that fires on legitimate citations is one people learn to ignore.
-leak="$(grep -rInoE "$PRIV"'|(^|[^./A-Za-z])research/[a-z0-9._-]+|_manifest\.json|/Users/[a-z]|/home/[a-z]|~/(Desktop|Users|Documents|src|repos|code)/' \
+leak="$(grep -rInoE "$PRIV"'|(^|[^./A-Za-z])research/[A-Za-z0-9._-]+|_manifest\.json|/Users/[a-z]|/home/[a-z]|~/(Desktop|Users|Documents|src|repos|code)/' \
   skills/ agents/ hooks/ references/ scripts/ README.md .claude-plugin/ 2>/dev/null \
   | grep -v '^scripts/check.sh:' || true)"
 if [ -n "$leak" ]; then

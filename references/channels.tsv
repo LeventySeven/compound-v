@@ -45,7 +45,7 @@
 # TIERS: core = densest technical alpha, sweep these first. platform = vendor dev channels, real
 # engineering mixed with launch marketing. research = academic/lab. podcast = long-form interviews.
 #
-aiDotEngineer	AI Engineer	core	THE densest lane for this kit: practitioners describing harnesses, evals and what broke, at length, with slides. Not marketing-free: of 67 talks picked and read in full on 2026-09-21, 12 carried no pitch, 47 some and 4 were mostly product — judge the speaker, not the stage. 1,159 videos against alpha.sh's 200-title sweep window, so the channel's older canon is registered in references/talks.tsv.
+aiDotEngineer	AI Engineer	core	THE densest lane for this kit: practitioners describing harnesses, evals and what broke, at length, with slides. Not marketing-free: of 67 talks picked and read in full on 2026-09-21, 15 carried no pitch, 48 some and 4 were mostly product — judge the speaker, not the stage. 1,159 videos against alpha.sh's 200-title sweep window, so the channel's older canon is registered in references/talks.tsv.
 anthropic-ai	Anthropic	core	The people who build this CLI: harness design, context engineering, what they unshipped. Mixed with general/research content ("How Icelanders are thinking about AI") — the engineering talks are the minority, so sweep with a specific regex.
 claude	Claude	platform	PRODUCT channel, not an engineering one — recent feed is feature marketing (Claude for Word, Cowork). It does hold the Code w/ Claude talks that 13 corpus transcripts came from, so sweep it, but expect a low hit rate and do not treat it as a core lane.
 ycombinator	Y Combinator	core	Founders and CTOs on building and scaling. Bias to the engineering talks; skip the fundraising ones.
