@@ -57,7 +57,11 @@ PRIV="${PRIV:-^$}"
 # -I skips binaries: a .DS_Store matches path fragments and reports only "Binary file matches",
 # which is noise, not a finding. Binaries are caught by their own check below instead — this kit
 # ships text, so a binary in the shipped tree is suspect on its own terms and gets named.
-leak="$(grep -rInoE "$PRIV"'|research/(findings|SYNTH|sources)|_manifest\.json|/Users/[a-z]|/home/[a-z]|~/(Desktop|Users|Documents|src|repos|code)/' \
+# The named subdirectories missed a dated run folder (`research/aie-2026-09-21/`) that a shipped
+# file then pointed at. Match any LOCAL research/ path instead — anchored so a URL that merely
+# contains /research/ (anthropic.com/research/…, a vendor's research index) is not a hit, because a
+# gate that fires on legitimate citations is one people learn to ignore.
+leak="$(grep -rInoE "$PRIV"'|(^|[^./A-Za-z])research/[a-z0-9._-]+|_manifest\.json|/Users/[a-z]|/home/[a-z]|~/(Desktop|Users|Documents|src|repos|code)/' \
   skills/ agents/ hooks/ references/ scripts/ README.md .claude-plugin/ 2>/dev/null \
   | grep -v '^scripts/check.sh:' || true)"
 if [ -n "$leak" ]; then

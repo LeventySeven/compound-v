@@ -3,14 +3,14 @@
 #
 # WHY A TALK REGISTRY BESIDE channels.tsv. channels.tsv stores the channel and mines on demand, and
 # that reaches only what a sweep can list. scripts/alpha.sh runs `yt.sh sweep "<topic>" 200` — the
-# newest 200 titles per channel (yt.sh's own default is 400). @aiDotEngineer listed 1,160 videos on
+# newest 200 titles per channel (yt.sh's own default is 400). @aiDotEngineer listed 1,159 videos on
 # 2026-09-21 and publishes faster than any other lane, so most of its canon (Jane Street, Zed, METR's
 # RCT, Sourcegraph's adoption talk) already sits below that window, and this year's talks follow
 # within months. A row here is still a pointer, never a transcript:
 #   bash scripts/yt.sh transcript https://www.youtube.com/watch?v=<video_id>
 # Find rows with `grep -i "<topic>" references/talks.tsv`; the fourth column holds kit skill names.
 #
-# EVERY ROW WAS READ, NOT JUDGED BY ITS TITLE. 63 candidates were transcribed and read end to end;
+# EVERY ROW WAS READ, NOT JUDGED BY ITS TITLE. 67 candidates were transcribed and read end to end;
 # 27 earned a row. The bar is the one channels.tsv and practitioners.tsv use: a first-person builder
 # or operator describing a system they ran, material a strong engineer would not already know, and a
 # claim still true now. What was cut, and why:

@@ -168,7 +168,15 @@ case "${1:-}" in
     # Stable releases only: a project cutting daily alphas fills the ten newest slots with
     # ~25-byte prerelease bodies, so openai/codex scored fix-notes 0 while its latest stable
     # release opened with "## Bug Fixes". Read the ten newest NON-prerelease bodies instead.
-    fixes="$(gh api "repos/$r/releases?per_page=100" --jq '[.[] | select(.prerelease | not)][:10] | [.[].body // ""] | join(" ")' 2>/dev/null | grep -ciE 'fix|bug|patch|regression' || true)"
+    # Capture the API's own status: a failed call must not score 0. The heavier page size makes a
+    # 5xx likelier, and a swallowed failure prints the same "nobody has lived with it" verdict this
+    # block exists to stop — a broken instrument reading as a measurement.
+    rel_bodies="$(gh api "repos/$r/releases?per_page=100" --jq '[.[] | select(.prerelease | not)][:10] | [.[].body // ""] | join(" ")' 2>/dev/null)"; fixes_rc=$?
+    if [ "$fixes_rc" -eq 0 ]; then
+      fixes="$(printf '%s' "$rel_bodies" | grep -ciE 'fix|bug|patch|regression' || true)"
+    else
+      fixes=""   # unmeasured, not zero
+    fi
     tags="$(gh api "repos/$r/tags?per_page=5" --jq 'length' 2>/dev/null || echo 0)"
     tests="$(gh api "repos/$r/contents" --jq '[.[].name]|map(select(test("test|spec|__tests__";"i")))|length' 2>/dev/null || echo 0)"
     # RECENCY, not just "not archived". `archived != true` passes a repo that is dead but merely
@@ -194,12 +202,19 @@ case "${1:-}" in
     # own number is worse than either half alone.
     printf '  maintained    pushed %-7s %s\n' "$pushed" "$({ [ "$archived" != true ] && [ "${recent:-0}" -gt 0 ]; } && echo 'ok — not archived, and commits in the last 90d' || { [ "$archived" = true ] && echo 'FAIL — archived' || echo 'FAIL — no commits in the last 90d: un-archived is not the same as alive'; })"
     printf '  versioned     rel=%-3s tags=%-4s %s\n' "${rel:-0}" "${tags:-0}" "$({ [ "${rel:-0}" -gt 0 ] || [ "${tags:-0}" -gt 0 ]; } && echo 'ok — someone ships versions (releases OR tags)' || echo 'FAIL — never versioned')"
-    printf '  fix-notes     %-14s %s\n' "${fixes:-0}" "$([ "${fixes:-0}" -gt 0 ] && echo 'ok — changelogs carry BUG FIXES, not just features' || echo 'FAIL — features only: nobody has lived with it')"
+    if [ -z "${fixes}" ]; then
+      printf '  fix-notes     %-14s %s\n' "—" "UNMEASURED — the releases API call failed; re-run before reading this row"
+    else
+      printf '  fix-notes     %-14s %s\n' "$fixes" "$([ "$fixes" -gt 0 ] && echo 'ok — changelogs carry BUG FIXES, not just features' || echo 'FAIL — features only: nobody has lived with it')"
+    fi
     printf '  tests         %-14s %s\n' "${tests:-0}" "$([ "${tests:-0}" -gt 0 ] && echo 'ok — top-level test dir' || echo 'weak — none at top level (may be nested)')"
     printf '  stars         %-14s NOT SCORED — reach is what marketing buys\n' "$stars"
     echo
-    if [ "$score" -ge 4 ]; then echo "  VERDICT: usable as an exemplar ($score/5). Now check the SUBTREE actually contains the pattern."
-    else echo "  VERDICT: do NOT use as an exemplar ($score/5). Popular is not the same as operated."; fi
+    # A row that could not be measured makes the total a FLOOR, never a verdict — say so rather
+    # than letting a failed API call read as a repo nobody maintains.
+    floor=""; [ -z "${fixes}" ] && floor=" — and one row is UNMEASURED, so this is a floor, not a verdict: re-run"
+    if [ "$score" -ge 4 ]; then echo "  VERDICT: usable as an exemplar ($score/5). Now check the SUBTREE actually contains the pattern.$floor"
+    else echo "  VERDICT: do NOT use as an exemplar ($score/5). Popular is not the same as operated.$floor"; fi
     echo "  A score is a floor, never a reason. The real test is whether a team had to KEEP THIS"
     echo "  WORKING for someone — read the issues strangers filed and whether anyone answered."
     echo
