@@ -12,10 +12,13 @@ description: <Imperative WHAT it does, one clause>. Use when <concrete triggers 
 ---
 ```
 
-- `name` and `description` are the only required keys. The harness documents more —
-  `when_to_use`, `argument-hint`, `allowed-tools`, `disallowed-tools`, `disable-model-invocation`,
-  `user-invocable`, `context`, `agent`, `background`, `license`, `metadata` — and `scripts/check.sh`
-  gates that set. **A gate that copies someone else's table goes stale silently:** when the harness
+- This kit requires `name` and `description`; Claude Code itself treats every key as optional and
+  only recommends `description`, while the Agent Skills spec path (claude.ai upload, the Skills API)
+  requires both and rejects Claude-Code-only keys. The harness documents more — `when_to_use`,
+  `argument-hint`, `arguments`, `allowed-tools`, `disallowed-tools`, `disable-model-invocation`,
+  `user-invocable`, `model`, `effort`, `context`, `agent`, `background`, `hooks`, `paths`, `shell`,
+  `license`, `compatibility`, `metadata` (code.claude.com/docs/en/skills, rev. 2026-09-17) — and
+  `scripts/check.sh` gates that set. **A gate that copies someone else's table goes stale silently:** when the harness
   ships a field, the gate reports it as *unknown*, which reads exactly like a typo, so read the
   harness's frontmatter reference before adding a key rather than trusting this list.
 - **`disallowed-tools` is the capability lock; `allowed-tools` is its opposite, and the names invite
@@ -37,9 +40,11 @@ description: <Imperative WHAT it does, one clause>. Use when <concrete triggers 
   skill; wait on a chained one.
 - **`disable-model-invocation: true` — right for a dead end, wrong for a link in a chain.** The flag
   enforces what a prose plea ("opt-in, do not auto-trigger") only asks for, so prefer it *when no
-  other skill hands off to this one*. If a skill sits mid-workflow, the flag silently breaks every
-  upstream handoff — the model can no longer reach it at all — and the failure is invisible until a
-  pipeline stops halfway. For those, keep the prose and put the real protection where it belongs: an
+  other skill hands off to this one*. If a skill sits mid-workflow, the flag breaks every upstream
+  handoff: the harness refuses the call and tells the model not to reproduce the steps another way,
+  so an attended run hands the step back to the user and an unattended one stalls at that link. It
+  also removes the description from context entirely — for a plugin skill the only per-skill lever
+  that frees listing budget, bought with every handoff. For those, keep the prose and put the real protection where it belongs: an
   explicit confirmation gate on each irreversible action inside the skill. Consequence-gating and
   invocation-gating are different jobs; don't substitute one for the other.
 

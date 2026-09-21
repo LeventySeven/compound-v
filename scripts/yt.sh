@@ -27,6 +27,27 @@ command -v "$YTDLP" >/dev/null 2>&1 || {
   exit 127
 }
 
+# YouTube bot-walls the default web client under load: "Sign in to confirm you're not a bot".
+# Measured 2026-09-21: every caption call on this machine walled on the default client while the
+# same videos listed and transcribed through the ios/mweb player clients. So a walled call is
+# retried once through them, and a wall that survives the retry is reported as a WALL. The old
+# message called it VIDEO_UNREADABLE ("deleted, private, members-only"), which blames the video
+# for the IP and invites recording a live source as gone.
+YT_ERR="$(mktemp -t yt_err.XXXXXX)"; trap 'rm -f "$YT_ERR"' EXIT
+ytd() {
+  "$YTDLP" "$@" 2>"$YT_ERR"; local rc=$?
+  if [ "$rc" -ne 0 ] && grep -q "not a bot" "$YT_ERR"; then
+    "$YTDLP" --extractor-args "youtube:player_client=ios,mweb" "$@" 2>"$YT_ERR"; rc=$?
+  fi
+  return "$rc"
+}
+walled() { grep -q "not a bot" "$YT_ERR" 2>/dev/null; }
+bot_wall_msg() {
+  echo "BOT_WALLED — YouTube is refusing this IP (\"confirm you're not a bot\"), even through the" >&2
+  echo "  ios/mweb fallback clients. A property of the IP, not the video: back off and retry" >&2
+  echo "  later, or pass cookies to yt-dlp. Do not record this video as unreadable or caption-free." >&2
+}
+
 clean() {
   sed -e 's/<[^>]*>//g' -e 's/&nbsp;/ /g' -e 's/&amp;/\&/g' \
       -e "s/&#39;/'/g" -e 's/&quot;/"/g' \
@@ -51,8 +72,9 @@ case "${1:-}" in
     # is the same defect as passing --quiet, which yt-dlp's own source confirms:
     # YoutubeDL.py:667 sends screen output to stderr under quiet and :1007 returns
     # early, deleting the only assertion of absence there is.
-    out="$("$YTDLP" --list-subs --skip-download "$2" 2>/dev/null)"; rc=$?
+    out="$(ytd --list-subs --skip-download "$2")"; rc=$?
     if [ $rc -ne 0 ]; then
+      if walled; then bot_wall_msg; exit 3; fi
       echo "BROKEN: the caption LISTING itself failed (exit $rc) — deleted, private," >&2
       echo "  members-only, or age/region-gated. This says NOTHING about captions." >&2
       exit 3
@@ -74,8 +96,8 @@ case "${1:-}" in
     fi ;;
   transcript)
     d="$(mktemp -d)"; url="$2"
-    "$YTDLP" --skip-download --write-subs --write-auto-subs --sub-langs 'en.*' \
-      --sub-format vtt -o "$d/cc.%(ext)s" "$url" >/dev/null 2>&1
+    ytd --skip-download --write-subs --write-auto-subs --sub-langs 'en.*' \
+      --sub-format vtt -o "$d/cc.%(ext)s" "$url" >/dev/null
     f="$(ls "$d"/cc*.vtt 2>/dev/null | head -1)"
     if [ -z "$f" ]; then
       # A failed FETCH and an absent TRACK are different facts and were previously reported
@@ -83,10 +105,10 @@ case "${1:-}" in
       # later returned NO_SUBTITLES_AVAILABLE under parallel load — that is throttling, and reading
       # it as "this talk has no captions" silently drops a readable source. Ask what tracks exist
       # before concluding anything, and retry once with backoff.
-      if "$YTDLP" --list-subs --skip-download "$url" 2>/dev/null | grep -qE '^[a-z]{2}(-[A-Za-z]+)?[[:space:]]'; then
+      if ytd --list-subs --skip-download "$url" | grep -qE '^[a-z]{2}(-[A-Za-z]+)?[[:space:]]'; then
         sleep 5
-        "$YTDLP" --skip-download --write-subs --write-auto-subs --sub-langs 'en.*' \
-          --sub-format vtt -o "$d/cc.%(ext)s" "$url" >/dev/null 2>&1
+        ytd --skip-download --write-subs --write-auto-subs --sub-langs 'en.*' \
+          --sub-format vtt -o "$d/cc.%(ext)s" "$url" >/dev/null
         f="$(ls "$d"/cc*.vtt 2>/dev/null | head -1)"
       fi
       if [ -z "$f" ]; then
@@ -95,8 +117,9 @@ case "${1:-}" in
         # members-only, age- or region-gated — produced no lines and fell through to a confident
         # "verified: genuinely no caption tracks". A listing that never returned cannot verify an
         # absence. Three outcomes, not two.
-        subs="$("$YTDLP" --list-subs --skip-download "$url" 2>/dev/null)"; list_rc=$?
+        subs="$(ytd --list-subs --skip-download "$url")"; list_rc=$?
         if [ "$list_rc" -ne 0 ]; then
+          if walled; then bot_wall_msg; rm -rf "$d"; exit 2; fi
           echo "VIDEO_UNREADABLE — the caption LISTING itself failed (deleted, private," >&2
           echo "  members-only, or age/region-gated). This says nothing about captions: it is a" >&2
           echo "  channel failure, not an absence. Do not record this video as caption-free." >&2
@@ -158,7 +181,7 @@ case "${1:-}" in
     # found nothing, with no hint that the tool never ran. YouTube bot-walls fresh IPs routinely, so
     # this is the common case for a new user, not an exotic one. The pipeline runs the loop in a
     # subshell, so the tally goes through a file rather than a variable.
-    errf="$(mktemp)"; trap 'rm -f "$errf"' EXIT
+    errf="$(mktemp)"; trap 'rm -f "$errf" "$YT_ERR"' EXIT
     awk -F'\t' '!/^#/ && NF>=3 {print $1"\t"$2}' "$REG" | while IFS="$(printf '\t')" read -r h name; do
       hits="$("$YTDLP" --flat-playlist --skip-download -I "1:$per" \
         --print "$name || %(title)s || %(duration_string)s || %(webpage_url)s" \

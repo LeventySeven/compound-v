@@ -3,7 +3,9 @@
 A skill delivers nothing unless it fires, and whether it fires is decided by a layer *above* the
 skill: the always-loaded listing of names and descriptions. That listing has a budget. When it
 overflows, the harness does not warn the model — it **drops descriptions, starting with the skills
-you invoke least**, leaving a bare name that matches nothing.
+you invoke least**, leaving a bare name that no user's phrasing matches. The name itself stays in the
+listing, so a handoff that names the skill exactly still reaches it — the failure is in matching, not
+in invocation.
 
 So the failure looks exactly like a badly-written description, and it is not. A skill can be perfect
 and unreachable. This file is the owner of that failure.
@@ -21,7 +23,9 @@ From the harness's own documentation (`code.claude.com/docs/en/skills`), current
 
 Two settings move these: `skillListingMaxDescChars` (the 1,536 cap) and `skillListingBudgetFraction`
 (the 1%), plus `SLASH_COMMAND_TOOL_CHAR_BUDGET` for a fixed character count. `skillOverrides` can set
-an entry to `"name-only"` to free budget. `/doctor` estimates the listing's cost and its biggest
+an entry to `"name-only"` to free budget — but not a plugin's: *"Plugin skills are not affected by
+`skillOverrides`. Manage those through `/plugin` instead"* (same page, rev. 2026-09-17), so for this
+kit's own entries the levers are a shorter description or `disable-model-invocation`. `/doctor` estimates the listing's cost and its biggest
 contributors; on overflow the harness also writes a warning to the debug log.
 
 ## It is not hypothetical — it is happening to this kit
@@ -56,7 +60,7 @@ trigger phrases is a description that truncates into uselessness.
 
 **Do not fix an overflow by deleting skills.** Deleting the least-invoked skill promotes the next
 least-invoked one into the same trap, and you lose a capability to buy budget you could have bought
-with `skillOverrides` or a shorter description. The population that gets dropped is a property of the
+with a shorter description (or `skillOverrides`, for skills that are not a plugin's). The population that gets dropped is a property of the
 *budget*, not of the skills.
 
 **Route around the listing where the work is important.** A `SessionStart` hook injects text

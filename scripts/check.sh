@@ -127,14 +127,14 @@ for f in skills/*/SKILL.md; do
   awk 'NR==1&&/^---/{p=1;next} p&&/^---/{exit} p&&/^[a-zA-Z][a-zA-Z0-9_-]*:/{sub(/:.*/,"");print}' "$f" \
   | while read -r k; do
       case "$k" in
-        name|description|when_to_use|argument-hint|disable-model-invocation|user-invocable|allowed-tools|disallowed-tools|context|agent|background|license|metadata) ;;
+        name|description|when_to_use|argument-hint|arguments|disable-model-invocation|user-invocable|allowed-tools|disallowed-tools|model|effort|context|agent|background|hooks|paths|shell|license|compatibility|metadata) ;;
         *) printf 'FAIL  %s: unknown frontmatter key "%s"\n' "$f" "$k" ;;
       esac
     done
 done
 unknown="$(for f in skills/*/SKILL.md; do
   awk 'NR==1&&/^---/{p=1;next} p&&/^---/{exit} p&&/^[a-zA-Z][a-zA-Z0-9_-]*:/{sub(/:.*/,"");print}' "$f"
-done | sort -u | grep -vE '^(name|description|when_to_use|argument-hint|disable-model-invocation|user-invocable|allowed-tools|disallowed-tools|context|agent|background|license|metadata)$' || true)"
+done | sort -u | grep -vE '^(name|description|when_to_use|argument-hint|arguments|disable-model-invocation|user-invocable|allowed-tools|disallowed-tools|model|effort|context|agent|background|hooks|paths|shell|license|compatibility|metadata)$' || true)"
 [ -n "$unknown" ] && fail=$((fail + 1))
 
 # 6. Description budget. Descriptions are ALWAYS loaded and share a listing budget across every
