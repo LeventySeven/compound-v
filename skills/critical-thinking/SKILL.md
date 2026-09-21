@@ -40,7 +40,13 @@ feedback that is objective, precise, public and continuous, and who have an exac
 their skill — still rated their own ability roughly **89 Elo points above their actual rating**, and
 only a small minority of the overconfident ones ever reached the level they claimed. If years of
 unambiguous scored feedback does not calibrate a person, a few hours of reasoning about your own
-conclusion will not either.
+conclusion will not either. The same gap has been measured on the question closest to this kit —
+*did the tool make the work faster?* In a randomized trial, experienced open-source developers
+forecast that AI would cut their task time by 24%, still estimated a 20% cut after doing the work,
+and were measured taking 19% longer. The sign of that effect is dated (early-2025 tools; the same
+lab's 2026 follow-up points to speed-ups); what has not dated is that the people who did the work
+misread its sign. So a claim that a tool, an agent or a change made work faster needs a timed
+comparison, never the felt speed-up — your own included.
 
 Two consequences for how this skill is run:
 

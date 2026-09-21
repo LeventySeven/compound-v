@@ -55,12 +55,11 @@ Security is a lens too, but its catalog lives in compound-v:agent-security (buil
 ## Step 4 — gate false positives by confidence
 
 **Raise the bar when the CONSUMER is an agent, not a person.** The threshold below is tuned for human
-noise; an agent-fed loop fails differently. A low-confidence comment handed to a fixer makes it *"fix
-something, go back, get another code review, and have to fix backwards because the quality of the
-comment was low"* — churn that costs turns and can end worse than silence. Two consequences: at
-`--fix`, and anywhere findings feed an implementer rather than a reader, gate harder than you would
-for a human; and note the inverse, which is free tuning — *"agents are more than happy to go through
-and fix 100 nits on a pull request where your engineers really get frustrated"*, so a nit that is
+noise; an agent-fed loop fails differently. A low-confidence comment handed to a fixer sends it round a loop
+— fix, re-review, then fix backwards because the comment was poor — churn that costs turns and can
+end worse than silence. Two consequences: at `--fix`, and anywhere findings feed an implementer
+rather than a reader, gate harder than you would for a human; and note the inverse, which is free
+tuning — an agent will fix a hundred nits that would frustrate an engineer, so a nit that is
 correct but low-value is cheap for an agent and expensive for a person. This is the opposite edge of
 the warning already in this skill that a defensive anti-false-positive instruction makes the model
 withhold a true finding; both edges are real and the consumer decides which one binds.
@@ -75,7 +74,7 @@ source for the comparative claim. One team's production report, unreplicated. So
 first version, not a vendor, and the real weight of the system was feedback plumbing — trajectory
 observability, addressal rate, per-team rules — not the reviewer.)*
 
-This is the step that makes an on-demand reviewer trustworthy instead of noisy. Gate cheapest-first: before scoring anything, **check every cited location against the file** — a line that doesn't exist is a hallucination, and dropping it is free and deterministic. A location that is real but **outside the diff** is not a hallucination and must never be dropped: the highest-value bugs live in the contract *between* changed code and its surroundings, which is out of the diff by definition, so a naive anchor gate deletes exactly your best findings. Route those to a separate, clearly-labelled **Adjacent (out-of-diff)** bucket — not deleted, not mixed into the main list. Then score every surviving candidate finding 0–100 for how sure you are it's a *real, diff-introduced* issue, and **drop anything below ~80** — a confidence-scored filter is what keeps false positives off the PR. For a CLAUDE.md-derived finding, re-verify the rule actually says what you claim before it counts.
+Gate cheapest-first: before scoring anything, **check every cited location against the file** — a line that doesn't exist is a hallucination, and dropping it is free and deterministic. A location that is real but **outside the diff** is not a hallucination and must never be dropped: the highest-value bugs live in the contract *between* changed code and its surroundings, which is out of the diff by definition, so a naive anchor gate deletes exactly your best findings. Route those to a separate, clearly-labelled **Adjacent (out-of-diff)** bucket — not deleted, not mixed into the main list. Then **verify each survivor outside the pass that found it**: at `high`+, one fresh subagent per finding, handed the claim, its location and the PR's stated intent — never the lens's reasoning — told to presume it false and to keep it only with the evidence below. Don't ask a lens to verify its own candidates: a finder that also verifies drops true positives, and a verifier that reads the finder's reasoning agrees instead of testing. At `low`/`medium` there is one pass, so score each finding 0–100 for how sure you are it's a *real, diff-introduced* issue, and **drop anything below ~80**. For a CLAUDE.md-derived finding, re-verify the rule actually says what you claim before it counts.
 
 The confidence gate filters hallucinated findings *after* they're generated; the sharper fix is upstream. A free-text "review this diff" prompt defaults to *manufacturing* nits, because silence reads as failure — so make "nothing to report" an explicit, equally-valid outcome (a `finish_review(comments: 0)` action), not an absence of output. One production reviewer's switch from free text to a forced per-finding action with an explicit no-finding branch cut its hallucination ratio from ~9:1 to ~1:1. Gates cut both ways, and this is measured too: a defensive instruction aimed at false positives overshoots and makes the model **withhold a true finding it already has**. Re-read every gate here for what it might be silencing, not only for what it filters.
 
@@ -87,11 +86,9 @@ defect you planted, one diff that is clean but looks suspicious, both put throug
 and the gate must flag the first and pass the second. Make the planted defect the lazy-but-plausible
 kind, correct on the happy path and wrong only on the axis you claim to measure, never an obvious
 strawman: a strawman is caught by a reviewer that catches nothing else, so flagging it measures
-nothing (**compound-v:verification-before-completion** owns the general form of this). The rubric
-that survives is the one that discriminates, not the one that agrees with itself — the benchmark this
-is taken from refuses to score a matrix at all until its judge has ranked a deliberately over-built
-reference strictly above a minimal one for the same task. Until your pair separates, the ~80 is not a
-threshold but a number the model prints, and a gate resting on it is decoration.
+nothing (**compound-v:verification-before-completion** owns the general form of this). Until your
+pair separates, the ~80 is not a threshold but a number the model prints, and a gate resting on it is
+decoration.
 
 
 Default to *not* a finding. These are not findings:
@@ -116,7 +113,7 @@ path/to/file.ext:line — issue: one sentence, what is wrong
 
 Then one verdict: **APPROVED** (no Critical/Important — a clean diff gets a one-line approval, not a manufactured list), **FIX_REQUIRED** (at least one Critical/Important), or **ARCHITECTURE_CONCERN** (the approach itself is wrong — escalate to a re-plan, don't patch). No praise-padding, no "great job", no "you might consider" hedging; if you can't name the trigger, it isn't a finding.
 
-APPROVED means "nothing survived the gate," never "no bugs here" — that gap is the price of the ~80 confidence bar and the four excluded categories. So carry the ceiling with the verdict: name what you checked and found clean, name what this diff left unassessable, and on a one-way-door change say plainly that a gated pass is not a substitute for a human read. And say what that read should be. A model-written diff often arrives larger than a person will line-read, and the lines are mostly right — which is why one team building its own coding agent with that agent replaced line-by-line PR review with a second agent's review plus human **acceptance testing**. So escalate as an acceptance check, not a reading assignment: name the two or three behaviours a person should exercise and what each should do. "Someone should look at this" is not an escalation.
+APPROVED means "nothing survived the gate," never "no bugs here" — that gap is the price of the confidence gate and the four excluded categories. So carry the ceiling with the verdict: name what you checked and found clean, name what this diff left unassessable, and on a one-way-door change say plainly that a gated pass is not a substitute for a human read. And say what that read should be. A model-written diff often arrives larger than a person will line-read, and the lines are mostly right — which is why one team building its own coding agent with that agent replaced line-by-line PR review with a second agent's review plus human **acceptance testing**. So escalate as an acceptance check, not a reading assignment: name the two or three behaviours a person should exercise and what each should do. "Someone should look at this" is not an escalation.
 
 **The licence to not read every line is bought upstream, and it is void if you did not pay.** The
 second failure mode of AI coding is not slop — it is a careful team that reviews every generated line
@@ -148,7 +145,7 @@ The review **finds**; it does not edit. A reviewer that can edit ships its own u
 
 | Smell | Why it's wrong |
 |---|---|
-| Posting findings straight from the diff with no confidence gate | Unfiltered review is noise; the one false positive a senior engineer waves off costs you the credibility of the ten real ones. Gate at ~80. |
+| Posting findings straight from the diff with no confidence gate | Unfiltered review is noise; the one false positive a senior engineer waves off costs you the credibility of the ten real ones. Gate every one. |
 | Running `ultra` on a one-file fix "to be safe" | Overkill is a defect. Depth matches the diff; a bigger pass isn't a better pass. |
 | Flagging a pre-existing issue as a blocker on this diff | Out of scope for *this* diff — Adjacent, reported once, never blocks. But a contract the diff **breaks** is not pre-existing at all: it is a main-list blocker however far from the changed lines it sits. The revert test sorts them. |
 | The reviewer edits the code while reviewing it | The edit it introduces is the one nobody reviews. Review read-only; `--fix` is a separate, explicit, re-verified phase. |
