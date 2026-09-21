@@ -165,7 +165,10 @@ case "${1:-}" in
     # release-hygiene ONCE, and give tagging its own signal so a tags-only project is not punished
     # twice for a publishing convention.
     rel="$(gh api "repos/$r/releases?per_page=10" --jq 'length' 2>/dev/null || echo 0)"
-    fixes="$(gh api "repos/$r/releases?per_page=10" --jq '[.[].body // ""]|join(" ")' 2>/dev/null | grep -ciE 'fix|bug|patch|regression' || true)"
+    # Stable releases only: a project cutting daily alphas fills the ten newest slots with
+    # ~25-byte prerelease bodies, so openai/codex scored fix-notes 0 while its latest stable
+    # release opened with "## Bug Fixes". Read the ten newest NON-prerelease bodies instead.
+    fixes="$(gh api "repos/$r/releases?per_page=100" --jq '[.[] | select(.prerelease | not)][:10] | [.[].body // ""] | join(" ")' 2>/dev/null | grep -ciE 'fix|bug|patch|regression' || true)"
     tags="$(gh api "repos/$r/tags?per_page=5" --jq 'length' 2>/dev/null || echo 0)"
     tests="$(gh api "repos/$r/contents" --jq '[.[].name]|map(select(test("test|spec|__tests__";"i")))|length' 2>/dev/null || echo 0)"
     # RECENCY, not just "not archived". `archived != true` passes a repo that is dead but merely
