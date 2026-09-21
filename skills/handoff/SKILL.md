@@ -26,7 +26,9 @@ the failure above; two files that *cannot* overlap is not.
    arbitrate: what a commit in `git log` backs needs no re-verification, but a dirty tree or commits
    newer than this file's rewrite timestamp are work that happened and was never recorded — which is
    exactly what a session killed mid-step leaves behind. Re-verify that tail; don't trust it and
-   don't redo it.
+   don't redo it. **Claim only the part this run can account for**, though: a change that neither the
+   state file nor the plan explains may be the user's, or a parallel session's in the same working
+   tree — leave it, never revert it, and ask before building on it.
 4. If the goal is still open and the work is unattended, quote the **Goal** line back to the user.
    If their harness has a goal or watchdog mechanism, that text is what arms it — a skill cannot
    arm one on their behalf.
@@ -45,6 +47,13 @@ the failure above; two files that *cannot* overlap is not.
 - **One writer owns this file.** When batches fan out in parallel (**compound-v:batched-implementation**), the workers never touch it — the orchestrator writes **Done** itself, one returned batch at a time, in the order verdicts land. File-disjointness between workers buys nothing here: they are disjoint in the code and identical in the path they would both write, and that is the collision, not the exception to it. If two runs genuinely have to be live at once, give each its own branch and its own state file there; a fixed name plus "whoever finishes last wins" is not concurrency safety.
 - Append to **Do not** whenever an approach fails. That section is what stops a fresh session
   repeating a dead end — it is the part git history cannot recover.
+- **Write a user's mid-run steer into the state file, in their words, before you act on it** — a
+  new constraint, a redirect, a reversal of something **Next** or **Do not** assumed — dated, under
+  **Goal**, with its object when the words alone do not carry it ("not that" is nothing without
+  what it refers to). Its only other home is the transcript, which a fresh session never reads, and
+  a paraphrase hands the next session your reading of the instruction rather than the instruction.
+  If it replaces part of the goal, rewrite that part and stop the work that served only it. A
+  correction spent once this step lands stays out; the file holds what must still bind next session.
 - Anything blocked goes in **Open decisions**. If it's a *judgment* — a retry cap, a deploy target, a product call — write it as a **proposal, not a question**: the answer you'd pick, the one-line reason, "agree?". Whoever holds the constraint rarely holds your context, so an open question comes back "it depends" or not at all, while a concrete proposal is answerable in seconds and a *no* comes back naming the constraint you were missing. Write it to be rejected, not rubber-stamped — a proposal shaped to be nodded through buys a yes and loses the constraint. If it's a thing only a person can hand over — a credential, an account, access — there is nothing to propose: name it exactly, and what it unblocks.
 - No calendar estimates. Size by steps and by what must be verified.
 
@@ -66,8 +75,15 @@ This is **not** the always-loaded instruction file — **compound-v:context-engi
 correctly bans transient failures from that, and this has a different reader: whoever repairs the
 environment, reading in batches, never per turn. **The trap is that a log with no resolution path is
 a graveyard.** It earns its place only if something periodically reads it and changes the
-environment, and an entry closes when that change lands, not when someone reads it. Nobody has
-published a yield for this; it ships as a cheap bet, not a measured practice. And the repair has to
+environment, and an entry closes when that change lands, not when someone reads it. One team has now published a yield,
+from the same loop inside a product: they gave their own agent a channel to report tooling
+friction, and *"approximately 20% of messages warranted a mergeable PR"* — their own number,
+self-reported and uncontrolled. The first one named a tool that had been failing for months on
+filenames carrying a non-breaking space, which nothing else had surfaced. Two conditions travel
+with it: the agent reports only where it is genuinely blocked — *"too pushy and we'd get a flood
+of 'I had to think for a moment' non-issues; too cautious and the agent silently ground through
+the same broken tool ten times before giving up"* — and an entry is a lead, never a verdict on
+the run. And the repair has to
 be made by the team using the kit rather than handed down, or it becomes an artifact people use
 where it works and quietly abandon where it does not.
 

@@ -155,8 +155,6 @@ abstract — never to copy names. And note what the registry deliberately exclud
 auth choice, the ORM wars. No single right answer there, so a named pick is an opinion aging into
 wrong; read the primary sources and say the choice is contested.
 
-It deliberately carries no row for the contested layers — state management, auth choice, the ORM wars, any "best-practices" listicle. There is no single right answer there, so a named pick is an opinion aging into wrong: read the primary sources and say the choice is contested.
-
 ### A different question, one level up: shapes, not stacks
 
 The rows above answer *how is this API used*. The expensive question is one level up — *what shape

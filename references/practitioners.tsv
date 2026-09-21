@@ -49,7 +49,7 @@ russelljkaplan	Russell Kaplan — President, Cognition; ex-Director of Eng, Scal
 thorstenball	Thorsten Ball — Amp / Sourcegraph; author of 'Writing an Interpreter in Go'	Amp coding agent; the 300-line 'How to Build an Agent' teardown
 dexhorthy	Dex Horthy — founder, HumanLayer; author of 12-Factor Agents	12-Factor Agents; HumanLayer; the 'software factories' benchmarking work
 GeoffreyHuntley	Geoffrey Huntley — independent engineer, agent-loop practitioner	The 'Ralph Wiggum' brute-force agent loop; long-running unattended coding-agent technique
-mitsuhiko	Armin Ronacher — creator of Flask/Jinja; ex-Sentry	Flask, Jinja2, Rye/uv-adjacent tooling; first-person writeups of what breaks in agent design
+mitsuhiko	Armin Ronacher — founder, Earendil; creator of Flask/Jinja; ex-Sentry (a decade)	Flask, Jinja2, Rye/uv-adjacent tooling; first-person writeups of what breaks in agent design; Earendil's agent-legible-codebase practice (talk _Zcw_sVF6hU). Same commercial orbit as badlogicgames
 addyosmani	Addy Osmani — Director, Google Cloud AI (prev. Chrome DevRel lead)	Chrome tooling/Lighthouse era work; publishes his own measured LLM coding workflow
 charlespacker	Charles Packer — co-founder & CEO, Letta (MemGPT)	MemGPT/Letta; Letta Code agents that rewrite their own harness
 sarahwooders	Sarah Wooders — co-founder & CTO, Letta	Letta memory/context-hierarchy runtime; Letta Code
@@ -64,11 +64,11 @@ antirez	Salvatore Sanfilippo — creator of Redis	Redis; currently shipping LLM-
 cramforce	Malte Ubl — CTO, Vercel	Vercel platform; AMP at Google; private cyber-evals and model-routing in production
 rauchg	Guillermo Rauch — founder & CEO, Vercel; creator of Socket.IO and Next.js's home	Next.js/Vercel; v0; the AI-cloud thesis and DESIGN.md-style agent conventions
 karrisaarinen	Karri Saarinen — co-founder & CEO, Linear	Linear, including harness/model-choice inside Linear's own agent surface
-lethain	Will Larson — CTO (Carta, prev. Calm/Stripe/Uber); author of An Elegant Puzzle	Multiple engineering orgs and platforms; writes strategy from operated systems
+lethain	Will Larson — CTO, Imprint (since 2025-06); prev. CTO Carta, Calm; Stripe, Uber; author of An Elegant Puzzle	Multiple engineering orgs and platforms; writes strategy from operated systems. His 2025-26 internal-agent and software-factory posts come from Imprint
 HamelHusain	Hamel Husain — applied-LLM consultant; ex-GitHub ML, ex-Airbnb	The eval methodology most AI-engineering teams now use; CodeSearchNet at GitHub
 sh_reya	Shreya Shankar — LLM-systems researcher (Berkeley → CMU); creator of DocETL	DocETL; data flywheels and agent action-space partitioning for production LLM pipelines
-eugeneyan	Eugene Yan — Principal Applied Scientist, Amazon	Production recsys/LLM systems at Amazon; task-specific eval guidance
-jxnlco	Jason Liu — creator of `instructor`; applied-AI/RAG consultant	instructor (structured outputs); systematic RAG-improvement methodology
+eugeneyan	Eugene Yan — Member of Technical Staff, Anthropic (2026–); prev. Principal Applied Scientist, Amazon	Production recsys/LLM systems at Amazon; task-specific eval guidance; now Anthropic's LLM vulnerability-pipeline work with security teams (claude.com/blog/using-llms-to-secure-source-code). Anthropic-orbit from 2026
+jxnlco	Jason Liu — Developer Experience Engineer, Codex team, OpenAI; creator of `instructor`; prev. applied-AI/RAG consultant	instructor (structured outputs); systematic RAG-improvement methodology. OpenAI-orbit now — his Codex workflow material is an employee's
 ankrgyl	Ankur Goyal — founder & CEO, Braintrust; ex-founder Impira, ex-MemSQL eng lead	Braintrust — the eval/observability stack many agent teams run on
 chipro	Chip Huyen — author of 'AI Engineering' and 'Designing ML Systems'; ex-founder Claypot AI, ex-NVIDIA	Production ML platforms; the reference text for AI engineering; currently testing agent-skill practice publicly
 lateinteraction	Omar Khattab — asst. professor MIT CSAIL; creator of ColBERT, DSPy, GEPA	DSPy and GEPA — programmatic prompt/harness optimization used in production
@@ -78,5 +78,8 @@ yoobinray	Raymond Yoo — engineering @ Melius; ex-MLE, Amazon	Realtime LLM infe
 simonw	Simon Willison — creator of Datasette and the `llm` CLI; co-creator of Django	Datasette, `llm`, sqlite-utils; the most consistently grounded running log of LLM tool behaviour
 swyx	Shawn 'swyx' Wang — Latent Space; smol.ai; Cognition	Coined/organized 'AI Engineer'; runs the AI Engineer conference; ships smol tools
 _philschmid	Philipp Schmid — Agents & Gemini API, MTS, Google DeepMind (ex-Hugging Face)	Gemini agent APIs; subagent-pattern and persistent-vs-stateless-bash writeups
-karpathy	Andrej Karpathy — ex-Director of AI, Tesla; founding member, OpenAI	nanoGPT, micrograd, llm.c, nanochat; Tesla Autopilot vision stack
+karpathy	Andrej Karpathy — Anthropic (joined 2026-05-19, by his own post); ex-Director of AI, Tesla; founding member, OpenAI	nanoGPT, micrograd, llm.c, nanochat; Tesla Autopilot vision stack. Posts after 2026-05-19 about Claude, Anthropic models or Claude Code come from an employee — weight them as one commercial source
 rasbt	Sebastian Raschka — author of 'Build a Large Language Model (From Scratch)'; ex-Lightning AI	LLMs-from-scratch; reasoning-model and architecture breakdowns used as reference
+thsottiaux	Thibault 'Tibo' Sottiaux — Codex, OpenAI (bio: 'Codex & ChatGPT @OpenAI')	The Codex agent (CLI, app, cloud); first-person operator postmortems with numbers — usage-regression root causes, destructive-action fixes, a background memory worker that inherited Stop hooks and checked 15,000 times whether it could stop. Author of 'Scaffolding is coping not scaling', which sources.md cites. Skip the launch and rate-limit posts
+badlogicgames	Mario Zechner — creator of the pi coding agent and libGDX; Earendil	pi (four tools, a few-line prompt, self-extending through TypeScript extensions; repo now earendil-works/pi); first-person harness-design writing at mariozechner.at. Same commercial orbit as mitsuhiko — count them as one source
+sqs	Quinn Slack — CEO & member of technical staff, Amp; co-founder, Sourcegraph	Sourcegraph code search and Cody, then the Amp coding agent; posts operating decisions — an oracle subagent in place of max reasoning effort, publicly declining to build a cost-optimizing model router (sources.md cites it). Same commercial orbit as thorstenball; ~3 of ~130 posts read were load-bearing, the rest product promotion

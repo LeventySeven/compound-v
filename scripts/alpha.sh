@@ -48,6 +48,19 @@ else
   echo "  yt.sh missing"
 fi
 
+hr "1b. TALKS ALREADY READ — the curated list (references/talks.tsv)"
+# The sweep above sees each channel's newest 200 titles, and a channel's canon is usually older than
+# that: on the AI Engineer channel (1,159 talks on 2026-09-21) "12-Factor Agents" sat at #814 and
+# "No Vibes Allowed" at #629, so the sweep could never surface either. This registry holds talks that
+# were READ IN FULL and kept because a builder speaks first-person. The match runs over every column.
+if [ -r "$here/references/talks.tsv" ]; then
+  awk -F'\t' -v t="$topic" '!/^#/ && NF>=5 && (tolower($0) ~ tolower(t)) {n++; printf "    https://www.youtube.com/watch?v=%s  %s\n        %s\n", $1, $2, $5}
+    END {if (!n) print "  (0) no curated talk matches — the sweep above is the recall lane for this topic"}' \
+    "$here/references/talks.tsv" | head -30
+else
+  echo "  references/talks.tsv missing — this lane did not run"
+fi
+
 hr "2. PAPERS — arXiv, newest first"
 # The API needs -L and a UA; without them it returns nothing and looks like "no papers exist".
 # A fixed /tmp path means two concurrent runs silently swap results — run A prints run B's
