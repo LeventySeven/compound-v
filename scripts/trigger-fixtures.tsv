@@ -72,6 +72,22 @@ here is what i want: full context on all our projects, the metrics, automatic fo
 ok start building the whole thing tonight, i am going to bed, i want something real by morning	get-shit-done,handoff
 we have been at this for six hours, tests are green, is any of this actually real	get-shit-done
 add a --json flag to the export command	NONE
+#
+# get-shit-done's four stage skills (split out 2026-09-21). The entry skill still owns the project
+# trigger; these rows measure the CHAIN — that a run reaching or resuming at a stage invokes that
+# stage's skill, not just the entry. Prompts name the stage's situation, never the skill.
+before anyone writes code, break this brief into the pieces a user would actually touch and tell me which one we should prove first	get-shit-done-1-carve
+here's the founder brief for the client portal. i want the whole thing, not a demo — start by working out what the parts are	get-shit-done-1-carve
+we're doing the full build. write down every function the brief asks for, each one starting out failing, before we touch the code	get-shit-done-1-carve
+the parts are agreed. for each one, find what has actually shipped for it and what it cost the people who shipped it	get-shit-done-2-recon
+slices are written down, resume the run. research is next — keep it to one question per slice	get-shit-done-2-recon
+before we build slice two, what's the known arrangement for the webhook retry part and what bites people later	get-shit-done-2-recon
+the slices and the research are approved, start building the first one end to end	get-shit-done-3-build
+slice one landed and merged, keep going with the next slice	get-shit-done-3-build
+third patch on the same importer design and slice three still fails its check. keep patching or swap it out	get-shit-done-3-build,systematic-debugging
+every slice has landed. walk the whole product and give me one word on whether it's done	get-shit-done-4-reckon
+all the rows are green and the branch is merged — hold it to the bar before we call the project finished	get-shit-done-4-reckon
+the overnight build finished. before i show the client tomorrow, is it real, and what's the one thing still missing	get-shit-done-4-reckon,get-shit-done
 i keep going back and forth on whether to use postgres or sqlite here and i cant settle it	council
 nobody can agree on this and theres no test that would tell us who's right	council
 get me a few independent reads on this decision before i commit to it	council

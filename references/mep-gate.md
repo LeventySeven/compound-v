@@ -1,4 +1,4 @@
-# The MEP gate — stage 4 of compound-v:get-shit-done in full
+# The MEP gate — stage 4 of compound-v:get-shit-done (compound-v:get-shit-done-4-reckon) in full
 
 The detail behind the final reckoning. The skill carries the bar, the four checks by name, and the
 verdict words; this is how to run each check. Read it when you reach the gate.

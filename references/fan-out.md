@@ -1,6 +1,6 @@
 # Fan-out — when parallel agents earn their place, and when they multiply the bottleneck
 
-`compound-v:get-shit-done` states the operative rule; this file carries the reasoning, the evidence
+`compound-v:get-shit-done-3-build` states the operative rule; this file carries the reasoning, the evidence
 and the traps. Read once, not per run.
 
 ## The rule, in one line

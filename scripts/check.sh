@@ -102,12 +102,14 @@ $(printf '%s' "$binaries" | sed 's/^/        /')"
 #    script instead of carrying a patched copy that then drifts from this one.
 NS="$(awk -F'"' '/"name"/{print $4; exit}' .claude-plugin/plugin.json 2>/dev/null)"
 NS="${NS:-compound-v}"
-for r in $(grep -rhoE "${NS}:[a-z][a-z-]+" skills/ agents/ hooks/ README.md 2>/dev/null | sed "s/${NS}://" | sort -u); do
+# Digits belong in the class: a skill name is ^[a-z0-9-]+$ (references/skill-format.md), and a class
+# without them cut `get-shit-done-1-carve` to `get-shit-done-` and reported a live skill as dangling.
+for r in $(grep -rhoE "${NS}:[a-z][a-z0-9-]+" skills/ agents/ hooks/ README.md 2>/dev/null | sed "s/${NS}://" | sort -u); do
   [ -d "skills/$r" ] || err "dangling cross-reference: ${NS}:$r (no skills/$r)"
 done
 # A reference to a namespace this plugin is not resolves to nothing for anyone who installed it.
 # The check stays namespace-agnostic so a fork under a different plugin name still gets it.
-stale="$(grep -rhoE 'compound-[a-z]+:[a-z][a-z-]+' skills/ agents/ hooks/ references/ README.md 2>/dev/null \
+stale="$(grep -rhoE 'compound-[a-z]+:[a-z][a-z0-9-]+' skills/ agents/ hooks/ references/ README.md 2>/dev/null \
          | grep -v "^${NS}:" | sort -u || true)"
 [ -n "$stale" ] && err "references to a namespace this plugin is not ('${NS}'):
 $(printf '%s' "$stale" | sed 's/^/        /')"

@@ -2,7 +2,7 @@
 
 Read this when the question is **what shape should this be**, before a design exists — from
 **compound-v:searching-patterns** when you are choosing an arrangement rather than an API call, and
-from **compound-v:gathering-context** (slot 3), **compound-v:get-shit-done** stage 2, where a hit here *is* the whole of recon for that slice.
+from **compound-v:gathering-context** (slot 3), **compound-v:get-shit-done-2-recon**, where a hit here *is* the whole of recon for that slice.
 
 It lives outside the skill because it is a lookup table: needed at one moment, read at none of the
 others, and long enough that carrying it inline pushed its own skill past the size where a skill

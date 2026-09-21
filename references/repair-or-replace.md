@@ -1,6 +1,6 @@
 # Repair or replace — decide it by running it, never by estimating it
 
-Read this at **compound-v:get-shit-done** stage 3, when you are about to put a third patch onto the
+Read this at stage 3 of **compound-v:get-shit-done** (**compound-v:get-shit-done-3-build**), when you are about to put a third patch onto the
 same shape, or when a slice's third failed close says *the shape is wrong*. It lives outside the
 skill because it is needed at one moment and the skill is read at every moment — and because the
 done-gate it used to sit above was falling past the compaction line, which is the one part of that

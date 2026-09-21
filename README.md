@@ -9,7 +9,7 @@ The bet is that code got cheap and judgment didn't. So most of these skills are 
 around the typing, not the typing. They're short on purpose — if a line doesn't change what the agent
 does, it's cut, and the kit runs its own checks to keep it that way.
 
-**31 skills · 1 agent · 4 hooks · 10 scripts · 4 source registries.** Everything it reads is public.
+**35 skills · 1 agent · 4 hooks · 10 scripts · 4 source registries.** Everything it reads is public.
 
 ---
 
@@ -174,7 +174,7 @@ Two pieces carry most of the remaining weight:
 | **Context** | `gathering-context` — the pack an implementer needs before any code: constraints the model cannot infer, **how it must not be done**, the candidate shapes and the axis between them, what prior art lets you delete, what to build out of, what "done" means, and what is still unknown. Assembled per task from the source registries via `scripts/alpha.sh`, then discarded. |
 | **Plan** | `brainstorming` (design before code; proposes 2–3 approaches and picks), `writing-plans` (a per-build plan with real code, no placeholders), `writing-prd` (the product's stable source-of-truth doc), `extracting-specs` (recover the real contract of *existing* code — the backward complement of `writing-prd`) |
 | **Thinking** | `critical-thinking` (red-team your own reasoning before you commit) and `council` (when solo skepticism isn't enough: fresh-context agents answer and cross-examine one unverifiable question, findings not votes, and you write the verdict) |
-| **Build** | `batched-implementation`, `recheck` (the in-pipeline gate), `code-review` (on-demand reviewer **and automatic pre-merge gate**), `finishing`, and `get-shit-done` (the **project spine**, aimed at the run that stops at 90%: every declared function becomes a ledger row that starts failing, a row goes green only on a check seen red first plus an end-to-end run driven as a user, and the run is not done while any row is neither passed nor explicitly dropped with a name attached) |
+| **Build** | `batched-implementation`, `recheck` (the in-pipeline gate), `code-review` (on-demand reviewer **and automatic pre-merge gate**), `finishing`, and `get-shit-done` (the **project spine**, aimed at the run that stops at 90%: every declared function becomes a ledger row that starts failing, a row goes green only on a check seen red first plus an end-to-end run driven as a user, and the run is not done while any row is neither passed nor explicitly dropped with a name attached; it runs as an entry skill plus four stage skills — `get-shit-done-1-carve` → `-2-recon` → `-3-build` → `-4-reckon` — each invoked in turn and each small enough to survive compaction whole, and invoking `get-shit-done` still starts it) |
 | **Correctness & security** | `test-driven-development`, `systematic-debugging`, `verification-before-completion`, `agent-security` (build-time defense: the lethal trifecta, source-trust, sandboxing model-written code) |
 | **AI design** (one feature) | `designing-agents` (a call, a workflow, or an agent?), `evals` (does the AI actually work?), `context-engineering` |
 | **AI systems** (opt-in) | `architecting-ai-systems` (harness-as-moat, primitive-not-wrapper, build for the model ~18 months out) and `ai-system-reliability` (keep a built system from corrupting its own state) |

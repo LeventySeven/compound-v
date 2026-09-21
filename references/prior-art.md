@@ -1,6 +1,6 @@
 # Prior art — recon that shrinks the build
 
-The stage-2 method for **compound-v:get-shit-done**. Read it when a slice's *unknown* is real and
+The stage-2 method for **compound-v:get-shit-done** (**compound-v:get-shit-done-2-recon**). Read it when a slice's *unknown* is real and
 unresolved. Its whole job is to come back with less to build than you left with.
 
 This is a different question from **compound-v:searching-patterns**, which asks *how is this API
@@ -325,7 +325,7 @@ item, and denser linking hurts it by enlarging the candidate set. Sparse and spe
 and associative: one pointer that uniquely identifies a source beats ten associative links.
 
 Fill `<MAX_LINES>` from the corpus you are pointing it at (5,000 is a safe default over a transcript
-library), `<N>` from the confidence band in **compound-v:get-shit-done** stage 2, and `<K>` at about
+library), `<N>` from the confidence band in **compound-v:get-shit-done-2-recon**, and `<K>` at about
 8 — forty small findings bury the one that mattered.
 
 ## Reading the result: demo or production?

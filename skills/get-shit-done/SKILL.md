@@ -52,144 +52,25 @@ The run holds two files, both scaffolding, both deleted when it ends: **`.claude
 
 **Attended runs get three *kinds* of scheduled interrupt**: the Carve+Recon approval, one line per landed slice, the verdict. **Unattended runs get zero** — take the reversible default, write it down, keep going. The one unscheduled interrupt in either mode is a **one-way door the recon did not resolve**: a schema, a public API, a spend, an irreversible write. Stop and ask, even overnight.
 
-## Stage 1 — Carve
+## The stages — four skills, invoked in order
 
-**If nobody has yet asked whether this should exist, that gate runs before the carve** — **compound-v:startup-taste**. Carving is a commitment to build.
+Each stage is its own skill, loaded only when it starts, so each one survives compaction whole.
+**Invoke them with the Skill tool, in this conversation and in this order** — never wrapped in a
+subagent, where a stage loses both its human interrupt and its own dispatch:
 
-Quote the **original ask verbatim** into the ledger's `ask` field first — not your summary, and not the plan or spec, both of which get written mid-run and absorb the drift.
+1. **compound-v:get-shit-done-1-carve** — first. The slices, their order, their checks.
+2. **compound-v:get-shit-done-2-recon** — once the slices exist. A slice whose lookup misses gets
+   its hunt at build time.
+3. **compound-v:get-shit-done-3-build** — for each slice, in carve order.
+4. **compound-v:get-shit-done-4-reckon** — once, over the assembled product. It also runs
+   standalone, when the ask is whether a run is actually done.
 
-Stage 1's output is `slices.json`, and it exists before any code. Per slice, four things and no more:
-
-- **Capability** — the user's sentence.
-- **Check** — what run command, or what one named human, says this slice works. Vague here is fatal; hand it to **compound-v:frame-the-goal**. **One row carries it, marked `is_check: true`** — a slice that never turns its check into a row can pass everything it has and still miss the thing it was for.
-  **Write the check from what would show the goal UNMET, because that is what differs between kinds of goal.** A *behaviour* goal's ground truth is a run. A *replication* goal's — *"like X"*, *"port this"*, *"match the design"* — is the source, so the check is a comparison, and a row that never touches the reference measures the wrong thing however green it goes. A *property* goal's is an adversarial probe, never the happy path. A *removal* goal's is absence plus nothing-else-broke. A *migration* goal's is old and new agreeing. A check aimed at the wrong truth passes while the goal fails.
-- **Unknown** — the one line naming what might not work.
-- **Confidence** — Steinhardt's buckets, coarse on purpose: *no unforeseen difficulties* (~95%), *"modulo Murphy's law"* (~90%), *the basic path is visible and every step should work* (~65%), *"only … a murky view of the path"* (~30%).
-
-**Then fill each slice with its rows** — every function the goal declares, each a witness case with a concrete input and an observable outcome, all starting failing. A function that is not a row here is one no later check will ever look for. **Nothing else will write this file for you, and the gate is silent without it**: skipping stage 1 does not get you a lenient pipeline, it gets you no pipeline.
-
-**Order by what fails fastest, not by what is easiest.** Easiest-first wastes the easy work when the hard part turns out infeasible — *"The work on the easy parts was mostly wasted."* Sort by information per unit time: a quick slice you have never done outranks a long one you have done many times. **De-risk all components, then execute.**
-
-**Slice 1 is the burning function, end to end, with the hard parts faked.** Wire the whole path with a cheating version of the hard component: if it works, a real implementation will too; if it doesn't, you saved building it. Its pair is a baseline, the dumb off-the-shelf version — *"complicated methods often underperform simple baselines"* — and a baseline that clears the check deletes the slice outright.
-
-**Then say what the ask named that is not a slice, and who asked for it** — as `notSlices`, one entry per item with `item`, `askedBy` and `why`. Anything with no answer is drift-in before a line is written. This is where a sprawling brief gets honest: *an AI that runs the whole agency* is not a project, it is four named parts, one of which is a job that reads a date and sends a message.
-
-## Stage 2 — Recon: one question, and the answer is a shape
-
-**Ask one question per slice, and make it this one:** *what is the simplest thing that has actually shipped for this, and what did it cost the people who shipped it?* An open question over a good corpus returns mostly restatement — it is the question, not the number of lanes, that makes recon expensive.
-
-**The output is a decision, not a report — and it lands in `slices.json` or it did not happen.** Name the **shape** (the architecture someone experienced would reach for), its **trap** (the second-order cost invisible on day one), and what the shape lets you **delete** — these land as slice fields in **references/completion-ledger.md** (which carries a fourth, `force`, for what the plan did not name), and a shape left in the conversation dies with the session. Shape-and-trap is the whole reason the corpus exists: an agent has read more code than any of us and has none of the scar tissue. The mechanism climb and the Simple/effective/scalable test are **compound-v:simplest-thing-that-works**; the API-level pattern is **compound-v:searching-patterns**.
-
-This stage is **compound-v:gathering-context** applied to one slice — its slots 3 and 4, the
-candidate-shapes-and-trap and the DELETE list. A slice usually has one arrangement worth taking, which
-is why this stage is written in the singular; where it genuinely has two, carry the one you rejected
-and the reason it lost, so the next session cannot reopen a question this one already closed. Invoke that skill when the slice needs the other four
-slots too (constraints you cannot infer, how it must NOT be done, what "done" means, what is
-still unknown); stay here when the shape is the whole question.
-
-**Look the shape up before you research it.** **references/shapes.md** carries curated arrangement-plus-trap pairs, and a hit *is* the whole of recon for that slice. On a miss, run **`bash scripts/alpha.sh "<the slice's unknown>"`** — one command sweeps every verified lane (talks, arXiv, exemplar repos, engineering blogs, practitioners) and returns a shortlist of pointers for a few seconds and zero tokens. Read the shortlist; do not read everything. Judge whatever comes back against **references/corroboration.md** — count distinct sources, not findings, and where two top sources conflict, name the axis and keep both. It is a cache with a miss path, so most slices miss and a miss is the rule working. On a miss you get **one hunt, scoped to that one domain**, at build time, never a standing sweep. The budget is the `confidence` stage 1 wrote down:
-
-| `confidence` | what recon costs |
-|---|---|
-| ~95% — *no unforeseen difficulties* | nothing. Write the shape you already hold. |
-| ~90% — *modulo Murphy's law* | the lookup only; on a miss, write what you know and move. |
-| ~65% — *the basic path, and the steps should work* | one lane, the one question, one pass. |
-| ~30% — *a murky view of the path* | the full ladder — three channels cheapest-first, **references/prior-art.md**. |
-
-When the hunt dispatches an agent, its brief is **references/prior-art.md**'s dispatch block, pasted verbatim. That file also owns how to read a corpus — enumerate lanes live, a local library is several lanes, `MUST`/`STRONG`/`OPTIONAL` sets **order, not inclusion** — which is context the dispatch block itself does not carry, so hand the worker both. If the environment ships a corpus-investigation skill (`workflow-investigation` is one), invoke it rather than re-deriving where things live.
-
-**The band is a pre-investigation guess, so an observable signal can overturn it** — a shape-table miss on a slice you banded ~0.9, or a first read contradicting its `unknown`. Re-band once, out loud, in the ledger, and **the legal revision is upward in recon** — which on this table means *downward in confidence*, from ~0.9 toward ~0.65 and its extra lane. Re-banding the other way mid-hunt, to buy yourself less work and an earlier stop, is the same move as editing a check to make it pass. Both failures are live and opposite — the measured sweeps over-researched what was known, while the one real ledger skipped recon on exactly the slices that needed it.
-
-**Stop when you can name the shape and its trap, or when two independent sources converge** — not when the lanes are exhausted, and never on a source's grade. A lane at zero is a defect you justify, not a gap you pass over. **An empty `delete` is a red flag, not a clean bill**: write `[]`, never nothing.
-
-**Recon returns a file:line map, not prose** — a cited line either exists or it does not, where a confidently hallucinated architecture reads exactly like a real one. Feed it forward: the shape into the plan, the trap into **compound-v:recheck** as a named checkable assertion, all three into the ledger. At Reckon, a shape that will recur graduates into the table — **compound-v:finishing** step 2.5 runs that harvest and **references/shapes.md** carries the admission bar. Harvest the trap, not the win: most runs graduate nothing, which is the bar working.
-
-
-## Stage 3 — Build one slice at a time
-
-The failure this shape prevents is measured. A frontier model in a loop from a high-level prompt *"tended to try to do too much at once"*, and later *"a later agent instance would look around, see that progress had been made, and declare the job done."* The fix is theirs: **one feature at a time**, *"This incremental approach turned out to be critical"*.
-
-Build it however you build things; **compound-v:writing-plans**, **compound-v:batched-implementation** and **compound-v:recheck** own that. The spine owns what a *closed* slice looks like:
-
-- **You ran what already exists first.** The thing starts, one primary action works, the previous slice still holds. If the agent starts implementing instead, *"it would likely make the problem worse."*
-- **The hit band was declared before the build, not after.** What fraction of real inputs this slice handles, and what the misses see. *"It breaks"* is not an answer; *"it says X and routes to a human"* is. Build to the middle and **give the tail a named exit**. The exception is the axis **compound-v:make-it-stable** draws: irreversible writes, money movement, data loss, silent corruption or a stranger-facing surface get the production bar on the bad path too.
-- **Every row you are closing was walked as a user, on the assembled product.** A slice walk closes only the rows it demonstrably exercised.
-- **You scanned the slice's diff for what you left behind** — `TODO`, `FIXME`, `stub`, `placeholder`, `mock`, `hardcoded`, `for now`, a skipped or `.only` test, a swallowed error. Each hit is a row or a named waiver. A missing declared function is a `todo` row; a stub the implementer *left* was declared by nobody, and that is the hole the denominator cannot see.
-- **What you gave up under pressure was elements, not quality.** Shipping all of it worse is how those stubs get written. Delete instead: drop each element whose removal still leaves the slice useful, down to the `is_check` row and not through it. Every cut is a `dropped` row, `moved` where it returns.
-- **Nothing that grades the work moved.** Never edit a check to make it pass — *"It is unacceptable to remove or edit tests because this could lead to missing or buggy functionality"*. A threshold quietly widened at hour six is indistinguishable from success.
-- **It still answers the ask, and nothing rode in that nobody asked for.** Put the slice beside the
-  `ask` field verbatim — not the plan, which absorbed the drift — and answer both directions: what
-  the goal asked for that this does not do, and what exists here that no row declared. A slice can
-  pass every row it declared and have declared the wrong ones. **compound-v:recheck** runs this per
-  batch as its first two gates; this pass is over the assembled slice, where no batch reviewer stood.
-- **The landing went through the pre-merge gate, not just the batch gate.** `recheck` closes a
-  *batch*, **compound-v:code-review** closes the *branch*, and both run. A slice merged on batch
-  verdicts alone has never had its assembled diff read.
-- **One slice, one commit, and the commit moves the ledger.**
-
-**The walk is the one rigid condition, because it is the documented failure.** Claude would make the change, run unit tests, curl the dev server — and still not notice that *"the feature didn’t work end-to-end"*. Lint and type-check are the verification that was already automated; the question is **can the agent run the thing**, and it is the first thing dropped when nobody is watching.
-
-**When the walk fails, it is a root-cause question, not a retry** (**compound-v:systematic-debugging**). On the third failed close, say which is true: the slice splits, the check was wrong, or stage 1's unknown was real. Where the answer is *the shape is wrong*, run the call below **before** you mark anything — `blocked` is what you mark when the replacement failed too, not instead of trying it.
-
-### Repair or replace — decide it by running it, never by estimating it
-
-The third patch onto the same shape is a decision being made by default. Make it deliberately and on
-evidence: **build the replacement in a throwaway worktree and run the existing check against both** —
-*"if one experiment fails, I throw away that worktree and nothing is lost in main."* The
-under-selection is measured, so this is a run, never an argument. **references/repair-or-replace.md**
-carries the three conditions that separate it from licence — the check must pre-date the replacement,
-name which cost you are paying, and the rows move with it — plus what each one is guarding against.
-Read it before you mark anything `blocked`.
-
-**Dispatch the check, not the build.** The measured payoff for a fresh context is in *judging* work, not producing it — a clean-context reviewer finds around two real bugs per pull request on code the same system wrote, most severe, precisely because it shares no context with the author. Every measured result on dispatching the *build* runs the other way, and **the skimping is the ledger's job, not dispatch's**: an agent identified **20 call sites**, changed **5**, and stopped, and what fixed it was an in-context checklist. **Do not dispatch because there are many tasks.**
-
-**But DO fan out for coverage, and take the cap off when you do.** The rule above is about
-throughput — splitting a build to go faster, which measures worse. Completeness is the opposite
-case, it is embarrassingly parallel, and it is worth spending freely on: sweep the ask for functions
-no row declared, verify closed rows independently of the worker that closed them, check every call
-site rather than the five that were easy, read the source nobody opened.
-**compound-v:dispatching-parallel-agents** owns the mechanics — cut the seam at a stable interface,
-not an arbitrary file boundary, or "disjoint" files still couple through a shifting API. Nothing here
-is capped: if ten agents are what it takes to prove the denominator complete, run ten.
-
-**The condition that separates this from theatre: every lane must be verifiable without reading its
-trace** — which coverage work has and build work does not. Past that line you have not parallelised
-the work, you have turned one review queue into N. **references/fan-out.md** carries the evidence,
-the three stacked boundaries and why the binding one is the supervisor's head rather than the file
-graph.
-
-**The hard rule that makes that safe: agents launched and tokens burned are evidence of nothing.**
-Not effort, not progress, not thoroughness. The only currency is closed rows and a working thing, so
-never report a fan-out as an accomplishment and never widen one to look rigorous. A run that
-dispatched thirty agents and closed no rows did nothing, expensively. A large fan-out *feels* like
-diligence and reads like it in a summary — which is why the ledger grades the run and the agent
-count grades nothing.
-
-**The check is dispatchable; the build is not — and the condition that decides it is this: dispatch a slice only where you can re-run its check yourself, without the worker's trace** — otherwise the split bought context isolation at the price of an unauditable ledger. **The worker returns evidence; the orchestrator flips the row.** Workers never write `slices.json` — the single-writer rule **compound-v:handoff** applies to `STATE.md`, plus one this ledger adds: a worker that can flip its own row is a worker grading its own homework. Its brief carries the slice's rows, check, shape and trap: dispatch makes the ledger the only path from one slice's lesson to the next slice's worker, so a run whose `shape` and `trap` sit empty has no carrier at all.
-
-## Stage 4 — Reckon: the MEP bar over the assembled product
-
-Put the goal beside what exists and say plainly how much is real — including *"we have been busy for six hours and the product is not closer to a user."* The bar is **MEP, the minimum evolvable product**: it survived contact with a real person, and the next change is one you can afford. *Viable* is a bar an agent clears by writing code that runs, which is what produced that six-hour run.
-
-**Afford is priced in migrations, not in retyping.** A next change that forces you to rebuild a component is a Tuesday; one that forces you to migrate accumulated data, or a published surface others depend on, is the thing to have avoided. Only the second is a defect in what you shipped.
-
-**100% is over a declared denominator, never over every axis.** Every row you *declared*, passed or dropped with a name on it — not every requirement anyone could name. The second target does not ship: against a list running reliability, harmlessness, factual consistency, usefulness, scalability, cost, security, privacy and fairness, the verdict is *“If we try to tackle all these requirements at once, we’re never going to ship anything”*. So choose the denominator at Carve, put the rest into `notSlices` with a name against it, then finish **all** of what remains. A run measuring itself against every axis it can imagine is at 80% forever, its missing 20% undeclared rather than unbuilt.
-
-Four checks against the assembled system; **references/mep-gate.md** carries how. **Alignment** — does it still answer the ask, and what exists nobody asked for. **Reachability** — walk every capability end to end on an input you did not construct, then cold-start it. **Survival** — who used it who did not build it, on a clean artifact. **Evolvability** — the two likeliest next changes, and what each forces.
-
-The **clamp**: a finding blocks only if it names a real user blocked from a capability the goal asked for, or a next change that forces a migration you cannot afford.
-
-### The verdict — one word, then the next action
-
-- **DONE** — every capability the goal named is reachable on the assembled product, the survival bar for this ask was met on a clean artifact, and neither next change forces a migration you cannot afford.
-- **DONE WITH GAPS** — every goal capability reachable, survival bar met, gaps named and counted in the same breath. It ships; the gaps return at the next finish.
-- **UNPROVEN** — built, complete, green, and nobody outside the build has touched it. The remaining work is finding the first user, not more code.
-- **NOT_DONE** — the default. Return the remaining work as addable tasks: which capability, which path, what would close it.
-- **DRIFTED** — what exists is no longer what was asked for. Route back to the original ask, not to the plan.
-
-A hand-off is not a verdict: "pushed", "PR opened", "ready for review" are all stopping while work is open, and manual steps handed back to the user are unfinished work relabelled. **The next action is the one that closes the biggest gap to MEP, not the most comfortable one** — name the gap, name the comfortable alternative, and say why you are not doing it.
-
-**Discharge before the landing commit** — the ledger goes, but never undischarged: every passed row first names a durable target that outlives the file, and an incident opens a row before it opens a fix. `bash scripts/ledger.sh --discharge` refuses the landing until that holds.
+**Route by what the ledger shows, not by memory — a `Next` pointer can run ahead of unfinished
+work:** no `slices.json` → stage 1; a slice about to be built with no `shape` → stage 2; open rows →
+stage 3; every row `passed` or `dropped` → stage 4.
+An incident re-enters at stage 1. Advancing a stage never approves a one-way door — the stop above
+binds at every boundary. After compaction or in a new session, re-invoke this skill and the stage
+you are in: a skill's body is not re-read on its own, and the oldest one is dropped first.
 
 ## Red flags
 
