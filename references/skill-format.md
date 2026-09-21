@@ -37,7 +37,10 @@ description: <Imperative WHAT it does, one clause>. Use when <concrete triggers 
   the main window. **The trap: fork defaults to background** — the invoking turn gets a handle, not
   the answer, unless the skill sets `background: false`, so forking a link in a workflow chain hands
   the next step nothing, and an empty result is indistinguishable from a missing one. Fork a terminal
-  skill; wait on a chained one.
+  skill; wait on a chained one. **And fork only a body that is a task:** the fork gets no conversation
+  history, so a body of guidance — most of this kit — has nothing to apply itself to and *"returns
+  without meaningful output"* (the harness docs). A `claude -p` test always waits, so it cannot show
+  the background trap; test a forked link interactively.
 - **`disable-model-invocation: true` — right for a dead end, wrong for a link in a chain.** The flag
   enforces what a prose plea ("opt-in, do not auto-trigger") only asks for, so prefer it *when no
   other skill hands off to this one*. If a skill sits mid-workflow, the flag breaks every upstream
@@ -67,7 +70,13 @@ budget: the skill listing is capped near 1% of the context window, and when the 
    skill's description. A skill that fires rarely is not free.
 - **Ruling A — description = WHAT + WHEN, never the workflow.** State what the skill does + when to
   reach for it + searchable keywords. Be slightly *pushy* ("…even if not asked") to fight
-  under-triggering. **Never** summarize the steps/flow — a description that encodes the workflow makes
+  under-triggering — **but a trigger's breadth is also authority over scope**: whatever the body
+  lists becomes part of done on every task the trigger catches (a team deleted a guardrails skill
+  triggered by "most substantial coding work" because it *"made its entire checklist part of the
+  apparent definition of done"*; OpenAI reported skills *"triggering too often"*). So before widening
+  a trigger, read the body against the narrowest task it will now catch; where an item neither
+  applies nor sizes itself, narrow the trigger or add a near-miss clause naming the neighbour to use
+  instead ("Not for a single feature (compound-v:brainstorming)"). **Never** summarize the steps/flow — a description that encodes the workflow makes
   the model follow the description and skip the body (superpowers' #1 tested failure). Third person.
   ≤1,536 chars — and that cap counts `description` + `when_to_use` COMBINED. (This spec said 1024 for its whole life; the harness uses that number nowhere, so every description was trimmed against a cap 33% tighter than the real one. Verify a cap before enforcing it.)
 
@@ -102,12 +111,17 @@ flow. A second engineer abandoned shipping his harness as a skill for the same r
 agent saying it outright: *"you told me to do that. I decided not to."*
 
 Both are ASR-derived conference-talk quotes, so treat the wording as approximate and the phenomenon
-as attested twice rather than measured once. The consequence is not approximate: **a skill that grows
-past roughly forty real instructions stops being a procedure and becomes a menu.** It still reads
-well. It still fires. It just quietly stops doing the last third, and nothing reports that.
-
-So when a skill is over the line, splitting the *instruction count* matters more than trimming the
-prose. Cutting 500 words of rationale off a 90-instruction skill leaves 90 instructions.
+as attested twice rather than measured once. The steps really do go missing; **the count does not explain it, so do not split to a count.** The ceiling
+behind "forty" came from a 2025 benchmark of a few hundred named constraints, and its 2026
+replication puts current frontier models *"closer to 2,000"*. What that team saw skipped was
+specific: the ask-questions and approve-the-outline steps, the agent writing the plan straight away.
+Another practitioner sees the same in plan mode — the plan is the visible goal, so the questions get
+only a perfunctory pass — and moves the questions into a skill of their own (a talk, paraphrased). So when
+a skill sheds steps, **find the step that sits before a deliverable the model can see, and take the
+order out of prose** — a stage of its own, or real control flow; trimming leaves that step exactly as
+skippable. The replication scores named items, not ordered steps — *"evidence that long skills files
+are viable, not proof that every kind of instruction in them is followed"* — so length is no longer
+the charge against a long skill; the compaction ceiling still is.
 
 **Apply the expiry test to THIS kit, not only to the rules it writes for other people.** The kit
 tells others to ask whether a rule would still earn its place on a stronger model; nothing asks it of
@@ -117,8 +131,14 @@ loaded against 97% without**, and deleting 95% of that generated content (10,000
 lines of gotchas) made his eval both faster and more accurate. He only knew because he was measuring.
 
 That is the honest bar for every line here: not "is this true?" but "does loading this beat not
-loading it?" — and nothing in this kit currently answers that question with a number. Treat every
-rule as provisional until it has been run both ways.
+loading it?" — and nothing in this kit currently answers that question with a number. **The
+instrument now ships with the harness: `claude plugin eval`** runs each case three times with the
+plugin and three without, isolated from user settings and other plugins, and reports the difference.
+Its without-arm drops the router hook with every skill, so it prices the kit whole; to price one
+edit, run the suite against a copy holding the pre-edit skill (skill-creator's protocol), since the
+question is whether the edit beats what it replaced. Its `tool_order` grader also checks that a
+handoff fired after the skill that named it — a first-hop trigger score cannot. Treat every rule as
+provisional until it has been run both ways.
 
 **And be careful about who does the trimming.** The caution that pairs with the measurement above is
 sharper still: letting a model expand a skill *"converts high-level guidance into brittle procedural steps, and the

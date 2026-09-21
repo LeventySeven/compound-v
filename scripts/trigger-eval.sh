@@ -28,6 +28,11 @@
 #     but it means a passing row does not prove the description would have fired on its own. The
 #     mechanism that makes the kit reliable is the same mechanism that contaminates its own
 #     measurement, and there is no arrangement of flags that gets you both.
+#   - It denies Read, Grep, Glob and Bash as well as the tools that write, and those are how a model
+#     handles a task directly instead of consulting a skill. Anthropic's own trigger eval
+#     (skill-creator, run_eval.py) restricts no tools and warns that a simple ask "may not trigger a
+#     skill even if the description matches perfectly". So a hit here likely reads higher than in a
+#     real session, and a NONE row earns its place only as a near miss for a real skill.
 
 set -uo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

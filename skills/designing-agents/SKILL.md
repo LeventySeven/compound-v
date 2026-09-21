@@ -54,24 +54,7 @@ Invest as much in the agent-computer interface as in a human UI. The agent is a 
 - **Add tool examples only where the schema cannot say it.** Newer models take the examples as their exploration space, and an enum or expressive parameter already conveys usage. Examples pay for nested input where valid JSON isn't correct use, optional parameters whose inclusion matters, conventions no schema captures — Anthropic measured 72% to 90%.
 - **Fix the tool, not the prompt around it.** When the agent keeps misusing a tool, treat the tool as an eval target: run it many times, watch where the model trips, then rewrite the interface and description *in the agent's own voice*. A dedicated tool-testing pass that did exactly this cut downstream task-completion time ~40%.
 
-**And when the shape is wrong, observe before you redesign — but the observation is trace-driven, not
-a single run.** The reflex on a failing pipeline is to re-draw the topology (more agents, different
-roles), which is guessing. Strip the scaffolding instead: give the agent real data on a filesystem
-and plain tools, and derive the shape from what it actually does. That core move is corroborated
-across four independent organisations.
-
-What it is NOT — and the kit briefly said all three, with zero sources behind them: not an *empty*
-directory, not *one* task, and not a blanket ban on adding agents. The canonical diagnostic for a
-failing LLM pipeline reviews traces to saturation rather than watching a single run, and the useful
-signals are recurrences — *when the agent writes the same script repeatedly, that script wants to
-become a command; when it keeps re-loading the same guidance, that guidance belongs in the prompt.*
-And splitting into more agents is sometimes exactly right: failure-to-follow-instructions and
-wrong-tool-selection are named triggers for it.
-
-Then pull the deterministic half out: statistics, thresholds and prioritisation are code, and **the
-agent's job is to investigate, not to identify.**
-*(CONDITIONAL — the core observational move is DEFAULT-grade at four orgs; the surrounding
-prescriptions were single-source and are removed.)*
+**And when the shape is wrong, observe before you redesign — from traces, not a single run.** Re-drawing the topology (more agents, different roles) is guessing. Give the agent real data on a filesystem and plain tools, review its traces to saturation, and derive the shape from what recurs: *when the agent writes the same script repeatedly, that script wants to become a command; when it keeps re-loading the same guidance, that guidance belongs in the prompt.* Splitting is sometimes right: failure-to-follow-instructions and wrong-tool-selection are named triggers for it. Then pull the deterministic half out: statistics, thresholds and prioritisation are code, and **the agent's job is to investigate, not to identify.**
 
 - **Make the tool dumb and deterministic, not agentic.** A tool that is itself an LLM or sub-agent chains two non-deterministic systems, compounding failure. Prefer a plain deterministic action (a literal web search, a direct lookup) over "ask a sub-agent to figure it out" — push the intelligence into the *calling* agent. The reverse backfires: a sub-LLM wrapped inside an output tool to fix tone increases latency *and* reduces quality.
 
