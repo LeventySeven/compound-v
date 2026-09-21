@@ -60,14 +60,15 @@ subagent, where a stage loses both its human interrupt and its own dispatch:
 
 1. **compound-v:get-shit-done-1-carve** — first. The slices, their order, their checks.
 2. **compound-v:get-shit-done-2-recon** — once the slices exist. A slice whose lookup misses gets
-   its hunt at build time.
+   its hunt, where its band buys one, at build time.
 3. **compound-v:get-shit-done-3-build** — for each slice, in carve order.
 4. **compound-v:get-shit-done-4-reckon** — once, over the assembled product. It also runs
    standalone, when the ask is whether a run is actually done.
 
 **Route by what the ledger shows, not by memory — a `Next` pointer can run ahead of unfinished
-work:** no `slices.json` → stage 1; a slice about to be built with no `shape` → stage 2; open rows →
-stage 3; every row `passed` or `dropped` → stage 4.
+work:** no `slices.json` → stage 1, unless the ask is whether a run is done, which is stage 4
+standalone; a slice about to be built with no `shape` → stage 2; `todo` or `building` rows → stage
+3; none left — every row `passed`, `dropped` or `blocked` → stage 4.
 An incident re-enters at stage 1. Advancing a stage never approves a one-way door — the stop above
 binds at every boundary. After compaction or in a new session, re-invoke this skill and the stage
 you are in: a skill's body is not re-read on its own, and the oldest one is dropped first.

@@ -5,7 +5,7 @@ description: 'Stage 2 of compound-v:get-shit-done — recon each slice to a shap
 
 # Get Shit Done — 2 · Recon
 
-Stage 2 of **compound-v:get-shit-done**, which holds the ledger this stage writes against and the red flags every stage routes back to — if its body is not in your context (a new session, or after compaction), invoke it first. Needs `slices.json` — without it, invoke stage 1. When each slice's `shape`, `trap` and `delete` are in the ledger, invoke **compound-v:get-shit-done-3-build**.
+Stage 2 of **compound-v:get-shit-done**, which holds the ledger this stage writes against and the red flags every stage routes back to — if its body is not in your context (a new session, or after compaction), invoke it first. Needs `slices.json` — without it, invoke stage 1. When every slice has been looked up — a hit or a held shape written, a miss left for its build-time hunt — invoke **compound-v:get-shit-done-3-build**.
 
 ## Stage 2 — Recon: one question, and the answer is a shape
 
@@ -37,4 +37,4 @@ When the hunt dispatches an agent, its brief is **references/prior-art.md**'s di
 
 **Recon returns a file:line map, not prose** — a cited line either exists or it does not, where a confidently hallucinated architecture reads exactly like a real one. Feed it forward: the shape into the plan, the trap into **compound-v:recheck** as a named checkable assertion, all three into the ledger. At Reckon, a shape that will recur graduates into the table — **compound-v:finishing** step 2.5 runs that harvest and **references/shapes.md** carries the admission bar. Harvest the trap, not the win: most runs graduate nothing, which is the bar working.
 
-**Next:** in an attended run, the Carve+Recon approval; then invoke **compound-v:get-shit-done-3-build** for the first slice.
+**Next:** after the pass over every slice, in an attended run the Carve+Recon approval, then **compound-v:get-shit-done-3-build** for the first slice; after a build-time hunt, straight back to **compound-v:get-shit-done-3-build** for that slice.

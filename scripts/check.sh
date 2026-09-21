@@ -115,9 +115,9 @@ stale="$(grep -rhoE 'compound-[a-z]+:[a-z][a-z0-9-]+' skills/ agents/ hooks/ ref
 $(printf '%s' "$stale" | sed 's/^/        /')"
 
 # 4. No @path skill links (they force-load and burn context).
-if grep -rnE '@[a-z][a-z-]*/SKILL|@compound-v' skills/ >/dev/null 2>&1; then
+if grep -rnE '@[a-z][a-z0-9-]*/SKILL|@compound-v' skills/ >/dev/null 2>&1; then
   err "@path skill link found (use 'compound-v:<name>' by name instead):"
-  grep -rnE '@[a-z][a-z-]*/SKILL|@compound-v' skills/ | sed 's/^/        /'
+  grep -rnE '@[a-z][a-z0-9-]*/SKILL|@compound-v' skills/ | sed 's/^/        /'
 fi
 
 # 5. Frontmatter keys must be in the harness's documented set. Widen this list from the harness's
