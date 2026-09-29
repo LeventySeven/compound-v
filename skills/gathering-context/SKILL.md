@@ -58,7 +58,7 @@ whether or not it bears on the task. Everything below is assembled *for this tas
 discarded. If a section of your pack would be identical for every task in the repo, it belongs in the
 repo's own instruction file — or nowhere.
 
-The second measured qualifier: **a plan is not free.** Across 21,120 agent trajectories, a good plan
+The second measured qualifier: **a plan is not free.** Across 21,120 SWE-agent trajectories (arXiv 2604.12147, where the "plan" is a four-phase workflow in the system prompt, run on GPT-5 mini, DeepSeek-V3/R1 and Devstral-small), a good plan
 improved resolution and *"a subpar plan hurts performance even more than no plan at all"*, with
 extra early-stage phases degrading results when they cut against how the model already works. Adding
 preparation because it feels safer is a way to lose. Which is why this skill has a stop condition.
