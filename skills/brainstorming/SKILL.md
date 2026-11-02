@@ -25,7 +25,7 @@ The gate's strongest form is a **capability lock**, not a politeness rule. When 
 
 ## The flow
 
-1. **Read the context first.** Look at the existing code, docs, and recent commits before asking anything. Half your questions answer themselves, and your proposals will fit what's already there instead of fighting it.
+1. **Read the context first.** Look at the existing code, docs, and recent commits before asking anything. Half your questions answer themselves, and your proposals will fit what's already there instead of fighting it. Then, in an existing codebase, **say back what you learned before the first question** — the parts this change touches and how they work, in three to five lines — so the user corrects a misreading at minute one instead of meeting it in the design at minute thirty. Skip it on an empty repo.
 
 2. **Check scope before you refine.** If the request is actually several independent subsystems ("a platform with chat, billing, file storage, and analytics"), say so now — don't burn questions refining a thing that needs to be split. Decompose it into sub-projects, name how they relate and what order they build in, then brainstorm the first one through this flow. Each sub-project gets its own design → plan → build cycle. **Record that sequence — and which sub-projects have landed — on the PRD's core-functions spine** (`compound-v:writing-prd`), updated as each lands; don't open a roadmap or backlog file for it. It is the one piece of state a Large build needs that outlives every individual plan, and a spine that already caps itself at "the handful" is what keeps it from silently becoming a wish-list.
 
