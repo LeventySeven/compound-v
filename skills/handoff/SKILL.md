@@ -62,6 +62,13 @@ the failure above; two files that *cannot* overlap is not.
 Rewrite **Next** as one concrete action for a reader with zero context: the file, the function,
 the command. Commit. Then say in one line how to resume.
 
+You are the one reader who cannot test that sentence, because you hold everything it leaves out.
+When the session can dispatch and the work will resume unattended or in a session you won't be in,
+hand a fresh read-only agent `.claude/STATE.md` and the repo — nothing else — and ask three
+things: where the work stands, what it would do next, what it must not do. Compare its answers with
+yours. Where one is wrong, fix the file, not the reader, and commit again; a session killed
+mid-step resumes from this file and the repo, nothing from this session.
+
 ## Harness friction goes in a log, not in your head
 
 **When the agent hits friction in the environment — a wrong flag set, a stale documented path, a
