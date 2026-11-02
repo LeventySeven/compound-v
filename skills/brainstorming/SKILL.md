@@ -43,7 +43,10 @@ The gate's strongest form is a **capability lock**, not a politeness rule. When 
    it is built — an unattended run, a design you approve on the user's behalf — hand it to
    **compound-v:recheck** in artifact mode and ask for two things only: gaps (a requirement with no
    design decision behind it) and contradictions (two sections that cannot both be true). It sees
-   the design and the ask, never this conversation. The trap: a reviewer asked "is this the right
+   the design and the ask, never this conversation, and it says back what the design proposes
+   before it lists anything: read that paraphrase against what the user approved before you read
+   a single finding — where a stranger reads the design differently, the written design is what is
+   wrong, and that is the one comparison only you can make. The trap: a reviewer asked "is this the right
    design?" manufactures alternatives, and the person, not the reviewer, owns the key engineering
    decisions.
 

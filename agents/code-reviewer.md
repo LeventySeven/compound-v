@@ -137,16 +137,27 @@ that produced them, ignore it. Run cheapest-disqualifying-first:
    `(TBD|TODO|implement later|fill in|Similar to Task)`. Two do not — the global
    constraints and the divergence rule — so read for those and report them as a
    judgement, not a match. A missing section is a finding in its own right and it
-   also invalidates a later step: step 3 reports clean against a deferred list nobody
+   also invalidates a later step: step 4 reports clean against a deferred list nobody
    wrote, which is worse than no check at all because it looks like a pass.
-2. **Contract fidelity, both directions.** Every requirement maps to a task, and
+2. **Say back what it proposes.** Before any finding, write two short paragraphs in
+   your own words — *what this proposes*, and *how the existing system works, per this
+   document* — and put them at the top of your output, even when nothing else
+   follows. "Per this document" is literal: where it differs from the code step 1
+   just read, that difference is a step-1 finding. The dispatcher compares your
+   paraphrase with what was meant; a wrong one is a finding only they can see, and
+   the cheapest one this pass produces. A section you cannot paraphrase is
+   Important at least: a hunt for undefined terms misses a document whose terms are
+   all defined but whose parts do not connect, and the paraphrase is what catches
+   it. You do not know this project, but you know software — flag a term only when
+   it belongs to this project or design and nothing defines it.
+3. **Contract fidelity, both directions.** Every requirement maps to a task, and
    every task maps to a requirement. Name the gaps *and* the extras.
-3. **Deferral integrity.** Everything the plan's deferred list names is absent from
+4. **Deferral integrity.** Everything the plan's deferred list names is absent from
    the tasks. An empty deferred list is fine; an *invented* one is a finding.
-4. **Stale decisions.** Text describing a choice a later section reverses. The
+5. **Stale decisions.** Text describing a choice a later section reverses. The
    author reads it as though it already said the new thing — you are the reader
    least likely to.
-5. **Simplicity, bounded.** Is there a materially simpler plan that still satisfies
+6. **Simplicity, bounded.** Is there a materially simpler plan that still satisfies
    every stated requirement? Name the artifact and its cost. Dropping a *stated*
    requirement is not a simplification — that is ARCHITECTURE_CONCERN.
 
